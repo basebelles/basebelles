@@ -39,6 +39,7 @@ class Basebelles {
 
 		if ( function_exists( 'register_block_type' ) ) {
 			register_block_type( __DIR__ . '/blocks/schedule' );
+			register_block_type( __DIR__ . '/blocks/results' );
 		}
 	}
 
