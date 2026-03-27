@@ -131,7 +131,7 @@ if ( $is_home ) {
 		</div>
 		<div class="team-score"><?php echo esc_html( $away_team['score'] ); ?></div>
 
-		<div class="score-spacer"></div>
+		<div class="score-spacer"><strong>FINAL</strong></div>
 
 		<div class="team-score"><?php echo esc_html( $home_team['score'] ); ?></div>
 		<div class="team-logo">
