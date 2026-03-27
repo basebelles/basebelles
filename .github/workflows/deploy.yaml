@@ -1,0 +1,31 @@
+name: 'Deploy Code'
+
+on:
+  push:
+    branches: [ trunk ]
+
+jobs:
+  deploy-website:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Do a git checkout including submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Verify Workspace
+        run: |
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+      - name: Verify Folder
+        run: |
+          ls -lah ${GITHUB_WORKSPACE}
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.IPSTENU_SSH_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          REMOTE_HOST: ${{ secrets.IPSTENU_HOST }}
+          REMOTE_USER: ${{ secrets.IPSTENU_USER }}
+          TARGET: /home/${{ secrets.IPSTENU_USER }}/${{ secrets.IPSTENU_HOST }}/wp-content/plugins/basebelles
+          EXCLUDE: "/.git/, /.github/"

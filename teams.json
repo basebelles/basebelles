@@ -1,0 +1,242 @@
+{
+	"angels": {
+		"name": "Los Angeles Angels",
+		"abbreviation": "LAA",
+		"city": "Los Angeles",
+		"state": "CA",
+		"country": "USA",
+		"league": "AL West"
+	},
+	"astros": {
+		"name": "Houston Astros",
+		"abbreviation": "HOU",
+		"city": "Houston",
+		"state": "TX",
+		"country": "USA",
+		"league": "AL West"
+	},
+	"athletics": {
+		"name": "Oakland Athletics",
+		"abbreviation": "OAK",
+		"city": "Oakland",
+		"state": "CA",
+		"country": "USA",
+		"league": "AL West"
+	},
+	"blue-jays": {
+		"name": "Toronto Blue Jays",
+		"abbreviation": "TOR",
+		"city": "Toronto",
+		"state": "ON",
+		"country": "Canada",
+		"league": "AL East"
+	},
+	"braves": {
+		"name": "Atlanta Braves",
+		"abbreviation": "ATL",
+		"city": "Atlanta",
+		"state": "GA",
+		"country": "USA",
+		"league": "NL East"
+	},
+	"brewers": {
+		"name": "Milwaukee Brewers",
+		"abbreviation": "MIL",
+		"city": "Milwaukee",
+		"state": "WI",
+		"country": "USA",
+		"league": "NL Central"
+	},
+	"cardinals": {
+		"name": "St. Louis Cardinals",
+		"abbreviation": "STL",
+		"city": "St. Louis",
+		"state": "MO",
+		"country": "USA",
+		"league": "NL Central"
+	},
+	"cubs": {
+		"name": "Chicago Cubs",
+		"abbreviation": "CHC",
+		"city": "Chicago",
+		"state": "IL",
+		"country": "USA",
+		"league": "NL Central"
+	},
+	"d-backs": {
+		"name": "Arizona Diamondbacks",
+		"abbreviation": "ARI",
+		"city": "Phoenix",
+		"state": "AZ",
+		"country": "USA",
+		"league": "NL West"
+	},
+	"dodgers": {
+		"name": "Los Angeles Dodgers",
+		"abbreviation": "LAD",
+		"city": "Los Angeles",
+		"state": "CA",
+		"country": "USA",
+		"league": "NL West"
+	},
+	"giants": {
+		"name": "San Francisco Giants",
+		"abbreviation": "SFG",
+		"city": "San Francisco",
+		"state": "CA",
+		"country": "USA",
+		"league": "NL West"
+	},
+	"guardians": {
+		"name": "Cleveland Guardians",
+		"abbreviation": "CLE",
+		"city": "Cleveland",
+		"state": "OH",
+		"country": "USA",
+		"league": "AL Central"
+	},
+	"mariners": {
+		"name": "Seattle Mariners",
+		"abbreviation": "SEA",
+		"city": "Seattle",
+		"state": "WA",
+		"country": "USA",
+		"league": "AL West"
+	},
+	"marlins": {
+		"name": "Miami Marlins",
+		"abbreviation": "MIA",
+		"city": "Miami",
+		"state": "FL",
+		"country": "USA",
+		"league": "NL East"
+	},
+	"mets": {
+		"name": "New York Mets",
+		"abbreviation": "NYM",
+		"city": "New York",
+		"state": "NY",
+		"country": "USA",
+		"league": "NL East"
+	},
+	"nationals": {
+		"name": "Washington Nationals",
+		"abbreviation": "WSN",
+		"city": "Washington",
+		"state": "DC",
+		"country": "USA",
+		"league": "NL East"
+	},
+	"orioles": {
+		"name": "Baltimore Orioles",
+		"abbreviation": "BAL",
+		"city": "Baltimore",
+		"state": "MD",
+		"country": "USA",
+		"league": "AL East"
+	},
+	"padres": {
+		"name": "San Diego Padres",
+		"abbreviation": "SD",
+		"city": "San Diego",
+		"state": "CA",
+		"country": "USA",
+		"league": "NL West"
+	},
+	"phillies": {
+		"name": "Philadelphia Phillies",
+		"abbreviation": "PHI",
+		"city": "Philadelphia",
+		"state": "PA",
+		"country": "USA",
+		"league": "NL East"
+	},
+	"pirates": {
+		"name": "Pittsburgh Pirates",
+		"abbreviation": "PIT",
+		"city": "Pittsburgh",
+		"state": "PA",
+		"country": "USA",
+		"league": "NL Central"
+	},
+	"rangers": {
+		"name": "Texas Rangers",
+		"abbreviation": "TEX",
+		"city": "Arlington",
+		"state": "TX",
+		"country": "USA",
+		"league": "AL West"
+	},
+	"rays": {
+		"name": "Tampa Bay Rays",
+		"abbreviation": "TB",
+		"city": "Tampa",
+		"state": "FL",
+		"country": "USA",
+		"league": "AL East"
+	},
+	"red-sox": {
+		"name": "Boston Red Sox",
+		"abbreviation": "BOS",
+		"city": "Boston",
+		"state": "MA",
+		"country": "USA",
+		"league": "AL East"
+	},
+	"reds": {
+		"name": "Cincinnati Reds",
+		"abbreviation": "CIN",
+		"city": "Cincinnati",
+		"state": "OH",
+		"country": "USA",
+		"league": "NL Central"
+	},
+	"rockies": {
+		"name": "Colorado Rockies",
+		"abbreviation": "COL",
+		"city": "Denver",
+		"state": "CO",
+		"country": "USA",
+		"league": "NL West"
+	},
+	"royals": {
+		"name": "Kansas City Royals",
+		"abbreviation": "KC",
+		"city": "Kansas City",
+		"state": "MO",
+		"country": "USA",
+		"league": "AL Central"
+	},
+	"tigers": {
+		"name": "Detroit Tigers",
+		"abbreviation": "DET",
+		"city": "Detroit",
+		"state": "MI",
+		"country": "USA",
+		"league": "AL Central"
+	},
+	"twins": {
+		"name": "Minnesota Twins",
+		"abbreviation": "MIN",
+		"city": "Minneapolis",
+		"state": "MN",
+		"country": "USA",
+		"league": "AL Central"
+	},
+	"white-sox": {
+		"name": "Chicago White Sox",
+		"abbreviation": "CHW",
+		"city": "Chicago",
+		"state": "IL",
+		"country": "USA",
+		"league": "AL Central"
+	},
+	"yankees": {
+		"name": "New York Yankees",
+		"abbreviation": "NYY",
+		"city": "New York",
+		"state": "NY",
+		"country": "USA",
+		"league": "AL East"
+	}
+}
