@@ -112,7 +112,7 @@
 	border: 1px solid #F3EFE0;
 	font-family: sans-serif;
 	margin: 20px 0;
-	max-width: 90%;
+	max-width: 90%!important;
 }
 
 .results-header {
