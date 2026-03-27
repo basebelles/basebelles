@@ -1,0 +1,17 @@
+{
+    "name": "acf/basebelles-results",
+    "title": "Cleveland Guardians Game Results",
+    "description": "Displays the results of a Cleveland Guardians game.",
+    "style": "file:../../style.css",
+    "category": "widgets",
+    "icon": "chart-bar",
+    "keywords": ["results", "guardians", "baseball"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "supports": {
+        "align": true,
+        "anchor": true
+    }
+}
