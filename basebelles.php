@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
- * Description: All the base code for Base*Belles - If this isn't active, the site dies. An ugly death.
+ * Description: All the base code for Base*Belles - This controls all the blocks.
  * Version: 1.0
  * Author: Ipstenu
  *
