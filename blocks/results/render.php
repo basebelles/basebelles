@@ -79,6 +79,7 @@ if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
 if ( $is_home ) {
 	$home_team = array(
 		'name'     => 'Guardians',
+		'abbr'     => 'CLE',
 		'logo'     => $plugin_url . 'team-icons/guardians.png',
 		'score'    => $home_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
@@ -88,6 +89,7 @@ if ( $is_home ) {
 	);
 	$away_team = array(
 		'name'     => $opponent_short_name,
+		'abbr'     => $opponent_details['abbreviation'] ?? '',
 		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
 		'score'    => $away_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
@@ -98,6 +100,7 @@ if ( $is_home ) {
 } else {
 	$away_team = array(
 		'name'     => 'Guardians',
+		'abbr'     => 'CLE',
 		'logo'     => $plugin_url . 'team-icons/guardians.png',
 		'score'    => $away_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
@@ -107,6 +110,7 @@ if ( $is_home ) {
 	);
 	$home_team = array(
 		'name'     => $opponent_short_name,
+		'abbr'     => $opponent_details['abbreviation'] ?? '',
 		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
 		'score'    => $home_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
@@ -160,7 +164,7 @@ if ( $is_home ) {
 			</thead>
 			<tbody>
 				<tr>
-					<td class="team-label"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></td>
+					<td class="team-label"><?php echo esc_html( strtoupper( $away_team['abbr'] ) ); ?></td>
 					<?php for ( $i = 1; $i <= $display_innings; $i++ ) : ?>
 						<td>
 							<?php
@@ -178,7 +182,7 @@ if ( $is_home ) {
 					<td class="stat-cell"><?php echo esc_html( $away_team['errors'] ); ?></td>
 				</tr>
 				<tr>
-					<td class="team-label"><?php echo esc_html( strtoupper( $home_team['name'] ) ); ?></td>
+					<td class="team-label"><?php echo esc_html( strtoupper( $home_team['abbr'] ) ); ?></td>
 					<?php for ( $i = 1; $i <= $display_innings; $i++ ) : ?>
 						<td>
 							<?php
