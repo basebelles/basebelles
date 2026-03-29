@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the blocks.
- * Version: 1.0
+ * Version: 1.0.1
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.0.0';
+		self::$version = '1.0.1';
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'basebelles_enqueue_styles' ) );
