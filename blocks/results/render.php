@@ -89,7 +89,7 @@ if ( $is_home ) {
 	);
 	$away_team = array(
 		'name'     => $opponent_short_name,
-		'abbr'     => $opponent_details['abbreviation'] ?? '',
+		'abbr'     => $opponent_info['abbreviation'] ?? '',
 		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
 		'score'    => $away_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
@@ -110,7 +110,7 @@ if ( $is_home ) {
 	);
 	$home_team = array(
 		'name'     => $opponent_short_name,
-		'abbr'     => $opponent_details['abbreviation'] ?? '',
+		'abbr'     => $opponent_info['abbreviation'] ?? '',
 		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
 		'score'    => $home_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
