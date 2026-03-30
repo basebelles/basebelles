@@ -1,0 +1,59 @@
+/* Colors */
+.guardians-sandstone-cream {
+	color: #F3EFE0;
+}
+
+.guardians-wine-red {
+	color: #84172C;
+}
+
+.guardians-deep-navy {
+	color: #002D62;
+}
+
+.guardians-slate-blue {
+	color: #00385D;
+}
+
+.guardians-accent-slate {
+	color: #4A6274;
+}
+
+/* Overrides */
+.main {
+	.color-accent, .color-accent-hover:hover, .color-accent-hover:focus, :root .has-accent-color, .has-drop-cap:not(:focus):first-letter, .wp-block-button.is-style-outline, a {
+		color: #84172C;
+	}
+
+	button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-file__button, input[type="button"], input[type="reset"], input[type="submit"], .bg-accent, .bg-accent-hover:hover, .bg-accent-hover:focus, :root .has-accent-background-color, .comment-reply-link {
+		background-color: #84172C;
+		color: #F3EFE0!important;
+	}
+
+	.primary-menu > li > a,
+	.site-description {
+		color: #F3EFE0!important;
+	}
+
+	.footer-menu a {
+		color: #F3EFE0!important;
+	}
+}
+
+/* Responsive Streamable Embeds */
+.streamable-video-container {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+	height: 0;
+	overflow: hidden;
+	margin: 20px 0;
+}
+
+.streamable-video-container iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100% !important;
+	height: 100% !important;
+	border: 0;
+}

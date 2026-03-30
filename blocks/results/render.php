@@ -34,7 +34,7 @@ $is_home = $game_details['home'] ?? true; // TRUE means HOME is Guardians
 // Team Data from teams.json
 $plugin_path = dirname( __DIR__, 2 );
 $plugin_url  = plugin_dir_url( $plugin_path . '/basebelles.php' );
-$teams_json  = file_exists( $plugin_path . '/teams.json' ) ? file_get_contents( $plugin_path . '/teams.json' ) : '{}';
+$teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_contents( $plugin_path . '/team-info/list.json' ) : '{}';
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
@@ -44,7 +44,7 @@ $opponent_slug = $parts[0] ?? 'guardians';
 $opponent_info = $teams_data[ $opponent_slug ] ?? array();
 
 // Extract just the short team name (e.g. "Mariners" from "mariners")
-$opponent_short_name = ucwords( str_replace( '-', ' ', $opponent_slug ) );
+$opponent_short_name = $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) );
 $guards_info         = $teams_data['guardians'] ?? array();
 
 // Scores Logic
@@ -64,15 +64,12 @@ if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
 		$away_total_runs += (int) preg_replace( '/[^0-9]/', '', $away_val );
 		$home_total_runs += (int) preg_replace( '/[^0-9]/', '', $home_val );
 	}
+} elseif ( $is_home ) {
+	$away_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
+	$home_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
 } else {
-	// Fallback to manual entry if no repeater data
-	if ( $is_home ) {
-		$away_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
-		$home_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
-	} else {
-		$away_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
-		$home_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
-	}
+	$away_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
+	$home_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
 }
 
 // Determine Home/Away objects
@@ -80,7 +77,7 @@ if ( $is_home ) {
 	$home_team = array(
 		'name'     => 'Guardians',
 		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-icons/guardians.png',
+		'logo'     => $plugin_url . 'team-info/icons/guardians.png',
 		'score'    => $home_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
 		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
@@ -90,7 +87,7 @@ if ( $is_home ) {
 	$away_team = array(
 		'name'     => $opponent_short_name,
 		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
+		'logo'     => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
 		'score'    => $away_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
 		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),
@@ -101,7 +98,7 @@ if ( $is_home ) {
 	$away_team = array(
 		'name'     => 'Guardians',
 		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-icons/guardians.png',
+		'logo'     => $plugin_url . 'team-info/icons/guardians.png',
 		'score'    => $away_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
 		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
@@ -111,7 +108,7 @@ if ( $is_home ) {
 	$home_team = array(
 		'name'     => $opponent_short_name,
 		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
+		'logo'     => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
 		'score'    => $home_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
 		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),

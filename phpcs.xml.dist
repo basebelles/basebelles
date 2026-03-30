@@ -1,17 +1,26 @@
 <?xml version="1.0"?>
 <ruleset name="Half Elf Coding Standards">
-    <description>A custom ruleset to take in account both WordPress and Lesbian standards.</description>
+	<description>A custom ruleset to take in account both WordPress and HalfElf standards.</description>
+	<file>.</file>
 
-    <rule ref="WordPress-Extra">
-        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
-        <exclude name="WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query" />
-        <exclude name="WordPress.WP.I18n.NonSingularStringLiteralSingle" />
-        <exclude name="WordPress.WP.I18n.NonSingularStringLiteralPlural" />
-        <exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode" />
-        <exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents" />
-        <exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
-        <exclude name="WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents" />
-    </rule>
+	<arg name="extensions" value="php" />
+	<arg name="colors" />
+	<arg value="s" /><!-- Show sniff codes in all reports. -->
+	<arg value="p" /><!-- Show progress. -->
 
+	<config name="minimum_supported_wp_version" value="6.5" />
+
+	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+		<exclude name="WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query" />
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralSingle" />
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralPlural" />
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode" />
+		<exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents" />
+		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
+		<exclude name="WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents" />
+		<exclude name="WordPress.WP.DeprecatedFunctions.sanitize_urlFound" />
+		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+	</rule>
 </ruleset>

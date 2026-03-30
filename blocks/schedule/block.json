@@ -1,8 +1,8 @@
 {
     "name": "acf/basebelles-schedule",
-    "title": "Cleveland Guardians Schedule",
+    "title": "Guardians Schedule",
     "description": "Displays the next scheduled Cleveland Guardians game(s).",
-    "style": "file:../../style.css",
+    "style": "file: ./block.css",
     "category": "widgets",
     "icon": "calendar-alt",
     "keywords": ["schedule", "guardians", "baseball"],

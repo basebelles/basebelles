@@ -2,7 +2,7 @@
     "name": "acf/basebelles-series",
     "title": "Guardians Series Results",
     "description": "Displays the results of a Cleveland Guardians series.",
-    "style": "file:../../style.css",
+    "style": "file: ./block.css",
     "category": "widgets",
     "icon": "excerpt-view",
     "keywords": ["series", "results", "guardians", "baseball"],

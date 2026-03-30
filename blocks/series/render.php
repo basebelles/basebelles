@@ -10,11 +10,13 @@ if ( ! function_exists( 'get_field' ) ) {
 	return;
 }
 
-// ACF Group: Series Results (group_69c70525044fc)
+// ACF Group: Series Results (group_69c9b611cc123)
 $home_game    = (bool) get_field( 'home_game' ) ?? true;
 $guards_won   = (int) get_field( 'guards_won' ) ?? 0;
 $opponent     = get_field( 'opponent' );
 $opponent_won = (int) get_field( 'oppo_won' ) ?? 0;
+$first_game   = get_field( 'game_dates' )['first_game'] ?? '';
+$last_game    = get_field( 'game_dates' )['last_game'] ?? '';
 
 // If data is missing and not in admin, just return.
 if ( ! is_admin() && ! $opponent ) {
@@ -24,40 +26,39 @@ if ( ! is_admin() && ! $opponent ) {
 // Team Data from teams.json
 $plugin_path = dirname( __DIR__, 2 );
 $plugin_url  = plugin_dir_url( $plugin_path . '/basebelles.php' );
-$teams_json  = file_exists( $plugin_path . '/teams.json' ) ? file_get_contents( $plugin_path . '/teams.json' ) : '{}';
+$teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_contents( $plugin_path . '/team-info/list.json' ) : '{}';
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
-$opponent_raw  = $opponent_details['opponent'] ?? '';
-$parts         = explode( ': ', $opponent_raw );
-$opponent_slug = $parts[0] ?? '';
+$parts         = explode( ': ', $opponent );
+$opponent_slug = $parts[0] ?? $opponent;
 $opponent_info = $teams_data[ $opponent_slug ] ?? array();
 
 // Determine Home/Away objects
-if ( $is_home ) {
+if ( $home_game ) {
 	$home_team = array(
 		'name'      => 'Guardians',
 		'abbr'      => 'CLE',
-		'logo'      => $plugin_url . 'team-icons/guardians.png',
+		'logo'      => $plugin_url . 'team-info/icons/guardians.png',
 		'games_won' => $guards_won,
 	);
 	$away_team = array(
-		'name'      => $opponent_short_name,
+		'name'      => $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) ),
 		'abbr'      => $opponent_info['abbreviation'] ?? '',
-		'logo'      => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
+		'logo'      => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
 		'games_won' => $opponent_won,
 	);
 } else {
 	$away_team = array(
 		'name'      => 'Guardians',
 		'abbr'      => 'CLE',
-		'logo'      => $plugin_url . 'team-icons/guardians.png',
+		'logo'      => $plugin_url . 'team-info/icons/guardians.png',
 		'games_won' => $guards_won,
 	);
 	$home_team = array(
-		'name'      => $opponent_short_name,
+		'name'      => $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) ),
 		'abbr'      => $opponent_info['abbreviation'] ?? '',
-		'logo'      => $plugin_url . 'team-icons/' . $opponent_slug . '.png',
+		'logo'      => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
 		'games_won' => $opponent_won,
 	);
 }
@@ -66,20 +67,28 @@ if ( $is_home ) {
 $total_games = $guards_won + $opponent_won;
 
 if ( $home_team['games_won'] > $away_team['games_won'] ) {
-    $home_team['winner'] = true;
-    $away_team['winner'] = false;
+	$home_team['winner'] = true;
+	$away_team['winner'] = false;
+	$guards_win          = ( $home_game ) ? true : false;
 } elseif ( $away_team['games_won'] > $home_team['games_won'] ) {
-    $away_team['winner'] = true;
-    $home_team['winner'] = false;
+	$away_team['winner'] = true;
+	$home_team['winner'] = false;
+	$guards_win          = ( $home_game ) ? false : true;
 } else {
-    // series can be tied
-    $away_team['winner'] = false;
-    $home_team['winner'] = false;
+	// series can be tied
+	$away_team['winner'] = false;
+	$home_team['winner'] = false;
+	$guards_win          = 'split';
 }
 
+$winner_class = ( ! $guards_win ) ? 'oppo-win' : ( ( 'split' === $guards_win ) ? 'split-win' : 'guards-win' );
+
 ?>
-<div class="basebelles-results">
+<div class="basebelles-series-results">
 	<!-- Series Results Section -->
+	<div class="series-date">
+		<?php echo esc_html( $first_game ) . ' - ' . esc_html( $last_game ); ?>
+	</div>
 	<div class="series-results">
 		<div class="series-summary away">
 			<div class="team-name"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></div>
@@ -89,14 +98,19 @@ if ( $home_team['games_won'] > $away_team['games_won'] ) {
 			<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
 		</div>
 
-		<div class="score-spacer"><?php
+		<div class="series-spacer">
+			<span class="series-winner <?php echo esc_attr( $winner_class ); ?>">
+			<?php
 			if ( $away_team['winner'] ) {
-				// icon for beat up guards logo
+				echo esc_html( strtoupper( $away_team['abbr'] ) );
 			} elseif ( $home_team['winner'] ) {
-				// icon for happy guards logo
-			} elseif ( ! $home_team && ! $away-team ) {
-				// some icon for tie
-		?></div>
+				echo esc_html( strtoupper( $home_team['abbr'] ) );
+			} elseif ( ! $home_team['winner'] && ! $away_team['winner'] ) {
+				echo 'SPLIT';
+			}
+			?>
+			</span>
+		</div>
 
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $home_team['logo'] ); ?>" alt="<?php echo esc_attr( $home_team['name'] ); ?> Logo" />

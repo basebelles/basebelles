@@ -1,8 +1,8 @@
 {
     "name": "acf/basebelles-results",
-    "title": "Cleveland Guardians Game Results",
+    "title": "Guardians Game Results",
     "description": "Displays the results of a Cleveland Guardians game.",
-    "style": "file:../../style.css",
+    "style": "file: ./block.css",
     "category": "widgets",
     "icon": "chart-bar",
     "keywords": ["results", "guardians", "baseball"],

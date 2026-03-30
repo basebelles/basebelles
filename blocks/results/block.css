@@ -1,0 +1,93 @@
+/* Game Results Block */
+.basebelles-results {
+	padding: 10px;
+	background: #fff;
+	color: #002D62;
+	border: 1px solid #00385D;
+	font-family: sans-serif;
+	max-width: 90%!important;
+}
+
+.results-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.results-header .team-summary {
+	flex: 1;
+}
+
+.results-header .team-name {
+	font-weight: bold;
+	font-size: 1.2em;
+	line-height: 1.2;
+}
+
+.results-header .team-record,
+.results-header .team-standing {
+	font-size: 0.85em;
+	color: #4A6274;
+}
+
+.results-header .team-logo img {
+	width: 60px;
+	height: 60px;
+	display: block;
+	margin: 0 10px;
+}
+
+.results-header .team-score {
+	font-size: 2.5em;
+	font-weight: bold;
+	min-width: 50px;
+}
+
+.results-header .score-spacer {
+	flex: 1;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+.results-table-container {
+	overflow-x: auto;
+	margin-top: 10px;
+}
+
+.results-innings-table {
+	width: 100%;
+	min-width: 600px; /* Ensure table doesn't squash too much */
+	border-collapse: collapse;
+	font-size: 0.9em;
+}
+
+.results-table-container table {
+	margin: 5px;
+}
+
+.results-innings-table th,
+.results-innings-table td {
+	border: 1px solid #F3EFE0;
+	padding: 4px;
+	text-align: center;
+}
+
+.results-innings-table th {
+	background-color: #F3EFE0;
+	color: #002D62;
+	font-weight: bold;
+}
+
+.results-innings-table .team-label {
+	text-align: left;
+	font-weight: bold;
+	min-width: 25px;
+}
+
+.results-innings-table .stat-cell {
+	font-weight: bold;
+	background-color: #f9f9f9;
+}
