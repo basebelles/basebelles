@@ -77,7 +77,7 @@ if ( $is_home ) {
 	$home_team = array(
 		'name'     => 'Guardians',
 		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-info/icons/guardians.png',
+		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
 		'score'    => $home_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
 		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
@@ -87,7 +87,7 @@ if ( $is_home ) {
 	$away_team = array(
 		'name'     => $opponent_short_name,
 		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
+		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'score'    => $away_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
 		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),
@@ -98,7 +98,7 @@ if ( $is_home ) {
 	$away_team = array(
 		'name'     => 'Guardians',
 		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-info/icons/guardians.png',
+		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
 		'score'    => $away_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
 		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
@@ -108,7 +108,7 @@ if ( $is_home ) {
 	$home_team = array(
 		'name'     => $opponent_short_name,
 		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
+		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'score'    => $home_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
 		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),

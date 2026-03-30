@@ -39,26 +39,26 @@ if ( $home_game ) {
 	$home_team = array(
 		'name'      => 'Guardians',
 		'abbr'      => 'CLE',
-		'logo'      => $plugin_url . 'team-info/icons/guardians.png',
+		'logo'      => $plugin_url . 'team-info/logos/guardians.png',
 		'games_won' => $guards_won,
 	);
 	$away_team = array(
 		'name'      => $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) ),
 		'abbr'      => $opponent_info['abbreviation'] ?? '',
-		'logo'      => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
+		'logo'      => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'games_won' => $opponent_won,
 	);
 } else {
 	$away_team = array(
 		'name'      => 'Guardians',
 		'abbr'      => 'CLE',
-		'logo'      => $plugin_url . 'team-info/icons/guardians.png',
+		'logo'      => $plugin_url . 'team-info/logos/guardians.png',
 		'games_won' => $guards_won,
 	);
 	$home_team = array(
 		'name'      => $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) ),
 		'abbr'      => $opponent_info['abbreviation'] ?? '',
-		'logo'      => $plugin_url . 'team-info/icons/' . $opponent_slug . '.png',
+		'logo'      => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'games_won' => $opponent_won,
 	);
 }
