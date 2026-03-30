@@ -72,37 +72,36 @@ if ( $home_team['games_won'] > $away_team['games_won'] ) {
     $away_team['winner'] = true;
     $home_team['winner'] = false;
 } else {
-    // Somehow we tied? should never happen!
+    // series can be tied
+    $away_team['winner'] = false;
+    $home_team['winner'] = false;
 }
 
 ?>
 <div class="basebelles-results">
-	<!-- Header Section -->
-	<div class="results-header">
-		<div class="team-series-summary away">
+	<!-- Series Results Section -->
+	<div class="series-results">
+		<div class="series-summary away">
 			<div class="team-name"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></div>
 			<div class="team-series-record"><?php echo esc_html( $away_team['games_won'] ); ?></div>
 		</div>
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
 		</div>
-		<div class="team-won-series"><?php 
-            if ( $away_team['winner] ) {
-            	// some icon for winner...
-            }
-        ?></div>
 
-		<div class="score-spacer">&nbsp;</div>
+		<div class="score-spacer"><?php
+			if ( $away_team['winner'] ) {
+				// icon for beat up guards logo
+			} elseif ( $home_team['winner'] ) {
+				// icon for happy guards logo
+			} elseif ( ! $home_team && ! $away-team ) {
+				// some icon for tie
+		?></div>
 
-		<div class="team-won-series"><?php 
-            if ( $home_team['winner] ) {
-            	// some icon for winner...
-            }
-        ?></div>
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $home_team['logo'] ); ?>" alt="<?php echo esc_attr( $home_team['name'] ); ?> Logo" />
 		</div>
-		<div class="team-series-summary home">
+		<div class="series-summary home">
 			<div class="team-name"><?php echo esc_html( strtoupper( $home_team['name'] ) ); ?></div>
 			<div class="team-series-record"><?php echo esc_html( $home_team['games_won'] ); ?></div>
 		</div>
