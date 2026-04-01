@@ -2,6 +2,8 @@
 /**
  * Shared API integration helpers for Base*Belles.
  *
+ * Doc Source: https://github.com/pseudo-r/Public-MLB-API/blob/main/docs/README.md
+ *
  * @package Base*Belles
  */
 
