@@ -125,7 +125,7 @@ class Basebelles_API {
 	}
 
 	/**
-	 * Fetch and normalize today's Guardians game data.
+	 * Fetch and normalize the Guardians schedule for a single day.
 	 *
 	 * @param string $date Optional YYYY-MM-DD date.
 	 * @return array|WP_Error
@@ -133,7 +133,9 @@ class Basebelles_API {
 	public function get_guardians_today_game( $date = '' ) {
 		$date = $this->normalize_game_date( $date );
 
-		// If the date is in the past, return today.
+		// TEMPORARY: If the date is in the past, return today.
+		// We may change this later, but for now we want to skip over
+		// blocks of time like the ASG.
 		if ( strtotime( $date ) < strtotime( gmdate( 'Y-m-d' ) ) ) {
 			$date = gmdate( 'Y-m-d' );
 		}
@@ -152,33 +154,81 @@ class Basebelles_API {
 			return $data;
 		}
 
-		if ( empty( $data['dates'][0]['games'][0] ) || ! is_array( $data['dates'][0]['games'][0] ) ) {
-			return new WP_Error( 'basebelles_api_no_game', 'No Guardians game was found for today.' );
+		$timezone      = wp_timezone();
+		$day_timestamp = strtotime( $date . ' 12:00:00' );
+		$games         = $data['dates'][0]['games'] ?? array();
+
+		if ( empty( $games ) || ! is_array( $games ) ) {
+			return array(
+				'day_date' => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, $timezone ) : '',
+				'off_day'  => true,
+				'games'    => array(),
+			);
 		}
 
-		$game        = $data['dates'][0]['games'][0];
-		$settings    = $this->get_season_settings();
+		$settings         = $this->get_season_settings();
+		$normalized_games = array();
+
+		foreach ( $games as $game ) {
+			if ( ! is_array( $game ) ) {
+				continue;
+			}
+
+			$normalized_games[] = $this->normalize_scheduled_game( $game, $settings['season'] );
+		}
+
+		usort(
+			$normalized_games,
+			function ( $left, $right ) {
+				return (int) ( $left['sort_time'] ?? 0 ) <=> (int) ( $right['sort_time'] ?? 0 );
+			}
+		);
+
+		foreach ( $normalized_games as $index => $game ) {
+			$normalized_games[ $index ]['show_label'] = count( $normalized_games ) > 1;
+		}
+
+		return array(
+			'day_date' => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, $timezone ) : '',
+			'off_day'  => false,
+			'games'    => $normalized_games,
+		);
+	}
+
+	/**
+	 * Normalize one scheduled game from the MLB schedule payload.
+	 *
+	 * @param array $game One game payload.
+	 * @param int   $season Season year.
+	 * @return array
+	 */
+	private function normalize_scheduled_game( $game, $season ) {
 		$away_team   = $this->normalize_game_team( $game['teams']['away'] ?? array() );
 		$home_team   = $this->normalize_game_team( $game['teams']['home'] ?? array() );
 		$game_date   = $game['gameDate'] ?? '';
-		$is_home     = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ) ? true : false;
+		$is_home     = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
 		$game_status = $game['status']['abstractGameState'] ?? 'Live';
 		$is_preview  = 'Preview' === $game_status;
-		$has_scores  = 'Live' === $game_status || 'Final' === $game_status;
+		$has_scores  = in_array( $game_status, array( 'Live', 'Final' ), true );
 		$timezone    = wp_timezone();
 		$timestamp   = $game_date ? strtotime( $game_date ) : false;
 
 		return array(
+			'game_pk'      => (int) ( $game['gamePk'] ?? 0 ),
+			'game_number'  => (int) ( $game['gameNumber'] ?? 1 ),
+			'doubleheader' => (string) ( $game['doubleHeader'] ?? 'N' ),
 			'day_date'     => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
 			'game_time'    => $timestamp ? wp_date( 'g:i A T', $timestamp, $timezone ) : '',
-			'status'       => $game['status']['abstractGameState'] ?? '',
+			'status'       => $game_status,
+			'game_status'  => $game_status,
 			'away_team'    => $away_team,
 			'home_team'    => $home_team,
-			'game_status'  => $game_status,
-			'away_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $settings['season'] ) : array(),
-			'home_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $settings['season'] ) : array(),
+			'away_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season ) : array(),
+			'home_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season ) : array(),
 			'scores'       => $has_scores ? $this->get_game_scores( $game, $game_status ) : array(),
 			'broadcasts'   => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
+			'sort_time'    => $timestamp ? $timestamp : 0,
+			'show_label'   => false,
 		);
 	}
 
