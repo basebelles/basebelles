@@ -86,7 +86,7 @@
 }
 
 .pitcher-name a {
-	color: #002d62;
+	color: #002d62!important;
 	font-weight: 700;
 	text-decoration: none;
 }

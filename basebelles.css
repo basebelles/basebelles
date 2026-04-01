@@ -57,3 +57,24 @@
 	height: 100% !important;
 	border: 0;
 }
+
+/* From Customizer */
+.color-accent, .color-accent-hover:hover, .color-accent-hover:focus, :root .has-accent-color, .has-drop-cap:not(:focus):first-letter, .wp-block-button.is-style-outline, a {
+	color: #84172C;
+}
+
+button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-file__button, input[type="button"], input[type="reset"], input[type="submit"], .bg-accent, .bg-accent-hover:hover, .bg-accent-hover:focus, :root .has-accent-background-color, .comment-reply-link {
+	background-color: #84172C;
+	color: #F3EFE0!important;
+}
+
+.primary-menu > li > a,
+.site-description,
+.footer-menu a {
+	color: #F3EFE0!important;
+}
+
+thead {
+	background-color: #002D62;
+	color: #F3EFE0;
+}
