@@ -125,7 +125,6 @@ if ( $is_home ) {
 		<div class="team-summary away">
 			<div class="team-name"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></div>
 			<div class="team-record"><?php echo esc_html( $away_team['wl'] ); ?></div>
-			<div class="team-standing"><?php echo esc_html( $away_team['standing'] ); ?></div>
 		</div>
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
@@ -141,7 +140,6 @@ if ( $is_home ) {
 		<div class="team-summary home">
 			<div class="team-name"><?php echo esc_html( strtoupper( $home_team['name'] ) ); ?></div>
 			<div class="team-record"><?php echo esc_html( $home_team['wl'] ); ?></div>
-			<div class="team-standing"><?php echo esc_html( $home_team['standing'] ); ?></div>
 		</div>
 	</div>
 

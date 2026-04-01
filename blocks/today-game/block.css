@@ -1,0 +1,118 @@
+/* Guardians Today's Game Block */
+.basebelles-today-game {
+	padding: 10px;
+	background: #fff;
+	color: #002d62;
+	border: 1px solid #00385d;
+	font-family: sans-serif;
+	max-width: 100%;
+}
+
+.basebelles-today-game.placeholder {
+	border-style: dashed;
+	text-align: center;
+}
+
+.game-card + .game-card {
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 2px solid #f3efe0;
+}
+
+.game-label {
+	margin-bottom: 10px;
+	font-size: 0.85em;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	text-align: center;
+	color: #4a6274;
+}
+
+.off-day-box {
+	text-align: center;
+}
+
+.today-game-header,
+.probable-pitchers,
+.game-scores {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: 10px;
+}
+
+.today-game-header,
+.probable-pitchers,
+.game-scores {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.team-logo {
+	display: flex;
+	justify-content: center;
+}
+
+.team-logo img {
+	width: 60px;
+	height: 60px;
+	object-fit: contain;
+}
+
+.game-meta,
+.game-time {
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.team-record {
+	font-size: 0.95em;
+	color: #4a6274;
+}
+
+.probable-pitchers,
+.game-scores {
+	border-top: 1px solid #f3efe0;
+	padding-top: 10px;
+}
+
+.pitcher-away,
+.pitcher-home {
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	text-align: center;
+}
+
+.pitcher-name a {
+	color: #002d62;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.pitcher-name a:hover,
+.pitcher-name a:focus {
+	text-decoration: underline;
+}
+
+.pitcher-stats {
+	color: #4a6274;
+	font-size: 0.9em;
+}
+
+.pitcher-hand {
+	font-size: 0.8em;
+}
+
+.game-scores {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+.game-broadcasts {
+	font-size: 0.7em;
+	color: #4a6274;
+	text-align: center;
+	padding-bottom: 10px;
+}
