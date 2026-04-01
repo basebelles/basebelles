@@ -144,7 +144,7 @@ class Basebelles_API {
 				'sportId' => 1,
 				'date'    => $date,
 				'teamId'  => self::GUARDIANS_TEAM_ID,
-				'hydrate' => 'team,linescore,probablePitcher',
+				'hydrate' => 'team,linescore,probablePitcher,broadcasts',
 			)
 		);
 
@@ -156,14 +156,17 @@ class Basebelles_API {
 			return new WP_Error( 'basebelles_api_no_game', 'No Guardians game was found for today.' );
 		}
 
-		$game       = $data['dates'][0]['games'][0];
-		$settings   = $this->get_season_settings();
-		$away_team  = $this->normalize_game_team( $game['teams']['away'] ?? array() );
-		$home_team  = $this->normalize_game_team( $game['teams']['home'] ?? array() );
-		$game_date  = $game['gameDate'] ?? '';
-		$is_preview = 'Preview' === ( $game['status']['abstractGameState'] ?? '' );
-		$timezone   = wp_timezone();
-		$timestamp  = $game_date ? strtotime( $game_date ) : false;
+		$game        = $data['dates'][0]['games'][0];
+		$settings    = $this->get_season_settings();
+		$away_team   = $this->normalize_game_team( $game['teams']['away'] ?? array() );
+		$home_team   = $this->normalize_game_team( $game['teams']['home'] ?? array() );
+		$game_date   = $game['gameDate'] ?? '';
+		$is_home     = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ) ? true : false;
+		$game_status = $game['status']['abstractGameState'] ?? 'Live';
+		$is_preview  = 'Preview' === $game_status;
+		$has_scores  = 'Live' === $game_status || 'Final' === $game_status;
+		$timezone    = wp_timezone();
+		$timestamp   = $game_date ? strtotime( $game_date ) : false;
 
 		return array(
 			'day_date'     => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
@@ -171,9 +174,86 @@ class Basebelles_API {
 			'status'       => $game['status']['abstractGameState'] ?? '',
 			'away_team'    => $away_team,
 			'home_team'    => $home_team,
-			'is_preview'   => $is_preview,
+			'game_status'  => $game_status,
 			'away_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $settings['season'] ) : array(),
 			'home_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $settings['season'] ) : array(),
+			'scores'       => $has_scores ? $this->get_game_scores( $game, $game_status ) : array(),
+			'broadcasts'   => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
+		);
+	}
+
+	/**
+	 * Get the game broadcasts from the game payload.
+	 *
+	 * @param bool $is_home Whether the game is home or away.
+	 * @param array $broadcasts The game broadcasts array.
+	 * @return array
+	 */
+	private function get_game_broadcasts( $is_home, $broadcasts ) {
+		$radio = array();
+		$tv    = array();
+
+		foreach ( $broadcasts as $broadcast ) {
+			// If the game is home, only show the home broadcasts.
+			if ( $is_home && 'home' !== $broadcast['homeAway'] ) {
+				continue;
+			}
+
+			// If the game is away, only show the away broadcasts.
+			if ( ! $is_home && 'away' !== $broadcast['homeAway'] ) {
+				continue;
+			}
+
+			if ( in_array( $broadcast['type'], array( 'AM', 'FM' ), true ) ) {
+				$radio[] = $broadcast['callSign'];
+			}
+
+			if ( 'TV' === $broadcast['type'] ) {
+				$network = $broadcast['name'];
+
+				if ( $broadcast['isNational'] && 'exclusive' === $broadcast['availability']['availabilityCode'] ) {
+					$network .= ' (EXCLUSIVE)';
+				}
+
+				$tv[] = $network;
+			}
+		}
+
+		return array(
+			'radio' => $radio,
+			'tv'    => $tv,
+		);
+	}
+
+	/**
+	 * Get the game scores from the game payload.
+	 *
+	 * @param array $game The game payload.
+	 * @return array
+	 */
+	private function get_game_scores( $game, $game_status ) {
+		$away_scores = (int) ( $game['teams']['away']['score'] ?? 0 );
+		$home_scores = (int) ( $game['teams']['home']['score'] ?? 0 );
+		$winner      = '';
+		$final       = 'Final' === $game_status;
+
+		if ( $final ) {
+			$away_status = $game['teams']['away']['isWinner'] ?? false;
+			$home_status = $game['teams']['home']['isWinner'] ?? false;
+			$inning      = (int) ( $game['linescore']['currentInning'] ?? 1 );
+			$winner      = $away_status ? 'away' : ( $home_status ? 'home' : '' );
+		} else {
+			$inning_half = $game['linescore']['inningHalf'] ?? '';
+			$inning_ord  = $game['linescore']['currentInningOrdinal'] ?? '';
+			$inning      = $inning_half . ' of the ' . $inning_ord;
+		}
+
+		return array(
+			'away'    => $away_scores,
+			'home'    => $home_scores,
+			'winner'  => $winner,
+			'inning'  => $inning,
+			'isFinal' => $final,
 		);
 	}
 

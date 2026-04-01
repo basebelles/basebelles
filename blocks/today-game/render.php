@@ -84,7 +84,21 @@ if ( empty( $home_pitcher ) ) {
 		</div>
 	</div>
 
-	<?php if ( ! empty( $game['is_preview'] ) ) : ?>
+	<div class="game-broadcasts">
+		<?php if ( ! empty( $game['broadcasts']['radio'] ) ) : ?>
+			<div class="broadcast-radio">
+				📻 <?php echo esc_html( implode( ', ', $game['broadcasts']['radio'] ) ); ?>
+			</div>
+		<?php endif; ?>
+		<?php if ( ! empty( $game['broadcasts']['tv'] ) ) : ?>
+			<div class="broadcast-tv">
+				📺 <?php echo esc_html( implode( ', ', $game['broadcasts']['tv'] ) ); ?>
+			</div>
+		<?php endif; ?>
+	</div>
+
+	<?php if ( 'Preview' === $game['game_status'] ) : ?>
+		<!-- Probable Pitchers -->
 		<div class="probable-pitchers">
 			<div class="pitcher-away">
 				<div class="pitcher-name">
@@ -99,7 +113,8 @@ if ( empty( $home_pitcher ) ) {
 				</div>
 				<div class="pitcher-stats">
 					<span><?php echo esc_html( $away_pitcher['record'] ); ?></span>
-					<span class="pitcher-era">ERA <?php echo esc_html( $away_pitcher['era'] ); ?></span>
+					&bull;
+					<span class="pitcher-era"><?php echo esc_html( $away_pitcher['era'] ); ?> ERA</span>
 				</div>
 			</div>
 			<div class="game-meta">
@@ -118,8 +133,44 @@ if ( empty( $home_pitcher ) ) {
 				</div>
 				<div class="pitcher-stats">
 					<span><?php echo esc_html( $home_pitcher['record'] ); ?></span>
-					<span class="pitcher-era">ERA <?php echo esc_html( $home_pitcher['era'] ); ?></span>
+					&bull;
+					<span class="pitcher-era"><?php echo esc_html( $home_pitcher['era'] ); ?> ERA</span>
 				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( ! empty( $game['scores'] ) ) : ?>
+		<!-- Scores -->
+		<div class="game-scores">
+			<div class="score-away">
+				<?php echo esc_html( $game['scores']['away'] ); ?>
+			</div>
+			<div class="game-meta">
+				<?php if ( $game['scores']['isFinal'] ) : ?>
+					<strong>
+						FINAL
+						<?php
+						// If the game is final and the inning is greater than 9, show the inning.
+						if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
+							echo esc_html( '/' . $game['scores']['inning'] );
+						}
+						?>
+					</strong>
+				<?php else : ?>
+					<strong>
+						LIVE
+						<?php
+						// If the game is live, show the inning (top of the 9th, bottom of the 9th, etc.)
+						if ( ! empty( $game['scores']['inning'] ) ) {
+							echo esc_html( $game['scores']['inning'] );
+						}
+						?>
+					</strong>
+				<?php endif; ?>
+			</div>
+			<div class="score-home">
+				<?php echo esc_html( $game['scores']['home'] ); ?>
 			</div>
 		</div>
 	<?php endif; ?>
