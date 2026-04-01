@@ -1,0 +1,44 @@
+/* Guardians Standings Block */
+.basebelles-standings {
+	padding: 10px;
+	background: #fff;
+	color: #002d62;
+	border: 1px solid #00385d;
+	font-family: sans-serif;
+	max-width: 100%;
+}
+
+.basebelles-standings.placeholder {
+	border-style: dashed;
+	text-align: center;
+}
+
+.standings-table-wrap {
+	overflow-x: auto;
+}
+
+.standings-table {
+	width: 100%;
+	min-width: 520px;
+	border-collapse: collapse;
+	font-size: 0.95em;
+}
+
+.standings-table th,
+.standings-table td {
+	padding: 8px 10px;
+	border: 1px solid #f3efe0;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.standings-table th {
+	background: #f3efe0;
+	color: #002d62;
+	font-weight: 700;
+}
+
+.standings-table td:first-child,
+.standings-table th:first-child {
+	text-align: left;
+}

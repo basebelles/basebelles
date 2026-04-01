@@ -1,0 +1,17 @@
+{
+    "name": "acf/basebelles-standings",
+    "title": "Guardians Standings",
+    "description": "Displays the Cleveland Guardians standings.",
+    "style": "file: ./block.css",
+    "category": "widgets",
+    "icon": "chart-line",
+    "keywords": ["standings", "guardians", "baseball", "mlb"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "supports": {
+        "align": true,
+        "anchor": true
+    }
+}
