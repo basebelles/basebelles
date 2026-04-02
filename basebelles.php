@@ -38,10 +38,18 @@ class Basebelles {
 	 * @return void
 	 */
 	public function init() {
+		// Belle Features
 		require_once 'class-api.php';
 		require_once 'class-embeds.php';
-		require_once 'class-schedule.php';
-		require_once 'class-upgrades.php';
+		
+		// Generic Features
+		require_once 'features/class-comment-probation.php';
+		require_once 'features/class-impostercide.php';
+		require_once 'features/class-in-progress.php';
+		require_once 'features/class-no-tracking.php';
+		require_once 'features/class-upgrades.php';
+		
+		// Blocks
 		require_once 'blocks/class-blocks.php';
 	}
 
