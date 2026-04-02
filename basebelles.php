@@ -34,9 +34,10 @@ class Basebelles {
 	 * @return void
 	 */
 	public function init() {
-		require_once 'class-embeds.php';
 		require_once 'class-api.php';
+		require_once 'class-embeds.php';
 		require_once 'class-schedule.php';
+		require_once 'class-upgrades.php';
 		require_once 'blocks/class-blocks.php';
 	}
 
