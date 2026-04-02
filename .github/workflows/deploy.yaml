@@ -24,8 +24,10 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.BELLES_SSH_KEY }}
-          ARGS: "-rlgoDzvc -i"
+          # Standard rsync flags: archive, compress, verbose, delete extraneous
+          ARGS: "-azv --delete" 
           REMOTE_HOST: ${{ secrets.BELLES_HOST }}
           REMOTE_USER: ${{ secrets.BELLES_USER }}
-          TARGET: /home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_HOST }}/wp-content/plugins/basebelles
-          EXCLUDE: "/.git/, /.github/"
+          # Pathing for DreamHost standalone
+          TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_HOST }}/wp-content/plugins/basebelles/"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, .DS_Store"
