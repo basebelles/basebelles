@@ -64,12 +64,6 @@ if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
 		$away_total_runs += (int) preg_replace( '/[^0-9]/', '', $away_val );
 		$home_total_runs += (int) preg_replace( '/[^0-9]/', '', $home_val );
 	}
-} elseif ( $is_home ) {
-	$away_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
-	$home_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
-} else {
-	$away_total_runs = (int) ( $game_details['runs']['guardians'] ?? 0 );
-	$home_total_runs = (int) ( $game_details['runs']['opposition'] ?? 0 );
 }
 
 // Determine Home/Away objects
@@ -80,7 +74,6 @@ if ( $is_home ) {
 		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
 		'score'    => $home_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
-		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
 		'hits'     => $game_details['hits']['guardians'] ?? 0,
 		'errors'   => $game_details['errors']['guardians'] ?? 0,
 	);
@@ -90,7 +83,6 @@ if ( $is_home ) {
 		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'score'    => $away_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
-		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),
 		'hits'     => $game_details['hits']['opposition'] ?? 0,
 		'errors'   => $game_details['errors']['opposition'] ?? 0,
 	);
@@ -101,7 +93,6 @@ if ( $is_home ) {
 		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
 		'score'    => $away_total_runs,
 		'wl'       => $team_details['guards_wl'] ?? '',
-		'standing' => ( $team_details['guards_standing'] ?? '' ) . ' ' . ( $guards_info['league'] ?? '' ),
 		'hits'     => $game_details['hits']['guardians'] ?? 0,
 		'errors'   => $game_details['errors']['guardians'] ?? 0,
 	);
@@ -111,7 +102,6 @@ if ( $is_home ) {
 		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
 		'score'    => $home_total_runs,
 		'wl'       => $opponent_details['opponent_wl'] ?? '',
-		'standing' => ( $opponent_details['opponent_standing'] ?? '' ) . ' ' . ( $opponent_info['league'] ?? '' ),
 		'hits'     => $game_details['hits']['opposition'] ?? 0,
 		'errors'   => $game_details['errors']['opposition'] ?? 0,
 	);
