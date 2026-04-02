@@ -107,6 +107,13 @@ if ( $is_home ) {
 	);
 }
 
+// Winner
+if ( $home_total_runs > $away_total_runs ) {
+	$winner = 'home';
+} else {
+	$winner = 'away';
+}
+
 ?>
 
 <div class="basebelles-results">
@@ -121,7 +128,21 @@ if ( $is_home ) {
 		</div>
 		<div class="team-score"><?php echo esc_html( $away_team['score'] ); ?></div>
 
-		<div class="score-spacer"><strong>FINAL</strong></div>
+		<div class="score-spacer">
+			<strong>
+				<?php
+					if ( 'away' === $winner ) {
+						echo '&#9756;&nbsp;';
+					}
+				?>
+				FINAL
+				<?php
+					if ( 'home' === $winner ) {
+						echo '&nbsp;&#9758;';
+					}
+				?>
+			</strong>
+		</div>
 
 		<div class="team-score"><?php echo esc_html( $home_team['score'] ); ?></div>
 		<div class="team-logo">
