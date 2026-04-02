@@ -138,8 +138,8 @@ class Basebelles_API {
 		// TEMPORARY: If the date is in the past, return today.
 		// We may change this later, but for now we want to skip over
 		// blocks of time like the ASG.
-		if ( strtotime( $date ) < strtotime( gmdate( 'Y-m-d' ) ) ) {
-			$date = gmdate( 'Y-m-d' );
+		if ( strtotime( $date ) < strtotime( wp_date( 'Y-m-d' ) ) ) {
+			$date = wp_date( 'Y-m-d' );
 		}
 
 		$data = $this->request_json(
