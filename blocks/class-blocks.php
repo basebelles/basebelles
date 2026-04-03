@@ -32,8 +32,6 @@ class Basebelles_Blocks {
 		if ( class_exists( 'ACF' ) ) {
 			if ( did_action( 'acf/init' ) ) {
 				$this->register_fields();
-			} else {
-				add_action( 'acf/init', array( $this, 'register_fields' ) );
 			}
 		}
 	}
