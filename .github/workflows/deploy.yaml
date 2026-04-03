@@ -29,5 +29,5 @@ jobs:
           REMOTE_HOST: ${{ secrets.BELLES_HOST }}
           REMOTE_USER: ${{ secrets.BELLES_USER }}
           # Pathing for DreamHost standalone
-          TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_HOST }}/wp-content/plugins/basebelles/"
+          TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_FOLDER }}/wp-content/plugins/basebelles/"
           EXCLUDE: "/.git/, /.github/, /node_modules/, .DS_Store"
