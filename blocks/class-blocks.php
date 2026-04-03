@@ -29,13 +29,6 @@ class Basebelles_Blocks {
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_styles' ) );
 		self::register_blocks();
 		add_filter( 'block_categories_all', array( $this, 'block_categories' ), 10, 2 );
-		if ( class_exists( 'ACF' ) ) {
-			if ( did_action( 'acf/init' ) ) {
-				$this->register_fields();
-			} else {
-				add_action( 'acf/init', array( $this, 'register_fields' ) );
-			}
-		}
 	}
 
 	/**
@@ -97,80 +90,6 @@ class Basebelles_Blocks {
 		wp_enqueue_style( 'basebelles-schedule-style', plugin_dir_url( __FILE__ ) . 'schedule/block.css', array(), self::$version );
 		wp_enqueue_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', array(), self::$version );
 		wp_enqueue_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', array(), self::$version );
-	}
-
-	/**
-	 * Register local ACF fields for plugin blocks.
-	 *
-	 * @return void
-	 */
-	public function register_fields() {
-		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
-			return;
-		}
-
-		call_user_func(
-			'acf_add_local_field_group',
-			array(
-				'key'      => 'group_basebelles_standings',
-				'title'    => 'Guardians Standings',
-				'fields'   => array(
-					array(
-						'key'           => 'field_basebelles_standings_display_mode',
-						'label'         => 'Display Mode',
-						'name'          => 'display_mode',
-						'type'          => 'select',
-						'choices'       => array(
-							'standard' => 'Standard',
-							'expanded' => 'Expanded',
-						),
-						'default_value' => 'standard',
-						'return_format' => 'value',
-						'allow_null'    => 0,
-						'multiple'      => 0,
-						'ui'            => 1,
-					),
-				),
-				'location' => array(
-					array(
-						array(
-							'param'    => 'block',
-							'operator' => '==',
-							'value'    => 'acf/basebelles-standings',
-						),
-					),
-				),
-			)
-		);
-
-		call_user_func(
-			'acf_add_local_field_group',
-			array(
-				'key'      => 'group_basebelles_today_game',
-				'title'    => 'Guardians Today\'s Game',
-				'fields'   => array(
-					array(
-						'key'                     => 'field_basebelles_today_game_game_date',
-						'label'                   => 'Game Date',
-						'name'                    => 'game_date',
-						'type'                    => 'date_picker',
-						'display_format'          => 'd/m/Y',
-						'return_format'           => 'Y-m-d',
-						'first_day'               => 0,
-						'default_to_current_date' => 1,
-					),
-				),
-				'location' => array(
-					array(
-						array(
-							'param'    => 'block',
-							'operator' => '==',
-							'value'    => 'acf/basebelles-today-game',
-						),
-					),
-				),
-			)
-		);
 	}
 }
 
