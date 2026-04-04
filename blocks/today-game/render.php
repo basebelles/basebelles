@@ -160,25 +160,31 @@ if ( is_wp_error( $schedule ) ) {
 							<?php echo esc_html( $game['scores']['away'] ); ?>
 						</div>
 						<div class="game-meta">
-							<?php if ( 'Postponed' === $game['scores']['detailed_state']['state'] ) : ?>
-								<strong>
-									PPD
-									<?php 
-										if ( '' !== $game['scores']['detailed_state']['reason'] ) {
-											echo '</br><small>' . $game['scores']['detailed_state']['reason'] . '</small>';
-										}
-									?>
-								</strong>
-							<?php elseif ( $game['scores']['isFinal'] ) : ?>
-								<strong>
-									FINAL
-									<?php
-									if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
-										echo esc_html( '/' . $game['scores']['inning'] );
-									}
-									?>
-								</strong>
-							<?php else : ?>
+							<?php 
+								$d_state = $game['detailed_state']['state'] ?? '';
+								$reason  = $game['detailed_state']['reason'] ?? '';
+
+								// 1. Check for Postponed first!
+								if ( 'Postponed' === $d_state ) : ?>
+									<strong class="status-ppd">
+										PPD
+										<?php if ( ! empty( $reason ) ) : ?>
+											<br /><small><?php echo esc_html( $reason ); ?></small>
+										<?php endif; ?>
+									</strong>
+								<?php // 2. Check for Final
+									elseif ( ! empty( $game['scores']['isFinal'] ) ) : ?>
+										<strong>
+											FINAL
+											<?php
+												if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
+													echo esc_html( ' / ' . $game['scores']['inning'] );
+												}
+											?>
+											</strong>
+
+								<?php // 3. Fallback to Live
+								else : ?>
 								<strong>
 									LIVE
 									<?php
