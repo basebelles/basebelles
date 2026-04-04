@@ -27,6 +27,7 @@ class Basebelles_Blocks {
 		add_action( 'init', array( $this, 'register_styles' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_styles' ) );
+		
 		self::register_blocks();
 		add_filter( 'block_categories_all', array( $this, 'block_categories' ), 10, 2 );
 	}
@@ -37,8 +38,8 @@ class Basebelles_Blocks {
 	 * @return void
 	 */
 	public static function register_blocks() {
-		register_block_type( __DIR__ . '/schedule' );
 		register_block_type( __DIR__ . '/results' );
+		register_block_type( __DIR__ . '/season-header' );
 		register_block_type( __DIR__ . '/series' );
 		register_block_type( __DIR__ . '/standings' );
 		register_block_type( __DIR__ . '/today-game' );
@@ -52,7 +53,7 @@ class Basebelles_Blocks {
 	public function register_styles() {
 		wp_register_style( 'basebelles-results-style', plugin_dir_url( __FILE__ ) . 'results/block.css', array(), self::$version );
 		wp_register_style( 'basebelles-series-style', plugin_dir_url( __FILE__ ) . 'series/block.css', array(), self::$version );
-		wp_register_style( 'basebelles-schedule-style', plugin_dir_url( __FILE__ ) . 'schedule/block.css', array(), self::$version );
+		wp_register_style( 'basebelles-season-header-style', plugin_dir_url( __FILE__ ) . 'season-header/block.css', array(), self::$version );
 		wp_register_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', array(), self::$version );
 		wp_register_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', array(), self::$version );
 	}
@@ -87,7 +88,7 @@ class Basebelles_Blocks {
 	public function enqueue_styles() {
 		wp_enqueue_style( 'basebelles-results-style', plugin_dir_url( __FILE__ ) . 'results/block.css', array(), self::$version );
 		wp_enqueue_style( 'basebelles-series-style', plugin_dir_url( __FILE__ ) . 'series/block.css', array(), self::$version );
-		wp_enqueue_style( 'basebelles-schedule-style', plugin_dir_url( __FILE__ ) . 'schedule/block.css', array(), self::$version );
+		wp_enqueue_style( 'basebelles-season-header-style', plugin_dir_url( __FILE__ ) . 'season-header/block.css', array(), self::$version );
 		wp_enqueue_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', array(), self::$version );
 		wp_enqueue_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', array(), self::$version );
 	}
