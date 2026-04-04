@@ -212,7 +212,7 @@ class Basebelles_API {
 		$game_status     = $game['status']['abstractGameState'] ?? 'Live';
 		$detailed_status = array(
 			'state'  => $game['status']['detailedState'] ?? '',
-			'reason' => ( isset( $game['status']['reason'] ) ) ? $game['status']['reason'] ?? '',
+			'reason' => ( isset( $game['status']['reason'] ) ) ? $game['status']['reason'] : '',
 		);
 		$is_preview      = 'Preview' === $game_status;
 		$has_scores      = in_array( $game_status, array( 'Live', 'Final' ), true );
