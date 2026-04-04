@@ -160,7 +160,7 @@ if ( is_wp_error( $schedule ) ) {
 							<?php echo esc_html( $game['scores']['away'] ); ?>
 						</div>
 						<div class="game-meta">
-							<?php elseif ( 'Postponed' !== $game['scores']['detailed_state']['state'] ) : ?>
+							<?php if ( 'Postponed' !== $game['scores']['detailed_state']['state'] ) : ?;
 								<strong>
 									PPD
 									<?php 
