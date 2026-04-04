@@ -232,7 +232,7 @@ class Basebelles_API {
 			'home_team'      => $home_team,
 			'away_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season ) : array(),
 			'home_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season ) : array(),
-			'scores'         => $has_scores ? $this->get_game_scores( $game, $game_status ) : array(),
+			'scores'         => $has_scores ? $this->get_game_scores( $game, $game_status, $detailed_status ) : array(),
 			'broadcasts'     => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
 			'sort_time'      => $timestamp ? $timestamp : 0,
 			'show_label'     => false,
@@ -288,11 +288,16 @@ class Basebelles_API {
 	 * @param array $game The game payload.
 	 * @return array
 	 */
-	private function get_game_scores( $game, $game_status ) {
+	private function get_game_scores( $game, $game_status, $detailed_state = array() ) {
 		$away_scores = (int) ( $game['teams']['away']['score'] ?? 0 );
 		$home_scores = (int) ( $game['teams']['home']['score'] ?? 0 );
 		$winner      = '';
 		$final       = 'Final' === $game_status;
+		
+		if ( ! empty( $detailed_state ) && 'Postponed' === $detailed_state['state'] ) {
+				$away_scores = '-';
+				$home_scores = '-';
+			}
 
 		if ( $final ) {
 			$away_status = $game['teams']['away']['isWinner'] ?? false;
