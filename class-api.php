@@ -527,8 +527,14 @@ class Basebelles_API {
 
 			$wins   = (int) ( $record['wins'] ?? 0 );
 			$losses = (int) ( $record['losses'] ?? 0 );
+			
+			if( 0 === $wins && 0 === $losses ) {
+				$split_result = '—';
+			} else {
+				$split_result = $wins . '-' . $losses;
+			}
 
-			return $wins . '-' . $losses;
+			return $split_result;
 		}
 
 		return '0-0';
