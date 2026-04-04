@@ -160,7 +160,16 @@ if ( is_wp_error( $schedule ) ) {
 							<?php echo esc_html( $game['scores']['away'] ); ?>
 						</div>
 						<div class="game-meta">
-							<?php if ( $game['scores']['isFinal'] ) : ?>
+							<?php elseif ( 'Postponed' !== $game['scores']['detailed_state']['state'] ) : ?>
+								<strong>
+									PPD
+									<?php 
+										if ( '' !== $game['scores']['detailed_state']['reason'] ) {
+											echo '</br><small>' . $game['scores']['detailed_state']['reason'] . '</small>';
+										}
+									?>
+								</strong>
+							<?php elseif ( $game['scores']['isFinal'] ) : ?>
 								<strong>
 									FINAL
 									<?php
