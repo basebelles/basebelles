@@ -43,26 +43,26 @@ $postseason = array(
 );
 
 ?>
-<div class="basebelles-season-header">
-  <div class="season-year">
+<div class="basebelles-season-header-grid">
+  <div class="season-year-title">
   <?php if ( 'offSeason' === $season_type ) { ?>
-      <div class="off-season">
+      <div class="off-season-container">
         <img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
       </div>
   <?php } else { ?>
-	<div class="spring-training">
+	<div class="season-col spring-training">
 		<h3><a href="<?php echo esc_attr( $spring_training['link'] ); ?>">Spring Training</a></h3>
     <span class="<?php echo esc_attr( $spring_training['class'] ); ?>">
     <?php echo esc_html( $spring_training['start'] . ' - ' . $spring_training['start'] ); ?>
     </span>
 	</div>
-  <div class="regular-season">
+  <div class="season-col regular-season">
 		<h3><a href="<?php echo esc_attr( $regular_season['link'] ); ?>">Regular Season</a></h3>
     <span class="<?php echo esc_attr( $regular_season['class'] ); ?>">
     <?php echo esc_html( $regular_season['start'] . ' - ' . $regular_season['end'] ); ?>
     </span>
 	</div>
-  <div class="post-season">
+  <div class="season-col post-season">
 		<h3><a href="<?php echo esc_attr( $postseason['link'] ); ?>">Post Season</a></h3>
     <span class="<?php echo esc_attr( $postseason['class'] ); ?>">
     <?php echo esc_html( $postseason['start'] . ' - ' . $postseason['end'] ); ?>
