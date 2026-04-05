@@ -205,32 +205,37 @@ class Basebelles_API {
 	 * @return array
 	 */
 	private function normalize_scheduled_game( $game, $season ) {
-		$away_team   = $this->normalize_game_team( $game['teams']['away'] ?? array() );
-		$home_team   = $this->normalize_game_team( $game['teams']['home'] ?? array() );
-		$game_date   = $game['gameDate'] ?? '';
-		$is_home     = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
-		$game_status = $game['status']['abstractGameState'] ?? 'Live';
-		$is_preview  = 'Preview' === $game_status;
-		$has_scores  = in_array( $game_status, array( 'Live', 'Final' ), true );
-		$timezone    = wp_timezone();
-		$timestamp   = $game_date ? strtotime( $game_date ) : false;
+		$away_team       = $this->normalize_game_team( $game['teams']['away'] ?? array() );
+		$home_team       = $this->normalize_game_team( $game['teams']['home'] ?? array() );
+		$game_date       = $game['gameDate'] ?? '';
+		$is_home         = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
+		$game_status     = $game['status']['abstractGameState'] ?? 'Live';
+		$detailed_status = array(
+			'state'  => $game['status']['detailedState'] ?? '',
+			'reason' => ( isset( $game['status']['reason'] ) ) ? $game['status']['reason'] : '',
+		);
+		$is_preview      = 'Preview' === $game_status;
+		$has_scores      = in_array( $game_status, array( 'Live', 'Final' ), true );
+		$timezone        = wp_timezone();
+		$timestamp       = $game_date ? strtotime( $game_date ) : false;
 
 		return array(
-			'game_pk'      => (int) ( $game['gamePk'] ?? 0 ),
-			'game_number'  => (int) ( $game['gameNumber'] ?? 1 ),
-			'doubleheader' => (string) ( $game['doubleHeader'] ?? 'N' ),
-			'day_date'     => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
-			'game_time'    => $timestamp ? wp_date( 'g:i A T', $timestamp, $timezone ) : '',
-			'status'       => $game_status,
-			'game_status'  => $game_status,
-			'away_team'    => $away_team,
-			'home_team'    => $home_team,
-			'away_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season ) : array(),
-			'home_pitcher' => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season ) : array(),
-			'scores'       => $has_scores ? $this->get_game_scores( $game, $game_status ) : array(),
-			'broadcasts'   => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
-			'sort_time'    => $timestamp ? $timestamp : 0,
-			'show_label'   => false,
+			'game_pk'        => (int) ( $game['gamePk'] ?? 0 ),
+			'game_number'    => (int) ( $game['gameNumber'] ?? 1 ),
+			'doubleheader'   => (string) ( $game['doubleHeader'] ?? 'N' ),
+			'day_date'       => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
+			'game_time'      => $timestamp ? wp_date( 'g:i A T', $timestamp, $timezone ) : '',
+			'status'         => $game_status,
+			'detailed_state' => $detailed_status,
+			'game_status'    => $game_status,
+			'away_team'      => $away_team,
+			'home_team'      => $home_team,
+			'away_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season ) : array(),
+			'home_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season ) : array(),
+			'scores'         => $has_scores ? $this->get_game_scores( $game, $game_status, $detailed_status ) : array(),
+			'broadcasts'     => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
+			'sort_time'      => $timestamp ? $timestamp : 0,
+			'show_label'     => false,
 		);
 	}
 
@@ -283,11 +288,16 @@ class Basebelles_API {
 	 * @param array $game The game payload.
 	 * @return array
 	 */
-	private function get_game_scores( $game, $game_status ) {
+	private function get_game_scores( $game, $game_status, $detailed_state = array() ) {
 		$away_scores = (int) ( $game['teams']['away']['score'] ?? 0 );
 		$home_scores = (int) ( $game['teams']['home']['score'] ?? 0 );
 		$winner      = '';
 		$final       = 'Final' === $game_status;
+		
+		if ( ! empty( $detailed_state ) && 'Postponed' === $detailed_state['state'] ) {
+				$away_scores = '-';
+				$home_scores = '-';
+			}
 
 		if ( $final ) {
 			$away_status = $game['teams']['away']['isWinner'] ?? false;
