@@ -15,7 +15,8 @@ $season_settings = get_field( 'season_settings' );
 
 // Overall Settings
 $season_type = $season_settings['season_type'] ?? 'regularSeason';
-$this_season = (int) $season_settings['last_game'] ?? wp_date( 'Y' );
+$this_season = (int) $season_settings['current_season'] ?? wp_date( 'Y' );
+$plugin_url   = plugin_dir_url( dirname( __DIR__, 2 ) . '/basebelles.php' );
 $off_season  = $plugin_url . 'blocks/season-header/off-season.jpg';
 
 // Season Data
@@ -23,25 +24,27 @@ $spring_training = array(
   'start' => $season_settings['spring-training']['start'] ?? 'TBD',
   'end'   => $season_settings['spring-training']['end'] ?? 'TBD',
   'class' => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
+  'link'  => '/season-type/spring-training/?year=' . $this_season,
 );
 
 $regular_season = array(
   'start' => $season_settings['regular-season']['start'] ?? 'TBD',
   'end'   => $season_settings['regular-season']['end'] ?? 'TBD',
   'class' => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array($season_type, ['postSeason', 'wildCard', 'offSeason']) ? 'over' : '' ),
+  'link'  => '/season-type/regular-season/?year=' . $this_season,
 );
 
 
 $postseason = array(
   'start' => $season_settings['post-season']['start'] ?? 'TBD',
   'end'   => $season_settings['post-season']['end'] ?? 'TBD',
-  'class' => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : ''
+  'class' => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : '',
+  'link'  => '/season-type/post-season/?year=' . $this_season,
 );
 
 ?>
 <div class="basebelles-season-header">
   <div class="season-year">
-    
   <?php if ( 'offSeason' === $season_type ) { ?>
       <div class="off-season">
         <img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
