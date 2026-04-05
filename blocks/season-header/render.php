@@ -16,6 +16,7 @@ $season_settings = get_field( 'season_settings' );
 // Overall Settings
 $season_type = $season_settings['season_type'] ?? 'regularSeason';
 $this_season = (int) $season_settings['last_game'] ?? wp_date( 'Y' );
+$off_season   = $plugin_url . 'blocks/season-header/off-season.jpg';
 
 // Season Data
 $spring_training = array(
@@ -42,7 +43,7 @@ $postseason = array(
     
   <?php if ( 'offSeason' === $season_type ) { ?>
       <div class="off-season">
-        IMAGE FOR OFF SEASON
+        <img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
       </div>
   <?php } else { ?>
 	<div class="spring-training">
