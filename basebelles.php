@@ -31,7 +31,7 @@ class Basebelles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
-		add_action( 'wp_head', array( $this, 'wp_head' ) );
+		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
 	}
 
 	/**
@@ -93,7 +93,11 @@ class Basebelles {
 		return $existing_mimes;
 	}
 	
-	public function wp_head() {
+	/**
+	 * Custom Header
+	 * @return void
+	 */
+	private function wp_head() {
 		echo '<link rel="shortcut icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 		echo '<link rel="icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 	}
