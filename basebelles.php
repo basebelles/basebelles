@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the blocks.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.1.0';
+		self::$version = '1.2.0';
 		
 		// Quality of Life
 		add_action( 'pre_ping', array( $this, 'no_self_ping' ) );
@@ -30,6 +30,8 @@ class Basebelles {
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+
+		add_action( 'wp_head', array( $this, 'wp_head' ) );
 	}
 
 	/**
@@ -89,6 +91,11 @@ class Basebelles {
 		$existing_mimes['epub'] = 'application/epub+zip'; //allow epub files
 		$existing_mimes['webm'] = 'video/webm'; //allow epub file
 		return $existing_mimes;
+	}
+	
+	public function wp_head() {
+		echo '<link rel="shortcut icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
+		echo '<link rel="icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 	}
 
 }
