@@ -51,19 +51,19 @@ $postseason = array(
       </div>
   <?php } else { ?>
 	<div class="spring-training">
-		<h3>Spring Training</h3>
+		<h3><a href="<?php echo esc_attr( $spring_training['link'] ); ?>">Spring Training</a></h3>
     <span class="<?php echo esc_attr( $spring_training['class'] ); ?>">
     <?php echo esc_html( $spring_training['start'] . ' - ' . $spring_training['start'] ); ?>
     </span>
 	</div>
   <div class="regular-season">
-		<h3>Regular Season</h3>
+		<h3><a href="<?php echo esc_attr( $regular_season['link'] ); ?>">Regular Season</a></h3>
     <span class="<?php echo esc_attr( $regular_season['class'] ); ?>">
     <?php echo esc_html( $regular_season['start'] . ' - ' . $regular_season['end'] ); ?>
     </span>
 	</div>
   <div class="post-season">
-		<h3>Post Season</h3>
+		<h3><a href="<?php echo esc_attr( $postseason['link'] ); ?>">Post Season</a></h3>
     <span class="<?php echo esc_attr( $postseason['class'] ); ?>">
     <?php echo esc_html( $postseason['start'] . ' - ' . $postseason['end'] ); ?>
     </span>
