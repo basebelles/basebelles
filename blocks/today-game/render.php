@@ -186,10 +186,11 @@ if ( is_wp_error( $schedule ) ) {
 								<?php // 3. Fallback to Live
 								else : ?>
 								<strong>
-									LIVE
 									<?php
 									if ( ! empty( $game['scores']['inning'] ) ) {
 										echo esc_html( $game['scores']['inning'] );
+									} else {
+										echo 'LIVE';
 									}
 									?>
 								</strong>
