@@ -23,12 +23,13 @@ class Basebelles {
 	 */
 	public function __construct() {
 		self::$version = '1.2.0';
-		
+
 		// Quality of Life
 		add_action( 'pre_ping', array( $this, 'no_self_ping' ) );
 		add_filter( 'upload_mimes', array( $this, 'custom_upload_mimes' ) );
 
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'register_styles' ), 5 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
 		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
@@ -43,16 +44,25 @@ class Basebelles {
 		// Belle Features
 		require_once 'class-api.php';
 		require_once 'class-embeds.php';
-		
+
 		// Generic Features
 		require_once 'features/class-comment-probation.php';
 		require_once 'features/class-impostercide.php';
 		require_once 'features/class-in-progress.php';
 		require_once 'features/class-no-tracking.php';
 		require_once 'features/class-upgrades.php';
-		
+
 		// Blocks
 		require_once 'blocks/class-blocks.php';
+	}
+
+	/**
+	 * Register the main stylesheet so other handles can depend on it (e.g. block CSS in the editor).
+	 *
+	 * @return void
+	 */
+	public function register_styles() {
+		wp_register_style( 'basebelles-style', plugin_dir_url( __FILE__ ) . 'basebelles.css', array(), self::$version );
 	}
 
 	/**
@@ -61,9 +71,9 @@ class Basebelles {
 	 * @return void
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( 'basebelles-style', plugin_dir_url( __FILE__ ) . 'basebelles.css', array(), self::$version );
+		wp_enqueue_style( 'basebelles-style' );
 	}
-	
+
 	/*
 	 * Prevent self-pings
 	 *
@@ -92,7 +102,7 @@ class Basebelles {
 		$existing_mimes['webm'] = 'video/webm'; //allow epub file
 		return $existing_mimes;
 	}
-	
+
 	/**
 	 * Custom Header
 	 * @return void
@@ -101,7 +111,6 @@ class Basebelles {
 		echo '<link rel="shortcut icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 		echo '<link rel="icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 	}
-
 }
 
 new Basebelles();

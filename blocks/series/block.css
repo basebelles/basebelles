@@ -1,8 +1,8 @@
 .basebelles-series-results {
 	padding: 10px;
 	background: #fff;
-	color: #002D62;
-	border: 1px solid #00385D;
+	color: var(--bb-deep-navy);
+	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
 	max-width: 95%!important;
 	min-width: 200px;
@@ -18,7 +18,7 @@
 
 .series-date {
 	font-size: 0.8em;
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 	margin-bottom: 10px;
 	text-align: center;
 	font-weight: bold;
@@ -56,5 +56,5 @@
 }
 
 .series-winner.split-win {
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 }

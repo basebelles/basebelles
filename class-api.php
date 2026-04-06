@@ -293,11 +293,11 @@ class Basebelles_API {
 		$home_scores = (int) ( $game['teams']['home']['score'] ?? 0 );
 		$winner      = '';
 		$final       = 'Final' === $game_status;
-		
+
 		if ( ! empty( $detailed_state ) && 'Postponed' === $detailed_state['state'] ) {
-				$away_scores = '-';
-				$home_scores = '-';
-			}
+			$away_scores = '-';
+			$home_scores = '-';
+		}
 
 		if ( $final ) {
 			$away_status = $game['teams']['away']['isWinner'] ?? false;
@@ -537,8 +537,8 @@ class Basebelles_API {
 
 			$wins   = (int) ( $record['wins'] ?? 0 );
 			$losses = (int) ( $record['losses'] ?? 0 );
-			
-			if( 0 === $wins && 0 === $losses ) {
+
+			if ( 0 === $wins && 0 === $losses ) {
 				$split_result = '—';
 			} else {
 				$split_result = $wins . '-' . $losses;

@@ -21,52 +21,52 @@ $off_season  = $plugin_url . 'blocks/season-header/off-season.jpg';
 
 // Season Data
 $spring_training = array(
-  'start' => $season_settings['spring-training']['start'] ?? 'TBD',
-  'end'   => $season_settings['spring-training']['end'] ?? 'TBD',
-  'class' => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
-  'link'  => '/season-type/spring-training/?year=' . $this_season,
+	'start' => $season_settings['spring-training']['start'] ?? 'TBD',
+	'end'   => $season_settings['spring-training']['end'] ?? 'TBD',
+	'class' => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
+	'link'  => '/season-type/spring-training/?year=' . $this_season,
 );
 
 $regular_season = array(
-  'start' => $season_settings['regular-season']['start'] ?? 'TBD',
-  'end'   => $season_settings['regular-season']['end'] ?? 'TBD',
-  'class' => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array($season_type, ['postSeason', 'wildCard', 'offSeason']) ? 'over' : '' ),
-  'link'  => '/season-type/regular-season/?year=' . $this_season,
+	'start' => $season_settings['regular-season']['start'] ?? 'TBD',
+	'end'   => $season_settings['regular-season']['end'] ?? 'TBD',
+	'class' => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array( $season_type, array( 'postSeason', 'wildCard', 'offSeason' ), true ) ? 'over' : '' ),
+	'link'  => '/season-type/regular-season/?year=' . $this_season,
 );
 
 
 $postseason = array(
-  'start' => $season_settings['post-season']['start'] ?? 'TBD',
-  'end'   => $season_settings['post-season']['end'] ?? 'TBD',
-  'class' => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : '',
-  'link'  => '/season-type/post-season/?year=' . $this_season,
+	'start' => $season_settings['post-season']['start'] ?? 'TBD',
+	'end'   => $season_settings['post-season']['end'] ?? 'TBD',
+	'class' => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : '',
+	'link'  => '/season-type/post-season/?year=' . $this_season,
 );
 
 ?>
 <div class="basebelles-season-header-grid">
-  <div class="season-year-title">
-  <?php if ( 'offSeason' === $season_type ) { ?>
-      <div class="off-season-container">
-        <img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
-      </div>
-  <?php } else { ?>
+	<div class="season-year-title">
+	<?php if ( 'offSeason' === $season_type ) { ?>
+			<div class="off-season-container">
+				<img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
+			</div>
+	<?php } else { ?>
 	<div class="season-col spring-training">
 		<h3><a href="<?php echo esc_attr( $spring_training['link'] ); ?>">Spring Training</a></h3>
-    <span class="<?php echo esc_attr( $spring_training['class'] ); ?>">
-    <?php echo esc_html( $spring_training['start'] . ' - ' . $spring_training['start'] ); ?>
-    </span>
+		<span class="<?php echo esc_attr( $spring_training['class'] ); ?>">
+		<?php echo esc_html( $spring_training['start'] . ' - ' . $spring_training['start'] ); ?>
+		</span>
 	</div>
-  <div class="season-col regular-season">
+	<div class="season-col regular-season">
 		<h3><a href="<?php echo esc_attr( $regular_season['link'] ); ?>">Regular Season</a></h3>
-    <span class="<?php echo esc_attr( $regular_season['class'] ); ?>">
-    <?php echo esc_html( $regular_season['start'] . ' - ' . $regular_season['end'] ); ?>
-    </span>
+		<span class="<?php echo esc_attr( $regular_season['class'] ); ?>">
+		<?php echo esc_html( $regular_season['start'] . ' - ' . $regular_season['end'] ); ?>
+		</span>
 	</div>
-  <div class="season-col post-season">
+	<div class="season-col post-season">
 		<h3><a href="<?php echo esc_attr( $postseason['link'] ); ?>">Post Season</a></h3>
-    <span class="<?php echo esc_attr( $postseason['class'] ); ?>">
-    <?php echo esc_html( $postseason['start'] . ' - ' . $postseason['end'] ); ?>
-    </span>
+		<span class="<?php echo esc_attr( $postseason['class'] ); ?>">
+		<?php echo esc_html( $postseason['start'] . ' - ' . $postseason['end'] ); ?>
+		</span>
 	</div>
-  <?php } ?>
+	<?php } ?>
 </div>
