@@ -20,8 +20,16 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 	return;
 }
 
+// Get the season type and year from ACF Options or query variables. Default to regular season and current year.
+$season_type = (string) ( get_field( 'season_type', 'option' ) ?? 'regularSeason' );
+$season_year = (int) ( get_query_var( 'season_year' ) ?? get_field( 'season_year', 'option' ) ?? (int) gmdate( 'Y' ) );
+if ( ! is_numeric( $season_year ) ) {
+	$season_year = (int) gmdate( 'Y' );
+}
+
+// Get the standings from the API.
 $api       = Basebelles_API::get_instance();
-$standings = $api->get_guardians_standings();
+$standings = $api->get_guardians_standings( (string) $season_type, (int) $season_year );
 
 if ( is_wp_error( $standings ) ) {
 	if ( is_admin() ) {

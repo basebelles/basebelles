@@ -1,6 +1,6 @@
 {
     "name": "acf/basebelles-season-header",
-    "title": "Guards Season Header",
+    "title": "Season Header",
     "description": "Displays the current season.",
     "style": [ "basebelles-style", "file:./block.css" ],
     "category": "basebelles",

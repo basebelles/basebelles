@@ -1,6 +1,6 @@
 {
     "name": "acf/basebelles-series",
-    "title": "Guardians Series Results",
+    "title": "Series Results",
     "description": "Displays the results of a Cleveland Guardians series.",
     "style": [ "basebelles-style", "file:./block.css" ],
     "category": "basebelles",

@@ -1,6 +1,6 @@
 {
     "name": "acf/basebelles-standings",
-    "title": "Guardians Standings",
+    "title": "Current Standings",
     "description": "Displays the Cleveland Guardians standings.",
     "style": [ "basebelles-style", "file:./block.css" ],
     "category": "basebelles",

@@ -1,0 +1,6 @@
+{
+	"intelephense.telemetry.enabled": false,
+	"intelephense.environment.includePaths": [
+		"/Users/Ipstenu/Development/php-stubs/"
+	]
+}

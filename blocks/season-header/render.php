@@ -36,7 +36,7 @@ $season_data = array(
 		'start'  => empty( $season_details['spring_training']['start'] ) ? 'TBD' : $season_details['spring_training']['start'],
 		'end'    => empty( $season_details['spring_training']['end'] ) ? 'TBD' : $season_details['spring_training']['end'],
 		'class'  => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
-		'link'   => '/season-type/spring-training/?year=' . $this_season,
+		'link'   => '/season-type/spring-training/?season_year=' . $this_season,
 		'record' => empty( $season_details['spring_training']['record'] ) ? '' : $season_details['spring_training']['record'],
 	),
 	'regular_season'  => array(
@@ -45,7 +45,7 @@ $season_data = array(
 		'start'  => empty( $season_details['regular_season']['start'] ) ? 'TBD' : $season_details['regular_season']['start'],
 		'end'    => empty( $season_details['regular_season']['end'] ) ? 'TBD' : $season_details['regular_season']['end'],
 		'class'  => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array( $season_type, array( 'postSeason', 'wildCard', 'offSeason' ), true ) ? 'over' : '' ),
-		'link'   => '/season-type/regular-season/?year=' . $this_season,
+		'link'   => '/season-type/regular-season/?season_year=' . $this_season,
 		'record' => empty( $season_details['regular_season']['record'] ) ? '' : $season_details['regular_season']['record'],
 	),
 	'post_season'     => array(
@@ -54,7 +54,7 @@ $season_data = array(
 		'start'  => empty( $season_details['post_season']['start'] ) ? 'TBD' : $season_details['post_season']['start'],
 		'end'    => empty( $season_details['post_season']['end'] ) ? 'TBD' : $season_details['post_season']['end'],
 		'class'  => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : '',
-		'link'   => '/season-type/post-season/?year=' . $this_season,
+		'link'   => '/season-type/post-season/?season_year=' . $this_season,
 		'record' => empty( $season_details['post_season']['record'] ) ? '' : $season_details['post_season']['record'],
 	),
 );

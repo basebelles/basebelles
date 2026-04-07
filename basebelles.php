@@ -30,9 +30,22 @@ class Basebelles {
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_styles' ), 5 );
+		add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
 		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
+	}
+
+	/**
+	 * Register custom query vars (avoid `year` in URLs — it is a core date-archive var and triggers redirects to /YYYY/).
+	 *
+	 * @param string[] $vars Public query variables.
+	 * @return string[]
+	 */
+	public function register_query_vars( $vars ) {
+		$vars[] = 'season_year';
+		return $vars;
 	}
 
 	/**
@@ -111,6 +124,27 @@ class Basebelles {
 	public function wp_head() {
 		echo '<link rel="shortcut icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 		echo '<link rel="icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
+	}
+
+	/**
+	 * Pre Get Posts
+	 *
+	 * @param WP_Query $query
+	 * @return void
+	 */
+	public function pre_get_posts( $query ) {
+		// Only modify the main query on the frontend for your specific taxonomy archive
+		if ( ! is_admin() && $query->is_main_query() && is_tax( 'season-type' ) ) {
+			$year = get_query_var( 'year' );
+			if ( ! $year ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$year = isset( $_GET['year'] ) ? (int) wp_unslash( $_GET['year'] ) : false;
+			}
+
+			if ( $year && is_numeric( $year ) ) {
+				$query->set( 'year', (int) $year );
+			}
+		}
 	}
 }
 
