@@ -51,7 +51,7 @@ $cleveland = array(
 	'name'   => 'Guardians',
 	'abbr'   => 'CLE',
 	'logo'   => $plugin_url . 'team-info/logos/guardians.png',
-	'score'  => $home_total_runs,
+	'score'  => 0,
 	'wl'     => $team_details['guards_wl'] ?? '',
 	'hits'   => $game_details['hits']['guardians'] ?? 0,
 	'errors' => $game_details['errors']['guardians'] ?? 0,
@@ -62,7 +62,7 @@ $opposition = array(
 	'name'   => $opponent_short_name,
 	'abbr'   => $opponent_info['abbreviation'] ?? '',
 	'logo'   => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
-	'score'  => $away_total_runs,
+	'score'  => 0,
 	'wl'     => $opponent_details['opponent_wl'] ?? '',
 	'hits'   => $game_details['hits']['opposition'] ?? 0,
 	'errors' => $game_details['errors']['opposition'] ?? 0,
@@ -98,7 +98,7 @@ if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
 }
 
 // Winner
-if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
+if ( 0 !== $home_total_runs || 0 !== $away_total_runs ) {
 	$home_team['score'] = $home_total_runs;
 	$away_team['score'] = $away_total_runs;
 
@@ -111,6 +111,16 @@ if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
 	}
 }
 
+$winner_class = 'guards-win';
+// If it's a home game and the home team lost, then the opponent won
+if ( $is_home && ! $home_team['winner'] ) {
+	$winner_class = 'oppo-win';
+}
+
+// If it's an away game and the home team won, then the opponent won
+if ( ! $is_home && $home_team['winner'] ) {
+	$winner_class = 'oppo-win';
+}
 ?>
 
 <div class="basebelles-results">
@@ -131,7 +141,7 @@ if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
 			?>
 		</div>
 
-		<div class="score-spacer">
+		<div class="score-spacer <?php echo esc_attr( $winner_class ); ?>">
 			<strong>
 				<?php
 				if ( $away_team['winner'] ) {
@@ -140,6 +150,8 @@ if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
 
 				if ( 'tbd' !== $opponent_slug ) {
 					echo 'FINAL';
+				} else {
+					echo 'TBD';
 				}
 
 				if ( $home_team['winner'] ) {
