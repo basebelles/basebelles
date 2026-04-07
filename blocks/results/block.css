@@ -2,8 +2,8 @@
 .basebelles-results {
 	padding: 10px;
 	background: #fff;
-	color: #002D62;
-	border: 1px solid #00385D;
+	color: var(--bb-deep-navy);
+	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
 	max-width: 90%!important;
 }
@@ -29,7 +29,7 @@
 .results-header .team-record,
 .results-header .team-standing {
 	font-size: 0.85em;
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 }
 
 .results-header .team-logo img {
@@ -64,20 +64,29 @@
 	font-size: 0.9em;
 }
 
+.results-table-container .results-table-placeholder {
+	font-size: 1.2em;
+	color: var(--bb-accent-slate);
+	margin-top: 10px;
+	text-align: center;
+	font-weight: bold;
+	line-height: 1.2;
+}
+
 .results-table-container table {
 	margin: 5px;
 }
 
 .results-innings-table th,
 .results-innings-table td {
-	border: 1px solid #F3EFE0;
+	border: 1px solid var(--bb-sandstone-cream);
 	padding: 4px;
 	text-align: center;
 }
 
 .results-innings-table th {
-	background-color: #F3EFE0;
-	color: #002D62;
+	background-color: var(--bb-sandstone-cream);
+	color: var(--bb-deep-navy);
 	font-weight: bold;
 }
 

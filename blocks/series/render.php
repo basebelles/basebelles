@@ -30,9 +30,8 @@ $teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_c
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
-$parts         = explode( ': ', $opponent );
-$opponent_slug = $parts[0] ?? $opponent;
-$opponent_info = $teams_data[ $opponent_slug ] ?? array();
+$opponent_slug = $opponent;
+$opponent_info = $teams_data[ $opponent ] ?? array();
 
 // Determine Home/Away objects
 if ( $home_game ) {
@@ -85,39 +84,57 @@ $winner_class = ( ! $guards_win ) ? 'oppo-win' : ( ( 'split' === $guards_win ) ?
 
 ?>
 <div class="basebelles-series-results">
-	<!-- Series Results Section -->
-	<div class="series-date">
-		<?php echo esc_html( $first_game ) . ' - ' . esc_html( $last_game ); ?>
-	</div>
-	<div class="series-results">
-		<div class="series-summary away">
-			<div class="team-name"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></div>
-			<div class="team-series-record"><?php echo esc_html( $away_team['games_won'] ); ?></div>
+	<?php
+	if ( 'tbd' === $opponent ) {
+		?>
+		<div class="series-date placeholder-text">
+			Series Results Coming Soon
 		</div>
-		<div class="team-logo">
-			<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
-		</div>
-
-		<div class="series-spacer">
-			<span class="series-winner <?php echo esc_attr( $winner_class ); ?>">
+		<?php
+	} else {
+		?>
+		<!-- Series Results Section -->
+		<div class="series-date">
 			<?php
-			if ( $away_team['winner'] ) {
-				echo esc_html( strtoupper( $away_team['abbr'] ) );
-			} elseif ( $home_team['winner'] ) {
-				echo esc_html( strtoupper( $home_team['abbr'] ) );
-			} elseif ( ! $home_team['winner'] && ! $away_team['winner'] ) {
-				echo 'SPLIT';
+			if ( $first_game !== $last_game ) {
+				echo esc_html( $first_game ) . ' - ' . esc_html( $last_game );
+			} else {
+				echo esc_html( $first_game );
 			}
 			?>
-			</span>
 		</div>
+		<div class="series-results">
+			<div class="series-summary away">
+				<div class="team-name"><?php echo esc_html( strtoupper( $away_team['name'] ) ); ?></div>
+				<div class="team-series-record"><?php echo esc_html( $away_team['games_won'] ); ?></div>
+			</div>
+			<div class="team-logo">
+				<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
+			</div>
 
-		<div class="team-logo">
-			<img src="<?php echo esc_url( $home_team['logo'] ); ?>" alt="<?php echo esc_attr( $home_team['name'] ); ?> Logo" />
+			<div class="series-spacer">
+				<span class="series-winner <?php echo esc_attr( $winner_class ); ?>">
+				<?php
+				if ( $away_team['winner'] ) {
+					echo esc_html( strtoupper( $away_team['abbr'] ) );
+				} elseif ( $home_team['winner'] ) {
+					echo esc_html( strtoupper( $home_team['abbr'] ) );
+				} elseif ( ! $home_team['winner'] && ! $away_team['winner'] ) {
+					echo 'SPLIT';
+				}
+				?>
+				</span>
+			</div>
+
+			<div class="team-logo">
+				<img src="<?php echo esc_url( $home_team['logo'] ); ?>" alt="<?php echo esc_attr( $home_team['name'] ); ?> Logo" />
+			</div>
+			<div class="series-summary home">
+				<div class="team-name"><?php echo esc_html( strtoupper( $home_team['name'] ) ); ?></div>
+				<div class="team-series-record"><?php echo esc_html( $home_team['games_won'] ); ?></div>
+			</div>
 		</div>
-		<div class="series-summary home">
-			<div class="team-name"><?php echo esc_html( strtoupper( $home_team['name'] ) ); ?></div>
-			<div class="team-series-record"><?php echo esc_html( $home_team['games_won'] ); ?></div>
-		</div>
-	</div>
+		<?php
+	}
+	?>
 </div>

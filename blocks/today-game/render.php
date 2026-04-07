@@ -160,40 +160,40 @@ if ( is_wp_error( $schedule ) ) {
 							<?php echo esc_html( $game['scores']['away'] ); ?>
 						</div>
 						<div class="game-meta">
-							<?php 
-								$d_state = $game['detailed_state']['state'] ?? '';
-								$reason  = $game['detailed_state']['reason'] ?? '';
+							<?php
+							$d_state = $game['detailed_state']['state'] ?? '';
+							$reason  = $game['detailed_state']['reason'] ?? '';
 
-								// 1. Check for Postponed first!
-								if ( 'Postponed' === $d_state ) : ?>
-									<strong class="status-ppd">
-										PPD
-										<?php if ( ! empty( $reason ) ) : ?>
-											<br /><small><?php echo esc_html( $reason ); ?></small>
-										<?php endif; ?>
-									</strong>
-								<?php // 2. Check for Final
-									elseif ( ! empty( $game['scores']['isFinal'] ) ) : ?>
-										<strong>
-											FINAL
-											<?php
-												if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
-													echo esc_html( ' / ' . $game['scores']['inning'] );
-												}
-											?>
-											</strong>
-
-								<?php // 3. Fallback to Live
-								else : ?>
+							// 1. Check for Postponed first!
+							if ( 'Postponed' === $d_state ) {
+								?>
+								<strong class="status-ppd">
+									PPD
+									<?php if ( ! empty( $reason ) ) : ?>
+										<br /><small><?php echo esc_html( $reason ); ?></small>
+									<?php endif; ?>
+								</strong>
+								<?php
+							} elseif ( ! empty( $game['scores']['isFinal'] ) ) {
+								?>
 								<strong>
-									LIVE
+									FINAL
 									<?php
-									if ( ! empty( $game['scores']['inning'] ) ) {
-										echo esc_html( $game['scores']['inning'] );
+									if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
+										echo esc_html( ' / ' . $game['scores']['inning'] );
 									}
 									?>
 								</strong>
-							<?php endif; ?>
+								<?php
+							} else {
+								// 3. Fallback to Live
+								?>
+								<strong>
+									LIVE
+								</strong>
+								<?php
+							}
+							?>
 						</div>
 						<div class="score-home">
 							<?php echo esc_html( $game['scores']['home'] ); ?>

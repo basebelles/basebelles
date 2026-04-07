@@ -1,42 +1,61 @@
-/* Colors */
+/*
+ * Shared palette — CSS variables on :root so every stylesheet that loads after
+ * basebelles.css (see basebelles-style dependency in class-blocks.php) can use
+ * var(--bb-sandstone-cream), etc.
+ */
+:root {
+	--bb-sandstone-cream: #f3efe0;
+	--bb-wine-red: #84172c;
+	/* Darker wine for large banners (e.g. season header); optional elsewhere */
+	--bb-wine-red-banner: #6d1a22;
+	--bb-deep-navy: #002d62;
+	--bb-slate-blue: #00385d;
+	--bb-accent-slate: #4a6274;
+	--bb-light-blue: #009ddc;
+}
+
+.guardians-light-blue {
+	color: var(--bb-light-blue);
+}
+
 .guardians-sandstone-cream {
-	color: #F3EFE0;
+	color: var(--bb-sandstone-cream);
 }
 
 .guardians-wine-red {
-	color: #84172C;
+	color: var(--bb-wine-red);
 }
 
 .guardians-deep-navy {
-	color: #002D62;
+	color: var(--bb-deep-navy);
 }
 
 .guardians-slate-blue {
-	color: #00385D;
+	color: var(--bb-slate-blue);
 }
 
 .guardians-accent-slate {
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 }
 
 /* Overrides */
 .main {
 	.color-accent, .color-accent-hover:hover, .color-accent-hover:focus, :root .has-accent-color, .has-drop-cap:not(:focus):first-letter, .wp-block-button.is-style-outline, a {
-		color: #84172C;
+		color: var(--bb-wine-red);
 	}
 
 	button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-file__button, input[type="button"], input[type="reset"], input[type="submit"], .bg-accent, .bg-accent-hover:hover, .bg-accent-hover:focus, :root .has-accent-background-color, .comment-reply-link {
-		background-color: #84172C;
-		color: #F3EFE0!important;
+		background-color: var(--bb-wine-red);
+		color: var(--bb-sandstone-cream);
 	}
 
 	.primary-menu > li > a,
 	.site-description {
-		color: #F3EFE0!important;
+		color: var(--bb-sandstone-cream) !important;
 	}
 
 	.footer-menu a {
-		color: #F3EFE0!important;
+		color: var(--bb-sandstone-cream) !important;
 	}
 }
 
@@ -60,21 +79,32 @@
 
 /* From Customizer */
 .color-accent, .color-accent-hover:hover, .color-accent-hover:focus, :root .has-accent-color, .has-drop-cap:not(:focus):first-letter, .wp-block-button.is-style-outline, a {
-	color: #84172C;
+	color: var(--bb-wine-red);
 }
 
 button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-file__button, input[type="button"], input[type="reset"], input[type="submit"], .bg-accent, .bg-accent-hover:hover, .bg-accent-hover:focus, :root .has-accent-background-color, .comment-reply-link {
-	background-color: #84172C;
-	color: #F3EFE0!important;
+	background-color: var(--bb-wine-red);
+	color: var(--bb-sandstone-cream) !important;
 }
 
 .primary-menu > li > a,
 .site-description,
 .footer-menu a {
-	color: #F3EFE0!important;
+	color: var(--bb-sandstone-cream) !important;
 }
 
 thead {
-	background-color: #002D62;
-	color: #F3EFE0;
+	background-color: var(--bb-deep-navy);
+	color: var(--bb-sandstone-cream);
+}
+
+a.wp-block-latest-posts__post-title {
+	font-weight: bold;
+	font-size: 1.15em;
+}
+
+/* Homepage Pullquote */
+.home .wp-block-pullquote cite {
+	font-size: .5em!important;
+	font-style: italic;
 }

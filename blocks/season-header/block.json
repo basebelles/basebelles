@@ -1,11 +1,11 @@
 {
-    "name": "acf/basebelles-standings",
-    "title": "Current Standings",
-    "description": "Displays the Cleveland Guardians standings.",
+    "name": "acf/basebelles-season-header",
+    "title": "Season Header",
+    "description": "Displays the current season.",
     "style": [ "basebelles-style", "file:./block.css" ],
     "category": "basebelles",
-    "icon": "chart-line",
-    "keywords": ["standings", "guardians", "baseball", "mlb"],
+    "icon": "status",
+    "keywords": ["season", "guardians", "baseball"],
     "acf": {
         "mode": "preview",
         "renderTemplate": "render.php"

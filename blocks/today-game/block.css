@@ -2,10 +2,10 @@
 .basebelles-today-game {
 	padding: 10px;
 	background: #fff;
-	color: #002d62;
-	border: 1px solid #00385d;
+	color: var(--bb-deep-navy);
+	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 100%;
+	max-width: 75%;
 }
 
 .basebelles-today-game.placeholder {
@@ -16,7 +16,7 @@
 .game-card + .game-card {
 	margin-top: 14px;
 	padding-top: 14px;
-	border-top: 2px solid #f3efe0;
+	border-top: 2px solid var(--bb-sandstone-cream);
 }
 
 .game-label {
@@ -26,7 +26,7 @@
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	text-align: center;
-	color: #4a6274;
+	color: var(--bb-accent-slate);
 }
 
 .off-day-box {
@@ -68,12 +68,12 @@
 
 .team-record {
 	font-size: 0.95em;
-	color: #4a6274;
+	color: var(--bb-accent-slate);
 }
 
 .probable-pitchers,
 .game-scores {
-	border-top: 1px solid #f3efe0;
+	border-top: 1px solid var(--bb-sandstone-cream);
 	padding-top: 10px;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .pitcher-name a {
-	color: #002d62!important;
+	color: var(--bb-deep-navy) !important;
 	font-weight: 700;
 	text-decoration: none;
 }
@@ -97,7 +97,7 @@
 }
 
 .pitcher-stats {
-	color: #4a6274;
+	color: var(--bb-accent-slate);
 	font-size: 0.9em;
 }
 
@@ -112,7 +112,7 @@
 
 .game-broadcasts {
 	font-size: 0.7em;
-	color: #4a6274;
+	color: var(--bb-accent-slate);
 	text-align: center;
 	padding-bottom: 10px;
 }

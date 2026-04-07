@@ -1,10 +1,10 @@
 .basebelles-series-results {
 	padding: 10px;
 	background: #fff;
-	color: #002D62;
-	border: 1px solid #00385D;
+	color: var(--bb-deep-navy);
+	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 95%!important;
+	max-width: 75%!important;
 	min-width: 200px;
 }
 
@@ -18,7 +18,7 @@
 
 .series-date {
 	font-size: 0.8em;
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 	margin-bottom: 10px;
 	text-align: center;
 	font-weight: bold;
@@ -26,8 +26,13 @@
 	line-height: 1.2;
 }
 
-.series-results .team-summary {
-	flex: 1;
+.series-date.placeholder-text {
+	margin-top: 10px;
+}
+
+.series-results .series-summary {
+	flex: 1 1 0;
+	min-width: 0;
 }
 
 .series-results .team-name {
@@ -45,6 +50,7 @@
 .series-winner {
 	font-size: 2.5em;
 	font-weight: bold;
+	padding: 0 10px;
 }
 
 .series-winner.guards-win {
@@ -56,5 +62,5 @@
 }
 
 .series-winner.split-win {
-	color: #4A6274;
+	color: var(--bb-accent-slate);
 }

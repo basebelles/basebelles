@@ -1,0 +1,54 @@
+/* Ensure the off-season div takes up the whole row */
+.off-season-container {
+    grid-column: 1 / -1; /* Spans all 3 columns */
+    width: 100%;
+}
+
+.off-season-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Wrapper for the three columns */
+.basebelles-season-header-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    gap: 20px;
+    text-align: center;
+    background: #6d1a22; /* wine red */
+    padding: 30px 20px;
+    color: #f3efe0; /* cream/white */
+}
+
+/* Center the 2026 Season title above the grid */
+.season-year-title {
+    grid-column: 1 / -1; /* Spans all 3 columns */
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.season-col h3 {
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 5px;
+    text-decoration: underline;
+}
+
+.season-col span {
+    font-size: 1rem;
+    display: block;
+}
+
+/* The 'Cross Out' logic */
+.season-col .over {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.season-col .active {
+    font-weight: bold;
+}
+

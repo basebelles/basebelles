@@ -16,8 +16,9 @@ class Basebelles_API {
 	const API_BASE_URL      = 'https://statsapi.mlb.com/api/v1/';
 	const API_CACHE_TTL     = 900;
 	const API_TIMEOUT       = 10;
-	const AL_LEAGUE_ID      = 103;
-	const GUARDIANS_TEAM_ID = 114;
+	const AL_LEAGUE_ID      = 103; // American League
+	const CL_LEAGUE_ID      = 114; // Cactus League (spring training)
+	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
 
 	/**
 	 * Singleton instance.
@@ -42,9 +43,11 @@ class Basebelles_API {
 	/**
 	 * Get settings used to build MLB API requests.
 	 *
+	 * @param string $season_type The season type.
+	 *
 	 * @return array
 	 */
-	public function get_season_settings() {
+	public function get_season_settings( $season_type = 'regularSeason' ) {
 		$allowed_types = array(
 			'springTraining',
 			'regularSeason',
@@ -52,14 +55,11 @@ class Basebelles_API {
 			'postseason',
 		);
 
-		$season_type = (string) $this->get_option_value( 'season_type', 'regularSeason' );
+		$season_type = ( ! in_array( $season_type, $allowed_types, true ) ) ? 'regularSeason' : (string) $season_type;
 		$season      = (int) $this->get_option_value( 'season', (int) gmdate( 'Y' ) );
 
-		if ( ! in_array( $season_type, $allowed_types, true ) ) {
-			$season_type = 'regularSeason';
-		}
-
-		if ( $season < 1900 ) {
+		// If the season is before 1900 or not a number, set the season to the current year.
+		if ( $season < 1900 || ! is_numeric( $season ) ) {
 			$season = (int) gmdate( 'Y' );
 		}
 
@@ -72,14 +72,17 @@ class Basebelles_API {
 	/**
 	 * Fetch and normalize Guardians standings data.
 	 *
+	 * @param string $season_type The season type.
+	 *
 	 * @return array|WP_Error
 	 */
-	public function get_guardians_standings() {
-		$settings = $this->get_season_settings();
-		$data     = $this->request_json(
+	public function get_guardians_standings( $season_type = 'regularSeason' ) {
+		$settings  = $this->get_season_settings( $season_type );
+		$league_id = ( 'springTraining' === $season_type ) ? self::CL_LEAGUE_ID : self::AL_LEAGUE_ID;
+		$data      = $this->request_json(
 			'standings',
 			array(
-				'leagueId'       => self::AL_LEAGUE_ID,
+				'leagueId'       => $league_id,
 				'season'         => $settings['season'],
 				'standingsTypes' => $settings['season_type'],
 				'hydrate'        => 'division',
@@ -205,26 +208,33 @@ class Basebelles_API {
 	 * @return array
 	 */
 	private function normalize_scheduled_game( $game, $season ) {
-		$away_team       = $this->normalize_game_team( $game['teams']['away'] ?? array() );
-		$home_team       = $this->normalize_game_team( $game['teams']['home'] ?? array() );
-		$game_date       = $game['gameDate'] ?? '';
-		$is_home         = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
-		$game_status     = $game['status']['abstractGameState'] ?? 'Live';
-		$detailed_status = array(
+		$away_team         = $this->normalize_game_team( $game['teams']['away'] ?? array() );
+		$home_team         = $this->normalize_game_team( $game['teams']['home'] ?? array() );
+		$game_date         = $game['gameDate'] ?? '';
+		$is_home           = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
+		$game_status       = $game['status']['abstractGameState'] ?? 'Live';
+		$detailed_status   = array(
 			'state'  => $game['status']['detailedState'] ?? '',
 			'reason' => ( isset( $game['status']['reason'] ) ) ? $game['status']['reason'] : '',
 		);
-		$is_preview      = 'Preview' === $game_status;
-		$has_scores      = in_array( $game_status, array( 'Live', 'Final' ), true );
-		$timezone        = wp_timezone();
-		$timestamp       = $game_date ? strtotime( $game_date ) : false;
+		$is_preview        = 'Preview' === $game_status;
+		$has_scores        = in_array( $game_status, array( 'Live', 'Final' ), true );
+		$timezone          = wp_timezone();
+		$timestamp         = $game_date ? strtotime( $game_date ) : false;
+		$is_traditional_dh = ( 'Y' === ( $game['doubleHeader'] ?? 'N' ) );
+		$is_game_two       = ( 2 === (int) ( $game['gameNumber'] ?? 1 ) );
+
+		$game_time = $timestamp ? wp_date( 'g:i A T', $timestamp, $timezone ) : '';
+		if ( $is_preview && $is_traditional_dh && $is_game_two ) {
+			$game_time = 'TBD (30m after G1)';
+		}
 
 		return array(
 			'game_pk'        => (int) ( $game['gamePk'] ?? 0 ),
 			'game_number'    => (int) ( $game['gameNumber'] ?? 1 ),
 			'doubleheader'   => (string) ( $game['doubleHeader'] ?? 'N' ),
 			'day_date'       => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
-			'game_time'      => $timestamp ? wp_date( 'g:i A T', $timestamp, $timezone ) : '',
+			'game_time'      => $game_time,
 			'status'         => $game_status,
 			'detailed_state' => $detailed_status,
 			'game_status'    => $game_status,
@@ -293,11 +303,11 @@ class Basebelles_API {
 		$home_scores = (int) ( $game['teams']['home']['score'] ?? 0 );
 		$winner      = '';
 		$final       = 'Final' === $game_status;
-		
+
 		if ( ! empty( $detailed_state ) && 'Postponed' === $detailed_state['state'] ) {
-				$away_scores = '-';
-				$home_scores = '-';
-			}
+			$away_scores = '-';
+			$home_scores = '-';
+		}
 
 		if ( $final ) {
 			$away_status = $game['teams']['away']['isWinner'] ?? false;
@@ -538,7 +548,13 @@ class Basebelles_API {
 			$wins   = (int) ( $record['wins'] ?? 0 );
 			$losses = (int) ( $record['losses'] ?? 0 );
 
-			return $wins . '-' . $losses;
+			if ( 0 === $wins && 0 === $losses ) {
+				$split_result = '—';
+			} else {
+				$split_result = $wins . '-' . $losses;
+			}
+
+			return $split_result;
 		}
 
 		return '0-0';

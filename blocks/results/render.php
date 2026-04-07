@@ -38,9 +38,7 @@ $teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_c
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
-$opponent_raw  = $opponent_details['opponent'] ?? 'guardians: Cleveland Guardians';
-$parts         = explode( ': ', $opponent_raw );
-$opponent_slug = $parts[0] ?? 'guardians';
+$opponent_slug = $opponent_details['opponent'] ?? 'tbd';
 $opponent_info = $teams_data[ $opponent_slug ] ?? array();
 
 // Extract just the short team name (e.g. "Mariners" from "mariners")
@@ -66,52 +64,47 @@ if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
 	}
 }
 
+// Set Team Data
+$cleveland = array(
+	'name'   => 'Guardians',
+	'abbr'   => 'CLE',
+	'logo'   => $plugin_url . 'team-info/logos/guardians.png',
+	'score'  => $home_total_runs,
+	'wl'     => $team_details['guards_wl'] ?? '',
+	'hits'   => $game_details['hits']['guardians'] ?? 0,
+	'errors' => $game_details['errors']['guardians'] ?? 0,
+	'winner' => false,
+);
+
+$opposition = array(
+	'name'   => $opponent_short_name,
+	'abbr'   => $opponent_info['abbreviation'] ?? '',
+	'logo'   => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
+	'score'  => $away_total_runs,
+	'wl'     => $opponent_details['opponent_wl'] ?? '',
+	'hits'   => $game_details['hits']['opposition'] ?? 0,
+	'errors' => $game_details['errors']['opposition'] ?? 0,
+	'winner' => false,
+);
+
 // Determine Home/Away objects
 if ( $is_home ) {
-	$home_team = array(
-		'name'     => 'Guardians',
-		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
-		'score'    => $home_total_runs,
-		'wl'       => $team_details['guards_wl'] ?? '',
-		'hits'     => $game_details['hits']['guardians'] ?? 0,
-		'errors'   => $game_details['errors']['guardians'] ?? 0,
-	);
-	$away_team = array(
-		'name'     => $opponent_short_name,
-		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
-		'score'    => $away_total_runs,
-		'wl'       => $opponent_details['opponent_wl'] ?? '',
-		'hits'     => $game_details['hits']['opposition'] ?? 0,
-		'errors'   => $game_details['errors']['opposition'] ?? 0,
-	);
+	$home_team = $cleveland;
+	$away_team = $opposition;
 } else {
-	$away_team = array(
-		'name'     => 'Guardians',
-		'abbr'     => 'CLE',
-		'logo'     => $plugin_url . 'team-info/logos/guardians.png',
-		'score'    => $away_total_runs,
-		'wl'       => $team_details['guards_wl'] ?? '',
-		'hits'     => $game_details['hits']['guardians'] ?? 0,
-		'errors'   => $game_details['errors']['guardians'] ?? 0,
-	);
-	$home_team = array(
-		'name'     => $opponent_short_name,
-		'abbr'     => $opponent_info['abbreviation'] ?? '',
-		'logo'     => $plugin_url . 'team-info/logos/' . $opponent_slug . '.png',
-		'score'    => $home_total_runs,
-		'wl'       => $opponent_details['opponent_wl'] ?? '',
-		'hits'     => $game_details['hits']['opposition'] ?? 0,
-		'errors'   => $game_details['errors']['opposition'] ?? 0,
-	);
+	$away_team = $cleveland;
+	$home_team = $opposition;
 }
 
 // Winner
-if ( $home_total_runs > $away_total_runs ) {
-	$winner = 'home';
-} else {
-	$winner = 'away';
+if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
+	if ( $home_total_runs > $away_total_runs ) {
+		$home_team['winner'] = true;
+	}
+
+	if ( $away_total_runs > $home_total_runs ) {
+		$away_team['winner'] = true;
+	}
 }
 
 ?>
@@ -126,25 +119,39 @@ if ( $home_total_runs > $away_total_runs ) {
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $away_team['logo'] ); ?>" alt="<?php echo esc_attr( $away_team['name'] ); ?> Logo" />
 		</div>
-		<div class="team-score"><?php echo esc_html( $away_team['score'] ); ?></div>
+		<div class="team-score">
+			<?php
+			if ( 'tbd' !== $opponent_slug ) {
+				echo esc_html( $away_team['score'] );
+			}
+			?>
+		</div>
 
 		<div class="score-spacer">
 			<strong>
 				<?php
-					if ( 'away' === $winner ) {
-						echo '&#9756;&nbsp;';
-					}
-				?>
-				FINAL
-				<?php
-					if ( 'home' === $winner ) {
-						echo '&nbsp;&#9758;';
-					}
+				if ( $away_team['winner'] ) {
+					echo '&#9756;&nbsp;';
+				}
+
+				if ( 'tbd' !== $opponent_slug ) {
+					echo 'FINAL';
+				}
+
+				if ( $home_team['winner'] ) {
+					echo '&nbsp;&#9758;';
+				}
 				?>
 			</strong>
 		</div>
 
-		<div class="team-score"><?php echo esc_html( $home_team['score'] ); ?></div>
+		<div class="team-score">
+			<?php
+			if ( 'tbd' !== $opponent_slug ) {
+				echo esc_html( $home_team['score'] );
+			}
+			?>
+		</div>
 		<div class="team-logo">
 			<img src="<?php echo esc_url( $home_team['logo'] ); ?>" alt="<?php echo esc_attr( $home_team['name'] ); ?> Logo" />
 		</div>
@@ -154,8 +161,17 @@ if ( $home_total_runs > $away_total_runs ) {
 		</div>
 	</div>
 
-	<!-- Innings Table Section -->
 	<div class="results-table-container">
+	<?php
+	if ( 'tbd' === $opponent_slug ) {
+		?>
+		<div class="results-table-placeholder">
+			Game Results Coming Soon
+		</div>
+		<?php
+	} else {
+		?>
+		<!-- Innings Table Section -->
 		<table class="results-innings-table">
 			<thead>
 				<tr>
@@ -207,5 +223,8 @@ if ( $home_total_runs > $away_total_runs ) {
 				</tr>
 			</tbody>
 		</table>
+		<?php
+	}
+	?>
 	</div>
 </div>

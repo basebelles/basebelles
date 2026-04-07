@@ -2,8 +2,8 @@
 .basebelles-standings {
 	padding: 10px;
 	background: #fff;
-	color: #002d62;
-	border: 1px solid #00385d;
+	color: var(--bb-deep-navy);
+	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
 	max-width: 100%;
 }
@@ -27,14 +27,14 @@
 .standings-table th,
 .standings-table td {
 	padding: 8px 10px;
-	border: 1px solid #f3efe0;
+	border: 1px solid var(--bb-sandstone-cream);
 	text-align: center;
 	white-space: nowrap;
 }
 
 .standings-table th {
-	background: #f3efe0;
-	color: #002d62;
+	background: var(--bb-sandstone-cream);
+	color: var(--bb-deep-navy);
 	font-weight: 700;
 }
 
