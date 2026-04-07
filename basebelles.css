@@ -84,7 +84,7 @@
 
 button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-file__button, input[type="button"], input[type="reset"], input[type="submit"], .bg-accent, .bg-accent-hover:hover, .bg-accent-hover:focus, :root .has-accent-background-color, .comment-reply-link {
 	background-color: var(--bb-wine-red);
-	color: var(--bb-sandstone-cream) !important;
+	color: var(--bb-sandstone-cream);
 }
 
 .primary-menu > li > a,
