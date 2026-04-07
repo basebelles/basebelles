@@ -30,8 +30,9 @@
 	margin-top: 10px;
 }
 
-.series-results .team-summary {
-	flex: 1;
+.series-results .series-summary {
+	flex: 1 1 0;
+	min-width: 0;
 }
 
 .series-results .team-name {
@@ -49,6 +50,7 @@
 .series-winner {
 	font-size: 2.5em;
 	font-weight: bold;
+	padding: 0 10px;
 }
 
 .series-winner.guards-win {

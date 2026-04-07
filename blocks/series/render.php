@@ -95,7 +95,13 @@ $winner_class = ( ! $guards_win ) ? 'oppo-win' : ( ( 'split' === $guards_win ) ?
 		?>
 		<!-- Series Results Section -->
 		<div class="series-date">
-				<?php echo esc_html( $first_game ) . ' - ' . esc_html( $last_game ); ?>
+			<?php
+			if ( $first_game !== $last_game ) {
+				echo esc_html( $first_game ) . ' - ' . esc_html( $last_game );
+			} else {
+				echo esc_html( $first_game );
+			}
+			?>
 		</div>
 		<div class="series-results">
 			<div class="series-summary away">

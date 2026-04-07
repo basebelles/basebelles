@@ -64,6 +64,15 @@
 	font-size: 0.9em;
 }
 
+.results-table-container .results-table-placeholder {
+	font-size: 1.2em;
+	color: var(--bb-accent-slate);
+	margin-top: 10px;
+	text-align: center;
+	font-weight: bold;
+	line-height: 1.2;
+}
+
 .results-table-container table {
 	margin: 5px;
 }
