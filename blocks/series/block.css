@@ -54,11 +54,11 @@
 }
 
 .series-winner.guards-win {
-	color: #078025;
+	color: var(--bb-green);
 }
 
 .series-winner.oppo-win {
-	color: #C41E3A;
+	color: var(--bb-red);
 }
 
 .series-winner.split-win {

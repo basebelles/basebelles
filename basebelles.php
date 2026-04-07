@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the blocks.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.2.0';
+		self::$version = '1.2.1';
 
 		// Quality of Life
 		add_action( 'pre_ping', array( $this, 'no_self_ping' ) );

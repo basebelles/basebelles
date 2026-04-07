@@ -100,3 +100,11 @@
 	font-weight: bold;
 	background-color: #f9f9f9;
 }
+
+.results-header .score-spacer.guards-win {
+	color: var(--bb-green);
+}
+
+.results-header .score-spacer.oppo-win {
+	color: var(--bb-red);
+}
