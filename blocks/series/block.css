@@ -4,7 +4,7 @@
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 95%!important;
+	max-width: 75%!important;
 	min-width: 200px;
 }
 
@@ -24,6 +24,10 @@
 	font-weight: bold;
 	font-size: 1.2em;
 	line-height: 1.2;
+}
+
+.series-date.placeholder-text {
+	margin-top: 10px;
 }
 
 .series-results .team-summary {

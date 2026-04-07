@@ -11,6 +11,11 @@
 	--bb-deep-navy: #002d62;
 	--bb-slate-blue: #00385d;
 	--bb-accent-slate: #4a6274;
+	--bb-light-blue: #009ddc;
+}
+
+.guardians-light-blue {
+	color: var(--bb-light-blue);
 }
 
 .guardians-sandstone-cream {
@@ -91,4 +96,15 @@ button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-
 thead {
 	background-color: var(--bb-deep-navy);
 	color: var(--bb-sandstone-cream);
+}
+
+a.wp-block-latest-posts__post-title {
+	font-weight: bold;
+	font-size: 1.15em;
+}
+
+/* Homepage Pullquote */
+.home .wp-block-pullquote cite {
+	font-size: 1.25em!important;
+	font-style: italic;
 }

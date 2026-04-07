@@ -44,7 +44,7 @@ if ( is_wp_error( $standings ) ) {
 
 $columns = array(
 	array(
-		'label' => 'Standing',
+		'label' => 'Current Standing',
 		'value' => $standings['summary'],
 	),
 	array(
