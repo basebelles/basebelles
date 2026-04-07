@@ -13,29 +13,19 @@
  * This file was part of Dashboard: Posts In Progress, a plugin for WordPress.
  */
 
-class HELF_Dashboard_Posts_In_Progress {
+class Basebelles_Dashboard_Posts_In_Progress {
 
 	/**
 	 * __construct function.
 	 *
-	 * @return n/a
-	 */
-	public function __construct() {
-		add_action( 'init', array( &$this, 'init' ) );
-	}
-
-	/**
-	 * Initialize
+	 * Do not hook `init` from here: this file loads from Basebelles::init() while `init` is already
+	 * running, so nested `init` callbacks are unreliable. Register `wp_dashboard_setup` directly;
+	 * that fires later on the dashboard request and always runs.
 	 *
 	 * @return void
 	 */
-	public function init() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		add_action( 'wp_dashboard_setup', array( &$this, 'register_widget' ) );
-		add_filter( 'wp_dashboard_widgets', array( &$this, 'add_widget' ) );
+	public function __construct() {
+		add_action( 'wp_dashboard_setup', array( $this, 'register_widget' ), 20 );
 	}
 
 	/**
@@ -43,28 +33,18 @@ class HELF_Dashboard_Posts_In_Progress {
 	 * we use a hook/function to make the widget a dashboard-only widget
 	 */
 	public function register_widget() {
-		wp_add_dashboard_widget( 'dashboard_in_progress', __( 'Posts in Progress', 'lwtv-plugin' ), array( &$this, 'widget' ) );
-	}
-
-	/**
-	 * Add widget
-	 *
-	 * Modifies the array of dashboard widgets and adds this plugin's output
-	 *
-	 * @return array  array of Widget data
-	 */
-	public function add_widget( $widgets ) {
-		global $wp_registered_widgets;
-
-		if ( isset( $wp_registered_widgets['dashboard_in_progress'] ) ) {
-			$widgets[] = 'dashboard_in_progress';
-		}
-
-		return $widgets;
+		wp_add_dashboard_widget(
+			'basebelles_posts_in_progress',
+			__( 'Posts in Progress', 'basebelles' ),
+			array( $this, 'widget' )
+		);
 	}
 
 	/**
 	 * Output the widget contents
+	 *
+	 * @param array $args The widget arguments.
+	 * @return void
 	 */
 	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 	public function widget( $args ) {
@@ -191,4 +171,4 @@ class HELF_Dashboard_Posts_In_Progress {
 	}
 }
 
-new HELF_Dashboard_Posts_In_Progress();
+new Basebelles_Dashboard_Posts_In_Progress();

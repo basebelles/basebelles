@@ -105,9 +105,10 @@ class Basebelles {
 
 	/**
 	 * Custom Header
+	 *
 	 * @return void
 	 */
-	private function wp_head() {
+	public function wp_head() {
 		echo '<link rel="shortcut icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 		echo '<link rel="icon" href="' . esc_url( home_url( '/favicon.ico?v=' . self::$version ) ) . '" type="image/x-icon" />';
 	}

@@ -25,16 +25,18 @@
 .season-year-title {
 	grid-column: 1 / -1; /* Spans all 3 columns */
 	font-size: 2.2rem;
-	margin-bottom: 20px;
 	font-weight: bold;
 	text-transform: uppercase;
 }
 
 .season-col h3 {
-	font-size: 1.1rem;
+	font-size: 1.4rem;
 	font-style: italic;
 	margin-bottom: 5px;
-	text-decoration: underline;
+}
+
+a.season-type-link {
+	color: var(--bb-sandstone-cream);
 }
 
 .season-col span {
