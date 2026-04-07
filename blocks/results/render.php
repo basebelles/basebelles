@@ -45,24 +45,6 @@ $opponent_info = $teams_data[ $opponent_slug ] ?? array();
 $opponent_short_name = $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) );
 $guards_info         = $teams_data['guardians'] ?? array();
 
-// Scores Logic
-$inning_scores   = $game_details['inning_scores'] ?? array();
-$num_innings     = is_array( $inning_scores ) ? count( $inning_scores ) : 0;
-$display_innings = max( 9, $num_innings ); // Always show at least 9 columns
-
-$away_total_runs = 0;
-$home_total_runs = 0;
-
-if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
-	foreach ( $inning_scores as $score ) {
-		// Parse numeric part from text (e.g., '1x' -> 1, 'X' -> 0)
-		$away_val = $score['away'] ?? '0';
-		$home_val = $score['home'] ?? '0';
-
-		$away_total_runs += (int) preg_replace( '/[^0-9]/', '', $away_val );
-		$home_total_runs += (int) preg_replace( '/[^0-9]/', '', $home_val );
-	}
-}
 
 // Set Team Data
 $cleveland = array(
@@ -96,8 +78,30 @@ if ( $is_home ) {
 	$home_team = $opposition;
 }
 
+// Scores Logic
+$inning_scores   = $game_details['inning_scores'] ?? array();
+$num_innings     = is_array( $inning_scores ) ? count( $inning_scores ) : 0;
+$display_innings = max( 9, $num_innings ); // Always show at least 9 columns
+
+$away_total_runs = 0;
+$home_total_runs = 0;
+
+if ( ! empty( $inning_scores ) && is_array( $inning_scores ) ) {
+	foreach ( $inning_scores as $score ) {
+		// Parse numeric part from text (e.g., '1x' -> 1, 'X' -> 0)
+		$away_val = $score['away'] ?? '0';
+		$home_val = $score['home'] ?? '0';
+
+		$away_total_runs += (int) preg_replace( '/[^0-9]/', '', $away_val );
+		$home_total_runs += (int) preg_replace( '/[^0-9]/', '', $home_val );
+	}
+}
+
 // Winner
 if ( 0 !== $home_total_runs && 0 !== $away_total_runs ) {
+	$home_team['score'] = $home_total_runs;
+	$away_team['score'] = $away_total_runs;
+
 	if ( $home_total_runs > $away_total_runs ) {
 		$home_team['winner'] = true;
 	}
