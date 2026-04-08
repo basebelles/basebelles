@@ -1,0 +1,17 @@
+{
+    "name": "acf/basebelles-season-stats-header",
+    "title": "Season Snapshot",
+    "description": "Summary stats bar for season-type archive pages (record, rank, run diff).",
+    "style": [ "basebelles-style", "file:./block.css" ],
+    "category": "basebelles",
+    "icon": "chart-area",
+    "keywords": [ "season", "stats", "archive", "guardians" ],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "supports": {
+        "align": true,
+        "anchor": true
+    }
+}

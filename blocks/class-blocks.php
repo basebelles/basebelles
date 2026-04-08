@@ -44,6 +44,7 @@ class Basebelles_Blocks {
 		register_block_type( __DIR__ . '/standings' );
 		register_block_type( __DIR__ . '/today-game' );
 		register_block_type( __DIR__ . '/streamable' );
+		register_block_type( __DIR__ . '/season-stats-header' );
 	}
 
 	/**
@@ -59,6 +60,7 @@ class Basebelles_Blocks {
 		wp_register_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-streamable-style', plugin_dir_url( __FILE__ ) . 'streamable/block.css', $deps, self::$version );
+		wp_register_style( 'basebelles-season-stats-header-style', plugin_dir_url( __FILE__ ) . 'season-stats-header/block.css', $deps, self::$version );
 	}
 
 	/**
@@ -96,6 +98,7 @@ class Basebelles_Blocks {
 		wp_enqueue_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', $deps, self::$version );
 		wp_enqueue_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', $deps, self::$version );
 		wp_enqueue_style( 'basebelles-streamable-style', plugin_dir_url( __FILE__ ) . 'streamable/block.css', $deps, self::$version );
+		wp_enqueue_style( 'basebelles-season-stats-header-style', plugin_dir_url( __FILE__ ) . 'season-stats-header/block.css', $deps, self::$version );
 	}
 }
 

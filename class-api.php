@@ -19,6 +19,8 @@ class Basebelles_API {
 	const AL_LEAGUE_ID      = 103; // American League
 	const CL_LEAGUE_ID      = 114; // Cactus League (spring training)
 	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
+	/** Cache TTL for season archive snapshots (past years are immutable). */
+	const API_ARCHIVE_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
 	 * Singleton instance.
@@ -72,29 +74,121 @@ class Basebelles_API {
 	/**
 	 * Fetch and normalize Guardians standings data.
 	 *
-	 * @param string $season_type The season type.
+	 * @param string   $season_type  The season type.
+	 * @param int|null $season_year  Optional season year; defaults to ACF/options season.
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_guardians_standings( $season_type = 'regularSeason' ) {
-		$settings  = $this->get_season_settings( $season_type );
-		$league_id = ( 'springTraining' === $season_type ) ? self::CL_LEAGUE_ID : self::AL_LEAGUE_ID;
-		$data      = $this->request_json(
-			'standings',
-			array(
-				'leagueId'       => $league_id,
-				'season'         => $settings['season'],
-				'standingsTypes' => $settings['season_type'],
-				'hydrate'        => 'division',
-			)
+	public function get_guardians_standings( $season_type = 'regularSeason', $season_year = null ) {
+		$settings = $this->get_season_settings( $season_type );
+		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
+		if ( $year < 1900 ) {
+			$year = (int) gmdate( 'Y' );
+		}
+
+		return $this->fetch_guardians_standings_normalized( $year, $settings['season_type'], null, self::API_CACHE_TTL );
+	}
+
+	/**
+	 * Standings snapshot for taxonomy archives (cached 24h; optional date for Spring Training freeze).
+	 *
+	 * @param int    $year        Season year (e.g. 2024).
+	 * @param string $season_type springTraining|regularSeason|wildCard|postseason.
+	 * @return array|WP_Error Normalized stats array, or error if unavailable.
+	 */
+	public function get_season_archive_stats( $year, $season_type ) {
+		$year = (int) $year;
+		if ( $year < 1900 ) {
+			return new WP_Error( 'basebelles_api_bad_year', 'Invalid season year.' );
+		}
+
+		$current_year = (int) gmdate( 'Y' );
+		if ( $year > $current_year ) {
+			return new WP_Error( 'basebelles_api_future', 'Season data is not available yet.' );
+		}
+
+		$allowed_types = array(
+			'springTraining',
+			'regularSeason',
+			'wildCard',
+			'postseason',
 		);
+		if ( ! in_array( $season_type, $allowed_types, true ) ) {
+			$season_type = 'regularSeason';
+		}
+
+		$date = null;
+		if ( 'springTraining' === $season_type ) {
+			$date = $this->get_spring_training_freeze_date( $year );
+		}
+
+		if ( 'postseason' === $season_type ) {
+			$full = $this->fetch_guardians_standings_normalized( $year, 'postseason', null, self::API_ARCHIVE_CACHE_TTL );
+			if ( is_wp_error( $full ) || ( is_array( $full ) && ! empty( $full['_empty_records'] ) ) ) {
+				$fallback = $this->get_postseason_record_from_schedule( $year );
+				if ( is_wp_error( $fallback ) ) {
+					return is_wp_error( $full ) ? $full : $fallback;
+				}
+				return $this->map_team_record_to_archive_stats( $fallback['standings_row'], $year, 'postseason', $fallback['division_name'] );
+			}
+			unset( $full['_empty_records'], $full['_team_record_raw'] );
+			return $this->map_full_standings_to_archive_stats( $full, $year, 'postseason' );
+		}
+
+		$full = $this->fetch_guardians_standings_normalized( $year, $season_type, $date, self::API_ARCHIVE_CACHE_TTL );
+		if ( is_wp_error( $full ) ) {
+			return $full;
+		}
+		if ( ! empty( $full['_empty_records'] ) ) {
+			return new WP_Error( 'basebelles_api_empty', 'Standings data was empty.' );
+		}
+		unset( $full['_empty_records'], $full['_team_record_raw'] );
+
+		return $this->map_full_standings_to_archive_stats( $full, $year, $season_type );
+	}
+
+	/**
+	 * Load standings from the API and return the same shape as the legacy get_guardians_standings array.
+	 *
+	 * @param int         $year         Season year.
+	 * @param string      $season_type  Standings type.
+	 * @param string|null $date         Optional YYYY-MM-DD snapshot (Spring Training).
+	 * @param int         $cache_ttl    Transient TTL in seconds.
+	 * @return array|WP_Error
+	 */
+	private function fetch_guardians_standings_normalized( $year, $season_type, $date = null, $cache_ttl = self::API_CACHE_TTL ) {
+		$allowed_types = array(
+			'springTraining',
+			'regularSeason',
+			'wildCard',
+			'postseason',
+		);
+		if ( ! in_array( $season_type, $allowed_types, true ) ) {
+			$season_type = 'regularSeason';
+		}
+
+		$league_id = ( 'springTraining' === $season_type ) ? self::CL_LEAGUE_ID : self::AL_LEAGUE_ID;
+		$query     = array(
+			'leagueId'       => $league_id,
+			'season'         => (int) $year,
+			'standingsTypes' => $season_type,
+			'hydrate'        => 'division',
+		);
+
+		if ( null !== $date && '' !== $date ) {
+			$query['date'] = $date;
+		}
+
+		$data = $this->request_json( 'standings', $query, $cache_ttl );
 
 		if ( is_wp_error( $data ) ) {
 			return $data;
 		}
 
 		if ( empty( $data['records'] ) || ! is_array( $data['records'] ) ) {
-			return new WP_Error( 'basebelles_api_empty', 'Standings data was empty.' );
+			return array(
+				'_empty_records' => true,
+			);
 		}
 
 		$team_record = $this->find_team_record( $data['records'], self::GUARDIANS_TEAM_ID );
@@ -123,9 +217,215 @@ class Basebelles_API {
 			'home'                 => $this->format_split_record( $split_records, 'home' ),
 			'away'                 => $this->format_split_record( $split_records, 'away' ),
 			'over_500'             => $this->format_split_record( $split_records, 'winners' ),
-			'season'               => $settings['season'],
-			'season_type'          => $settings['season_type'],
+			'season'               => (int) $year,
+			'season_type'          => $season_type,
 			'last_updated'         => $team_record['lastUpdated'] ?? '',
+			'_team_record_raw'     => $team_record,
+		);
+	}
+
+	/**
+	 * Last calendar day of Guardians spring training for a season (for standings snapshot).
+	 *
+	 * @param int $year Season year.
+	 * @return string YYYY-MM-DD.
+	 */
+	private function get_spring_training_freeze_date( $year ) {
+		$year = (int) $year;
+		$data = $this->request_json(
+			'schedule',
+			array(
+				'sportId'  => 1,
+				'teamId'   => self::GUARDIANS_TEAM_ID,
+				'season'   => $year,
+				'gameType' => 'S',
+			),
+			self::API_ARCHIVE_CACHE_TTL
+		);
+
+		$max_date = '';
+		if ( ! is_wp_error( $data ) && ! empty( $data['dates'] ) && is_array( $data['dates'] ) ) {
+			foreach ( $data['dates'] as $row ) {
+				$d = (string) ( $row['date'] ?? '' );
+				if ( '' !== $d && $d > $max_date ) {
+					$max_date = $d;
+				}
+			}
+		}
+
+		if ( '' !== $max_date ) {
+			return $max_date;
+		}
+
+		$options_year = (int) $this->get_option_value( 'season', (int) gmdate( 'Y' ) );
+		if ( $year === $options_year && function_exists( 'get_field' ) ) {
+			$st = get_field( 'spring_training', 'option' );
+			if ( is_array( $st ) && ! empty( $st['end'] ) && 'TBD' !== $st['end'] ) {
+				$parsed = $this->normalize_game_date( (string) $st['end'] );
+				if ( (int) substr( $parsed, 0, 4 ) === $year ) {
+					return $parsed;
+				}
+			}
+		}
+
+		// Conservative default when schedule is not yet published.
+		return $year . '-03-31';
+	}
+
+	/**
+	 * When postseason standings are empty, derive W–L from schedule (non-R/S games).
+	 *
+	 * @param int $year Season year.
+	 * @return array|WP_Error team_record-shaped array plus division_name, or error.
+	 */
+	private function get_postseason_record_from_schedule( $year ) {
+		$data = $this->request_json(
+			'schedule',
+			array(
+				'sportId'   => 1,
+				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'season'    => (int) $year,
+				'startDate' => $year . '-04-01',
+				'endDate'   => $year . '-11-30',
+			),
+			self::API_ARCHIVE_CACHE_TTL
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		$wins             = 0;
+		$losses           = 0;
+		$runs_scored      = 0;
+		$runs_allowed     = 0;
+		$postseason_games = 0;
+
+		foreach ( $data['dates'] ?? array() as $day ) {
+			foreach ( $day['games'] ?? array() as $game ) {
+				if ( ! is_array( $game ) ) {
+					continue;
+				}
+				$gtype = (string) ( $game['gameType'] ?? '' );
+				if ( 'R' === $gtype || 'S' === $gtype ) {
+					continue;
+				}
+				$status = (string) ( $game['status']['abstractGameState'] ?? '' );
+				if ( 'Final' !== $status ) {
+					continue;
+				}
+
+				$is_home   = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
+				$team_side = $is_home ? 'home' : 'away';
+				$opp_side  = $is_home ? 'away' : 'home';
+				$team_r    = (int) ( $game['teams'][ $team_side ]['score'] ?? 0 );
+				$opp_r     = (int) ( $game['teams'][ $opp_side ]['score'] ?? 0 );
+				$is_winner = ! empty( $game['teams'][ $team_side ]['isWinner'] );
+
+				++$postseason_games;
+				if ( $is_winner ) {
+					++$wins;
+				} else {
+					++$losses;
+				}
+				$runs_scored  += $team_r;
+				$runs_allowed += $opp_r;
+			}
+		}
+
+		if ( $postseason_games < 1 ) {
+			return new WP_Error( 'basebelles_api_postseason_empty', 'No postseason games found for this season.' );
+		}
+
+		$rd      = $runs_scored - $runs_allowed;
+		$pct_val = ( $wins + $losses ) > 0 ? $wins / ( $wins + $losses ) : 0;
+		$pct_str = number_format( $pct_val, 3, '.', '' );
+		if ( $pct_val < 1.0 ) {
+			$pct_str = substr( $pct_str, 1 );
+		}
+
+		$standings_row = array(
+			'wins'               => $wins,
+			'losses'             => $losses,
+			'winning_percentage' => $pct_str,
+			'run_differential'   => $this->format_run_differential( $rd ),
+			'games_back'         => '—',
+			'last_ten'           => '—',
+			'streak'             => '—',
+			'division_rank'      => '',
+			'division_name'      => 'Postseason',
+			'summary'            => 'Postseason',
+		);
+
+		return array(
+			'standings_row' => $standings_row,
+			'division_name' => 'Postseason',
+		);
+	}
+
+	/**
+	 * @param array  $full Full normalized standings from fetch_guardians_standings_normalized.
+	 * @param int    $year Season year.
+	 * @param string $season_type API season type.
+	 * @return array
+	 */
+	private function map_full_standings_to_archive_stats( $full, $year, $season_type ) {
+		return $this->map_team_record_to_archive_stats(
+			$full,
+			$year,
+			$season_type,
+			$full['division_name'] ?? 'AL Central'
+		);
+	}
+
+	/**
+	 * Build archive stat keys for the snapshot block.
+	 *
+	 * @param array  $full Full standings row or compatible array.
+	 * @param int    $year Season year.
+	 * @param string $season_type API season type.
+	 * @param string $division_override Division label from standings (or Postseason for schedule fallback).
+	 * @return array
+	 */
+	private function map_team_record_to_archive_stats( $full, $year, $season_type, $division_override ) {
+		$w   = (int) ( $full['wins'] ?? 0 );
+		$l   = (int) ( $full['losses'] ?? 0 );
+		$pct = (string) ( $full['winning_percentage'] ?? '.000' );
+		$rd  = (string) ( $full['run_differential'] ?? '0' );
+		$gb  = (string) ( $full['games_back'] ?? '-' );
+		$lt  = (string) ( $full['last_ten'] ?? '—' );
+		$stk = (string) ( $full['streak'] ?? '-' );
+
+		if ( 'springTraining' === $season_type ) {
+			$division = 'Cactus League';
+			$rank_raw = (string) ( $full['division_rank'] ?? '' );
+			$rank     = ctype_digit( $rank_raw )
+				? $this->format_ordinal( (int) $rank_raw ) . ' (Cactus)'
+				: ( $rank_raw ? $rank_raw . ' (Cactus)' : '—' );
+		} elseif ( 'postseason' === $season_type ) {
+			$division = $division_override ? $division_override : 'Postseason';
+			$rank_raw = (string) ( $full['division_rank'] ?? '' );
+			$rank     = ctype_digit( $rank_raw ) ? $this->format_ordinal( (int) $rank_raw ) . ' (' . $division . ')' : 'Postseason';
+		} else {
+			$division = (string) ( $full['division_name'] ?? 'AL Central' );
+			$rank_raw = (string) ( $full['division_rank'] ?? '' );
+			$rank     = ctype_digit( $rank_raw )
+				? $this->format_ordinal( (int) $rank_raw ) . ' (' . $division . ')'
+				: ( $full['summary'] ?? '—' );
+		}
+
+		return array(
+			'wins'        => $w,
+			'losses'      => $l,
+			'pct'         => $pct,
+			'run_diff'    => $rd,
+			'rank'        => $rank,
+			'division'    => $division,
+			'games_back'  => $gb,
+			'last_ten'    => $lt,
+			'streak'      => $stk,
+			'season'      => (int) $year,
+			'season_type' => $season_type,
 		);
 	}
 
@@ -366,8 +666,11 @@ class Basebelles_API {
 	 * @return array|WP_Error
 	 */
 	public function request_json( $endpoint, $query_args = array(), $expiration = self::API_CACHE_TTL ) {
-		$url       = $this->build_url( $endpoint, $query_args );
-		$cache_key = 'basebelles_api_' . md5( $url );
+		$url        = $this->build_url( $endpoint, $query_args );
+		$expiration = max( 1, (int) $expiration );
+		// Bucket by TTL window so data cannot stay fresh past the intended horizon if a persistent
+		// object cache (e.g. Docket Cache) fails to enforce transient expiration.
+		$cache_key = 'basebelles_api_' . md5( $url ) . '_' . (int) floor( time() / $expiration );
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {

@@ -1,11 +1,13 @@
 /* Guardians Today's Game Block */
 .basebelles-today-game {
+	box-sizing: border-box;
 	padding: 10px;
 	background: #fff;
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 75%;
+	max-width: 50%;
+	margin-inline: auto;
 }
 
 .basebelles-today-game.placeholder {
@@ -115,4 +117,12 @@
 	color: var(--bb-accent-slate);
 	text-align: center;
 	padding-bottom: 10px;
+}
+
+.game-meta .guards-win {
+	color: var(--bb-green);
+}
+
+.game-meta .oppo-win {
+	color: var(--bb-red);
 }

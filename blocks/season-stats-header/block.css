@@ -1,0 +1,112 @@
+/* Season Snapshot — taxonomy archive stat bar (City Connect palette via :root in basebelles.css) */
+
+.basebelles-season-stats-header {
+	position: relative;
+	margin-bottom: 1.5rem;
+}
+
+.basebelles-season-stats-header--placeholder,
+.basebelles-season-stats-header--empty,
+.basebelles-season-stats-header--error {
+	background: var(--bb-wine-red, #84172c);
+	color: var(--bb-sandstone-cream, #f3efe0);
+	padding: 1rem 1.25rem;
+	border-radius: 4px;
+}
+
+.basebelles-season-stats-header--placeholder p,
+.basebelles-season-stats-header--empty p,
+.basebelles-season-stats-header--error p {
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+.season-stats-inner {
+	position: relative;
+	overflow: hidden;
+	background-color: var(--bb-wine-red, #84172c);
+	color: var(--bb-sandstone-cream, #f3efe0);
+	border-radius: 4px;
+	padding: 1.25rem 1rem;
+}
+
+/* Ghost layer (~10%): desert / ballpark hint — swap for Goodyear / Progressive photos in theme if desired */
+.season-stats-ghost {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.1;
+	background-size: cover;
+	background-position: center;
+}
+
+.basebelles-season-stats-header--spring .season-stats-ghost {
+	background-image: radial-gradient(ellipse 90% 70% at 50% 100%, #f3efe0 0%, transparent 55%);
+}
+
+.basebelles-season-stats-header--regular .season-stats-ghost {
+	background-image: radial-gradient(ellipse 75% 60% at 70% 30%, #f3efe0 0%, transparent 50%),
+		linear-gradient(180deg, rgba(0, 45, 98, 0.35) 0%, transparent 45%);
+}
+
+.basebelles-season-stats-header--postseason .season-stats-ghost {
+	background-image: radial-gradient(ellipse 80% 55% at 50% 0%, #f3efe0 0%, transparent 50%),
+		linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, transparent 40%);
+}
+
+.season-stats-grid {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem 1.25rem;
+	align-items: start;
+}
+
+.season-stats-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.season-stats-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	opacity: 0.9;
+	font-weight: 600;
+}
+
+.season-stats-value {
+	font-size: 1.15rem;
+	font-weight: 700;
+	line-height: 1.25;
+	word-break: break-word;
+}
+
+/* Mirror Season Header “over” treatment for completed seasons */
+.basebelles-season-stats-header.is-past .season-stats-value {
+	text-decoration: line-through;
+	opacity: 0.65;
+}
+
+.basebelles-season-stats-header.is-past .season-stats-label {
+	opacity: 0.75;
+}
+
+@media screen and (max-width: 960px) {
+	.season-stats-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media screen and (max-width: 520px) {
+	.season-stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.season-stats-value {
+		font-size: 1.05rem;
+	}
+}
