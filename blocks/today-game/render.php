@@ -51,6 +51,9 @@ if ( is_wp_error( $schedule ) ) {
 			$away_pitcher = $game['away_pitcher'];
 			$home_pitcher = $game['home_pitcher'];
 
+			// Are the Guards the home team or away team?
+			$home_or_away = ( 'CLE' === $game['home_team']['abbreviation'] ) ? 'home' : 'away';
+
 			if ( empty( $away_pitcher ) ) {
 				$away_pitcher = array(
 					'name'   => 'TBD',
@@ -175,12 +178,23 @@ if ( is_wp_error( $schedule ) ) {
 								</strong>
 								<?php
 							} elseif ( ! empty( $game['scores']['isFinal'] ) ) {
+								$winner = $home_or_away === $game['scores']['winner'] ? 'guards-win' : 'oppo-win';
 								?>
-								<strong>
+								<strong class="<?php echo esc_attr( $winner ); ?>">
+									<?php
+									if ( 'away' === $game['scores']['winner'] ) {
+										echo esc_html( '&#9756;&nbsp;' );
+									}
+									?>
 									FINAL
 									<?php
 									if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
 										echo esc_html( ' / ' . $game['scores']['inning'] );
+									}
+									?>
+									<?php
+									if ( 'home' === $game['scores']['winner'] ) {
+										echo esc_html( '&#9758;&nbsp;' );
 									}
 									?>
 								</strong>

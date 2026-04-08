@@ -118,3 +118,11 @@
 	text-align: center;
 	padding-bottom: 10px;
 }
+
+.game-meta .guards-win {
+	color: var(--bb-green);
+}
+
+.game-meta .oppo-win {
+	color: var(--bb-red);
+}
