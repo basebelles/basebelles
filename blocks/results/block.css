@@ -1,11 +1,13 @@
 /* Game Results Block */
 .basebelles-results {
+	box-sizing: border-box;
 	padding: 10px;
 	background: #fff;
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
 	max-width: 90%!important;
+	margin-inline: auto;
 }
 
 .results-header {
