@@ -12,6 +12,7 @@ if ( ! function_exists( 'get_field' ) ) {
 
 // ACF Group: Season Info (group_69cd81d38a341)
 $season_settings   = get_field( 'season_settings', 'option' );
+$season_settings   = $season_settings ? $season_settings : array();
 $default_start_end = array(
 	'start'  => 'TBD',
 	'end'    => 'TBD',

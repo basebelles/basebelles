@@ -6,7 +6,6 @@
 :root {
 	--bb-sandstone-cream: #f3efe0;
 	--bb-wine-red: #84172c;
-	/* Darker wine for large banners (e.g. season header); optional elsewhere */
 	--bb-wine-red-banner: #6d1a22;
 	--bb-deep-navy: #002d62;
 	--bb-slate-blue: #00385d;
@@ -99,6 +98,11 @@ button, .button, .faux-button, .wp-block-button__link, .wp-block-file .wp-block-
 thead {
 	background-color: var(--bb-deep-navy);
 	color: var(--bb-sandstone-cream);
+}
+
+/* Season Snapshot block: optional layout hooks when not using block CSS alone */
+.basebelles-season-stats-header .season-stats-inner {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 a.wp-block-latest-posts__post-title {

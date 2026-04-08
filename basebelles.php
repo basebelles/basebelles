@@ -133,12 +133,16 @@ class Basebelles {
 	 * @return void
 	 */
 	public function pre_get_posts( $query ) {
+		if ( is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
 		// Only modify the main query on the frontend for your specific taxonomy archive
-		if ( ! is_admin() && $query->is_main_query() && is_tax( 'season-type' ) ) {
-			$year = get_query_var( 'year' );
+		if ( is_tax( 'season-type' ) ) {
+			$year = get_query_var( 'season_year' );
 			if ( ! $year ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$year = isset( $_GET['year'] ) ? (int) wp_unslash( $_GET['year'] ) : false;
+				$year = isset( $_GET['season_year'] ) ? (int) wp_unslash( $_GET['season_year'] ) : false;
 			}
 
 			if ( $year && is_numeric( $year ) ) {
