@@ -1,0 +1,9 @@
+/* Streamable block: layout lives on .streamable-video-container in basebelles.css */
+
+.basebelles-streamable-placeholder {
+	margin: 0;
+	padding: 1em;
+	text-align: center;
+	color: inherit;
+	opacity: 0.85;
+}

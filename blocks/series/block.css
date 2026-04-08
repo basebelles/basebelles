@@ -1,11 +1,13 @@
 .basebelles-series-results {
+	box-sizing: border-box;
 	padding: 10px;
 	background: #fff;
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 75%!important;
+	max-width: 75% !important;
 	min-width: 200px;
+	margin-inline: auto;
 }
 
 .series-results {
