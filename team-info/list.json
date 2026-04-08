@@ -6,7 +6,8 @@
 		"city": "Los Angeles",
 		"state": "CA",
 		"country": "USA",
-		"league": "AL West"
+		"league": "AL West",
+		"mlb_team_id": 108
 	},
 	"astros": {
 		"name": "Houston Astros",
@@ -15,16 +16,18 @@
 		"city": "Houston",
 		"state": "TX",
 		"country": "USA",
-		"league": "AL West"
+		"league": "AL West",
+		"mlb_team_id": 117
 	},
 	"athletics": {
-		"name": "Oakland Athletics",
+		"name": "Athletics",
 		"short_name": "Athletics",
 		"abbreviation": "OAK",
-		"city": "Oakland",
+		"city": "Sacremento",
 		"state": "CA",
 		"country": "USA",
-		"league": "AL West"
+		"league": "AL West",
+		"mlb_team_id": 133
 	},
 	"blue-jays": {
 		"name": "Toronto Blue Jays",
@@ -33,7 +36,8 @@
 		"city": "Toronto",
 		"state": "ON",
 		"country": "Canada",
-		"league": "AL East"
+		"league": "AL East",
+		"mlb_team_id": 141
 	},
 	"braves": {
 		"name": "Atlanta Braves",
@@ -42,7 +46,8 @@
 		"city": "Atlanta",
 		"state": "GA",
 		"country": "USA",
-		"league": "NL East"
+		"league": "NL East",
+		"mlb_team_id": 144
 	},
 	"brewers": {
 		"name": "Milwaukee Brewers",
@@ -51,7 +56,8 @@
 		"city": "Milwaukee",
 		"state": "WI",
 		"country": "USA",
-		"league": "NL Central"
+		"league": "NL Central",
+		"mlb_team_id": 158
 	},
 	"cardinals": {
 		"name": "St. Louis Cardinals",
@@ -60,7 +66,8 @@
 		"city": "St. Louis",
 		"state": "MO",
 		"country": "USA",
-		"league": "NL Central"
+		"league": "NL Central",
+		"mlb_team_id": 138
 	},
 	"cubs": {
 		"name": "Chicago Cubs",
@@ -69,7 +76,8 @@
 		"city": "Chicago",
 		"state": "IL",
 		"country": "USA",
-		"league": "NL Central"
+		"league": "NL Central",
+		"mlb_team_id": 112
 	},
 	"d-backs": {
 		"name": "Arizona Diamondbacks",
@@ -78,7 +86,8 @@
 		"city": "Phoenix",
 		"state": "AZ",
 		"country": "USA",
-		"league": "NL West"
+		"league": "NL West",
+		"mlb_team_id": 109
 	},
 	"dodgers": {
 		"name": "Los Angeles Dodgers",
@@ -87,7 +96,8 @@
 		"city": "Los Angeles",
 		"state": "CA",
 		"country": "USA",
-		"league": "NL West"
+		"league": "NL West",
+		"mlb_team_id": 119
 	},
 	"giants": {
 		"name": "San Francisco Giants",
@@ -96,7 +106,8 @@
 		"city": "San Francisco",
 		"state": "CA",
 		"country": "USA",
-		"league": "NL West"
+		"league": "NL West",
+		"mlb_team_id": 137
 	},
 	"guardians": {
 		"name": "Cleveland Guardians",
@@ -105,7 +116,8 @@
 		"city": "Cleveland",
 		"state": "OH",
 		"country": "USA",
-		"league": "AL Central"
+		"league": "AL Central",
+		"mlb_team_id": 114
 	},
 	"mariners": {
 		"name": "Seattle Mariners",
@@ -114,7 +126,8 @@
 		"city": "Seattle",
 		"state": "WA",
 		"country": "USA",
-		"league": "AL West"
+		"league": "AL West",
+		"mlb_team_id": 136
 	},
 	"marlins": {
 		"name": "Miami Marlins",
@@ -123,7 +136,8 @@
 		"city": "Miami",
 		"state": "FL",
 		"country": "USA",
-		"league": "NL East"
+		"league": "NL East",
+		"mlb_team_id": 146
 	},
 	"mets": {
 		"name": "New York Mets",
@@ -132,7 +146,8 @@
 		"city": "New York",
 		"state": "NY",
 		"country": "USA",
-		"league": "NL East"
+		"league": "NL East",
+		"mlb_team_id": 121
 	},
 	"nationals": {
 		"name": "Washington Nationals",
@@ -141,7 +156,8 @@
 		"city": "Washington",
 		"state": "DC",
 		"country": "USA",
-		"league": "NL East"
+		"league": "NL East",
+		"mlb_team_id": 120
 	},
 	"orioles": {
 		"name": "Baltimore Orioles",
@@ -150,7 +166,8 @@
 		"city": "Baltimore",
 		"state": "MD",
 		"country": "USA",
-		"league": "AL East"
+		"league": "AL East",
+		"mlb_team_id": 110
 	},
 	"padres": {
 		"name": "San Diego Padres",
@@ -159,7 +176,8 @@
 		"city": "San Diego",
 		"state": "CA",
 		"country": "USA",
-		"league": "NL West"
+		"league": "NL West",
+		"mlb_team_id": 135
 	},
 	"phillies": {
 		"name": "Philadelphia Phillies",
@@ -168,7 +186,8 @@
 		"city": "Philadelphia",
 		"state": "PA",
 		"country": "USA",
-		"league": "NL East"
+		"league": "NL East",
+		"mlb_team_id": 143
 	},
 	"pirates": {
 		"name": "Pittsburgh Pirates",
@@ -177,7 +196,8 @@
 		"city": "Pittsburgh",
 		"state": "PA",
 		"country": "USA",
-		"league": "NL Central"
+		"league": "NL Central",
+		"mlb_team_id": 134
 	},
 	"rangers": {
 		"name": "Texas Rangers",
@@ -186,7 +206,8 @@
 		"city": "Arlington",
 		"state": "TX",
 		"country": "USA",
-		"league": "AL West"
+		"league": "AL West",
+		"mlb_team_id": 140
 	},
 	"rays": {
 		"name": "Tampa Bay Rays",
@@ -195,7 +216,8 @@
 		"city": "Tampa",
 		"state": "FL",
 		"country": "USA",
-		"league": "AL East"
+		"league": "AL East",
+		"mlb_team_id": 139
 	},
 	"red-sox": {
 		"name": "Boston Red Sox",
@@ -204,7 +226,8 @@
 		"city": "Boston",
 		"state": "MA",
 		"country": "USA",
-		"league": "AL East"
+		"league": "AL East",
+		"mlb_team_id": 111
 	},
 	"reds": {
 		"name": "Cincinnati Reds",
@@ -213,7 +236,8 @@
 		"city": "Cincinnati",
 		"state": "OH",
 		"country": "USA",
-		"league": "NL Central"
+		"league": "NL Central",
+		"mlb_team_id": 113
 	},
 	"rockies": {
 		"name": "Colorado Rockies",
@@ -222,7 +246,8 @@
 		"city": "Denver",
 		"state": "CO",
 		"country": "USA",
-		"league": "NL West"
+		"league": "NL West",
+		"mlb_team_id": 115
 	},
 	"royals": {
 		"name": "Kansas City Royals",
@@ -231,7 +256,8 @@
 		"city": "Kansas City",
 		"state": "MO",
 		"country": "USA",
-		"league": "AL Central"
+		"league": "AL Central",
+		"mlb_team_id": 118
 	},
 	"tigers": {
 		"name": "Detroit Tigers",
@@ -240,7 +266,8 @@
 		"city": "Detroit",
 		"state": "MI",
 		"country": "USA",
-		"league": "AL Central"
+		"league": "AL Central",
+		"mlb_team_id": 116
 	},
 	"twins": {
 		"name": "Minnesota Twins",
@@ -249,7 +276,8 @@
 		"city": "Minneapolis",
 		"state": "MN",
 		"country": "USA",
-		"league": "AL Central"
+		"league": "AL Central",
+		"mlb_team_id": 142
 	},
 	"white-sox": {
 		"name": "Chicago White Sox",
@@ -258,7 +286,8 @@
 		"city": "Chicago",
 		"state": "IL",
 		"country": "USA",
-		"league": "AL Central"
+		"league": "AL Central",
+		"mlb_team_id": 145
 	},
 	"yankees": {
 		"name": "New York Yankees",
@@ -267,6 +296,7 @@
 		"city": "New York",
 		"state": "NY",
 		"country": "USA",
-		"league": "AL East"
+		"league": "AL East",
+		"mlb_team_id": 147
 	}
 }

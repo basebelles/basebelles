@@ -4,7 +4,7 @@
     "description": "Displays the current season.",
     "style": [ "basebelles-style", "file:./block.css" ],
     "category": "basebelles",
-    "icon": "status",
+    "icon": "slides",
     "keywords": ["season", "guardians", "baseball"],
     "acf": {
         "mode": "preview",

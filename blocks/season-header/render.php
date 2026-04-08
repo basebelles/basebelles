@@ -13,8 +13,9 @@ if ( ! function_exists( 'get_field' ) ) {
 // ACF Group: Season Info (group_69cd81d38a341)
 $season_settings   = get_field( 'season_settings', 'option' );
 $default_start_end = array(
-	'start' => 'TBD',
-	'end'   => 'TBD',
+	'start'  => 'TBD',
+	'end'    => 'TBD',
+	'record' => '',
 );
 $season_details    = array(
 	'spring_training' => get_field( 'spring_training', 'option' ) ?? $default_start_end,
@@ -86,7 +87,7 @@ if ( 'postSeason' === $season_type && $season_data['post_season']['end'] < wp_da
 	</div>
 	<?php if ( 'offSeason' === $season_type ) { ?>
 			<div class="off-season-container">
-				<img src=class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
+				<img class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
 			</div>
 	<?php } else { ?>
 		<?php foreach ( $season_data as $season_type => $season ) { ?>
