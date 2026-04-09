@@ -43,7 +43,7 @@ if ( is_wp_error( $schedule ) ) {
 <div class="basebelles-today-game">
 	<?php if ( ! empty( $schedule['off_day'] ) ) : ?>
 		<div class="off-day-box">
-			<img class="off-day-image" src="<?php echo esc_url( $off_day_image ); ?>" alt="Off day" />
+			<img class="off-day-image" width="500px" src="<?php echo esc_url( $off_day_image ); ?>" alt="Off day" />
 		</div>
 	<?php else : ?>
 		<?php foreach ( $schedule['games'] as $game ) : ?>
