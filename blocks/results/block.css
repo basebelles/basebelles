@@ -95,7 +95,7 @@
 .results-innings-table .team-label {
 	text-align: left;
 	font-weight: bold;
-	min-width: 25px;
+	max-width: 25px;
 }
 
 .results-innings-table .stat-cell {
