@@ -60,8 +60,8 @@
 }
 
 .results-innings-table {
-	width: 100%;
-	min-width: 600px; /* Ensure table doesn't squash too much */
+	width: 95%;
+	min-width: 550px; /* Ensure table doesn't squash too much */
 	border-collapse: collapse;
 	font-size: 0.9em;
 }
@@ -82,7 +82,7 @@
 .results-innings-table th,
 .results-innings-table td {
 	border: 1px solid var(--bb-sandstone-cream);
-	padding: 4px;
+	padding: 2px;
 	text-align: center;
 }
 
