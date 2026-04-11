@@ -1,27 +1,20 @@
+/* Guardians Series Results Block */
 .basebelles-series-results {
 	box-sizing: border-box;
-	padding: 10px;
+	padding: 15px;
 	background: #fff;
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 75% !important;
-	min-width: 200px;
-	margin-inline: auto;
-}
-
-.series-results {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	text-align: center;
-	margin-bottom: 10px;
+	/* Width fix for mobile: use 95% on small screens, 75% on desktop */
+	width: 95%;
+	max-width: 600px;
+	margin: 20px auto;
 }
 
 .series-date {
-	font-size: 0.8em;
 	color: var(--bb-accent-slate);
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.2em;
@@ -30,6 +23,24 @@
 
 .series-date.placeholder-text {
 	margin-top: 10px;
+}
+
+.series-results {
+	display: flex;
+	/* Stack by default for mobile */
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	gap: 10px;
+}
+
+@media (min-width: 480px) {
+	.series-results {
+		/* Side-by-side for iPad/Desktop */
+		flex-direction: row;
+		justify-content: space-between;
+	}
 }
 
 .series-results .series-summary {
@@ -44,7 +55,7 @@
 }
 
 .series-results .team-series-record {
-	font-size: 2.5em;
+	font-size: 2.2em; /* Slightly smaller to prevent box overflow */
 	font-weight: bold;
 	min-width: 50px;
 }
@@ -53,6 +64,7 @@
 	font-size: 2.5em;
 	font-weight: bold;
 	padding: 0 10px;
+	line-height: 1;
 }
 
 .series-winner.guards-win {
