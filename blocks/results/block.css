@@ -1,21 +1,32 @@
 /* Game Results Block */
 .basebelles-results {
 	box-sizing: border-box;
-	padding: 10px;
+	padding: 15px;
 	background: #fff;
 	color: var(--bb-deep-navy);
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
-	max-width: 90%!important;
-	margin-inline: auto;
+	width: 95%; /* Better fit for mobile */
+	max-width: 650px;
+	margin: 20px auto;
 }
 
 .results-header {
 	display: flex;
+	/* Stack header by default for mobile */
+	flex-direction: column; 
 	align-items: center;
-	justify-content: space-between;
+	gap: 10px;
 	text-align: center;
-	margin-bottom: 10px;
+	margin-bottom: 20px;
+}
+
+@media (min-width: 480px) {
+	.results-header {
+		/* Side-by-side for iPad/Desktop */
+		flex-direction: row;
+		justify-content: space-between;
+	}
 }
 
 .results-header .team-summary {
@@ -38,7 +49,7 @@
 	width: 60px;
 	height: 60px;
 	display: block;
-	margin: 0 10px;
+	margin: 5px 10px;
 }
 
 .results-header .team-score {
@@ -54,35 +65,26 @@
 	font-size: 1.2em;
 }
 
+/* Table Scrolling & Stickiness */
 .results-table-container {
 	overflow-x: auto;
-	margin-top: 10px;
+	margin-top: 15px;
+	-webkit-overflow-scrolling: touch;
 }
 
 .results-innings-table {
-	width: 95%;
-	min-width: 550px; /* Ensure table doesn't squash too much */
-	border-collapse: collapse;
+	width: 100%;
+	min-width: 500px;
+	border-collapse: separate; /* Required for sticky */
+	border-spacing: 0;
 	font-size: 0.9em;
-}
-
-.results-table-container .results-table-placeholder {
-	font-size: 1.2em;
-	color: var(--bb-accent-slate);
-	margin-top: 10px;
-	text-align: center;
-	font-weight: bold;
-	line-height: 1.2;
-}
-
-.results-table-container table {
-	margin: 5px;
 }
 
 .results-innings-table th,
 .results-innings-table td {
-	border: 1px solid var(--bb-sandstone-cream);
-	padding: 2px;
+	border-right: 1px solid var(--bb-sandstone-cream);
+	border-bottom: 1px solid var(--bb-sandstone-cream);
+	padding: 6px 4px;
 	text-align: center;
 }
 
@@ -92,15 +94,26 @@
 	font-weight: bold;
 }
 
+/* Sticky Team Labels (CLE / ATL) */
 .results-innings-table .team-label {
+	position: sticky;
+	left: 0;
+	background: #fff;
 	text-align: left;
 	font-weight: bold;
-	max-width: 25px;
+	z-index: 2;
+	min-width: 40px;
+	border-right: 2px solid var(--bb-sandstone-cream);
+}
+
+.results-innings-table th.team-label {
+	background-color: var(--bb-sandstone-cream);
+	z-index: 3;
 }
 
 .results-innings-table .stat-cell {
 	font-weight: bold;
-	background-color: #f9f9f9;
+	background-color: #faf9f6;
 }
 
 .results-header .score-spacer.guards-win {
@@ -109,4 +122,13 @@
 
 .results-header .score-spacer.oppo-win {
 	color: var(--bb-red);
+}
+
+.results-table-container .results-table-placeholder {
+	font-size: 1.2em;
+	color: var(--bb-accent-slate);
+	margin-top: 10px;
+	text-align: center;
+	font-weight: bold;
+	line-height: 1.2;
 }
