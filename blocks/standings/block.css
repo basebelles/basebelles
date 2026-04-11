@@ -15,19 +15,24 @@
 
 .standings-table-wrap {
 	overflow-x: auto;
+	/* Adds a smoother scroll experience on iOS */
+	-webkit-overflow-scrolling: touch;
 }
 
 .standings-table {
 	width: 100%;
-	min-width: 520px;
-	border-collapse: collapse;
+	/* Min-width ensures the table doesn't squish too much, triggering the scroll */
+	min-width: 600px;
+	border-collapse: separate; /* Required for sticky headers/columns */
+	border-spacing: 0;
 	font-size: 0.95em;
 }
 
 .standings-table th,
 .standings-table td {
 	padding: 8px 10px;
-	border: 1px solid var(--bb-sandstone-cream);
+	border-right: 1px solid var(--bb-sandstone-cream);
+	border-bottom: 1px solid var(--bb-sandstone-cream);
 	text-align: center;
 	white-space: nowrap;
 }
@@ -36,9 +41,32 @@
 	background: var(--bb-sandstone-cream);
 	color: var(--bb-deep-navy);
 	font-weight: 700;
+	position: sticky;
+	top: 0;
 }
 
+/* Sticky First Column (Team Name) */
 .standings-table td:first-child,
 .standings-table th:first-child {
 	text-align: left;
+	position: sticky;
+	left: 0;
+	background: #fff;
+	z-index: 2;
+	/* Add a small shadow or border to indicate the "split" when scrolling */
+	border-right: 2px solid var(--bb-sandstone-cream);
+}
+
+.standings-table th:first-child {
+	background: var(--bb-sandstone-cream);
+	z-index: 3; /* Keeps corner above both row and column headers */
+}
+
+/* Alternating row colors for better readability while scrolling */
+.standings-table tr:nth-child(even) td {
+	background: #faf9f6;
+}
+
+.standings-table tr:nth-child(even) td:first-child {
+	background: #faf9f6;
 }
