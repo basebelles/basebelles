@@ -16,6 +16,21 @@ defined( 'ABSPATH' ) || exit;
  */
 class Basebelles_ACF_JSON {
 
+	public static $version;
+
+	/**
+	 * Constructor
+	 *
+	 * @return void
+	 */
+	public function __construct() {
+		self::$version = Basebelles::$version;
+
+		add_filter( 'acf/settings/save_json', array( $this, 'save_json_path' ) );
+		add_filter( 'acf/settings/load_json', array( $this, 'load_json_paths' ) );
+		add_filter( 'acf/json/load_paths', array( $this, 'load_json_paths' ) );
+	}
+
 	/**
 	 * Absolute path to the acf-json directory (trailing slash).
 	 *
@@ -24,16 +39,6 @@ class Basebelles_ACF_JSON {
 	public static function json_dir() {
 		$json_dir = plugin_dir_path( __DIR__ ) . 'acf-json/';
 		return $json_dir;
-	}
-
-	/**
-	 * Register filters with ACF.
-	 *
-	 * @return void
-	 */
-	public static function register_hooks() {
-		add_filter( 'acf/settings/save_json', array( __CLASS__, 'save_json_path' ) );
-		add_filter( 'acf/settings/load_json', array( __CLASS__, 'load_json_paths' ) );
 	}
 
 	/**
@@ -48,30 +53,20 @@ class Basebelles_ACF_JSON {
 	}
 
 	/**
-	 * Additional load paths for Local JSON (theme paths remain; plugin JSON is appended).
-	 *
-	 * @param string[] $paths Load paths.
-	 * @return string[]
-	 */
-	public static function load_json_paths( $paths ) {
-		$paths[] = self::json_dir();
-		return $paths;
-	}
-
-	/**
 	 * ACF 6.2+: same load list as `acf/settings/load_json`, applied in `ACF_Local_JSON::get_load_paths()`.
 	 * Ensures WP-CLI (`wp acf json sync`, `wp acf json status`) sees plugin JSON, not only the theme folder.
 	 *
 	 * @param string[] $paths Load paths.
 	 * @return string[]
 	 */
-	public static function json_load_paths( $paths ) {
-		// Remove the original path (optional).
-		unset($paths[0]);
-
+	public static function load_json_paths( $paths ) {
 		// Append the new path and return it.
 		$paths[] = self::json_dir();
+
+		error_log( 'load_json_paths: ' . print_r( $paths, true ) );
 
 		return $paths;
 	}
 }
+
+new Basebelles_ACF_JSON();
