@@ -76,7 +76,7 @@ team-info/              # Team-related static data (e.g. list JSON)
 
 1. Clone or copy this directory into your WordPress `wp-content/plugins/` folder (folder name can remain `basebelles` or match your deployment convention).
 2. Activate **Base\*Belles** in **Plugins** in wp-admin.
-3. Ensure **ACF PRO** is installed and active. With Local JSON wired to `acf-json/`, open **Custom Fields** in wp-admin and **Sync** any definitions that show as available so the site database matches the repo. The bundled `acf-export-*.json` is optional if you prefer a manual import instead.
+3. Ensure **ACF PRO** is installed and active. With Local JSON wired to `acf-json/`, open **Custom Fields** in wp-admin and **Sync** any definitions that show as available so the site database matches the repo.
 
 There is no Composer/npm build step in this repository—the plugin is PHP, CSS, and block assets as committed.
 
