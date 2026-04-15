@@ -63,8 +63,6 @@ class Basebelles_ACF_JSON {
 		// Append the new path and return it.
 		$paths[] = self::json_dir();
 
-		error_log( 'load_json_paths: ' . print_r( $paths, true ) );
-
 		return $paths;
 	}
 }
