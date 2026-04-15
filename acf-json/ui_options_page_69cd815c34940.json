@@ -1,0 +1,25 @@
+{
+    "key": "ui_options_page_69cd815c34940",
+    "title": "Guardians Settings",
+    "active": true,
+    "menu_order": 0,
+    "page_title": "Guardians Settings",
+    "menu_slug": "guardians-settings",
+    "parent_slug": "none",
+    "advanced_configuration": 1,
+    "icon_url": "",
+    "menu_title": "Guardians",
+    "position": 6,
+    "redirect": 0,
+    "description": "Global settings used by multiple aspects of the site.",
+    "menu_icon": {
+        "type": "dashicons",
+        "value": "dashicons-smiley"
+    },
+    "update_button": "Update",
+    "updated_message": "Options Updated",
+    "capability": "edit_posts",
+    "data_storage": "options",
+    "post_id": "",
+    "autoload": 0
+}

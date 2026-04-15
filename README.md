@@ -1,2 +1,107 @@
-# basebelles
-Base*Belles custom code
+# Base\*Belles (WordPress plugin)
+
+This repository is the **Base\*Belles** WordPress plugin used on **[Basebelles.com](https://basebelles.com)**. It is the primary home for **custom blocks**, **data integrations**, and **site-specific behaviors** for that site live.
+
+The plugin wires together the block editor, [Advanced Custom Fields (ACF)](https://www.advancedcustomfields.com/) block definitions, and backend helpers (notably MLB Stats API access and embed handling) so editors can drop in baseball-focused UI without duplicating PHP in the theme.
+
+---
+
+## Features
+
+| Area              | Role |
+|-------------------|------------|
+| **Blocks**        | Registers a dedicated **Base\*Belles** block category and ships multiple **ACF-powered blocks** (see below). Each block has `block.json`, `render.php`, and block-scoped CSS. |
+| **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `class-api.php`. |
+| **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`class-embeds.php`, `streamable-oembed-helpers.php`). |
+| **Site behavior** | Loads small feature modules under `features/` (comment moderation hooks, anti-spam, query tweaks for season archives, optional privacy-related HTTP filters, automatic updates policy, etc.). |
+
+**ACF field definitions** (field groups, options screens, taxonomies, and other synced ACF JSON) live in **`acf-json/`** as the version-controlled source. Each file is a single JSON object named **`{key}.json`** (matching the top-level `"key"`). Saving a field group in wp-admin writes back to that folder via **`acf/settings/save_json`**. The plugin registers load/save paths in [`blocks/class-acf-json.php`](blocks/class-acf-json.php) (theme Local JSON paths remain; the plugin directory is appended for loading).
+
+After deploy, use **Custom Fields → Sync** in wp-admin when ACF shows updates so the database matches the repo. A bundled **`blocks/acf-export-*.json`** full export remains optional for reference or one-off import.
+
+If your exports include **`acfe_*`** keys from [ACF Extended](https://github.com/acf-extended/ACF-Extended), keep that plugin active where those features are required, or strip Extended-only properties if you standardize on vanilla ACF.
+
+---
+
+## Requirements
+
+- **WordPress** (block editor–capable release; this plugin targets modern block + Site Editor usage).
+- **Advanced Custom Fields PRO** — blocks use the `acf/` block type and `renderTemplate` in `block.json`; ACF must be active for blocks to register and render correctly.
+- **PHP** compatible with your WordPress install (the codebase follows typical WordPress PHP patterns; `phpcs.xml.dist` is present for coding standards).
+
+Optional but expected in production: object/transient caching as provided by WordPress for API responses (TTLs are defined in `class-api.php`).
+
+---
+
+## Custom blocks
+
+All blocks are registered from `blocks/class-blocks.php` and appear under the **Base\*Belles** category in the inserter:
+
+| Block directory | Purpose (high level) |
+|-----------------|----------------------|
+| `blocks/results/` | Game / results presentation |
+| `blocks/season-header/` | Season header UI |
+| `blocks/season-stats-header/` | Season statistics header |
+| `blocks/series/` | Series display |
+| `blocks/standings/` | Standings |
+| `blocks/today-game/` | Today’s game / probable pitchers |
+| `blocks/streamable/` | Streamable-related block UI |
+
+Shared front-end styling is coordinated via `basebelles.css` and per-block `block.css` files; handles are registered in `Basebelles_Blocks`.
+
+---
+
+## Repository layout
+
+```
+basebelles.php          # Plugin bootstrap, hooks, query var (season_year), style registration
+basebelles.css          # Shared plugin styles
+class-api.php           # MLB Stats API client, caching, Guardians-focused helpers
+class-embeds.php        # oEmbed providers, Streamable/MLB handlers, shortcode
+streamable-oembed-helpers.php
+acf-json/               # ACF Local JSON (field groups, options UI, taxonomies, etc.)
+blocks/
+  class-acf-json.php    # acf/settings/load_json + save_json → plugin acf-json/
+  class-blocks.php      # register_block_type() for each block; category; CSS enqueue
+  */block.json          # Block metadata (ACF render templates)
+  */render.php          # Server-side render
+  */block.css           # Block styles
+features/               # Optional behavior modules (comments, upgrades, privacy filters, …)
+team-info/              # Team-related static data (e.g. list JSON)
+```
+
+---
+
+## Installation
+
+1. Clone or copy this directory into your WordPress `wp-content/plugins/` folder (folder name can remain `basebelles` or match your deployment convention).
+2. Activate **Base\*Belles** in **Plugins** in wp-admin.
+3. Ensure **ACF PRO** is installed and active. With Local JSON wired to `acf-json/`, open **Custom Fields** in wp-admin and **Sync** any definitions that show as available so the site database matches the repo. The bundled `acf-export-*.json` is optional if you prefer a manual import instead.
+
+There is no Composer/npm build step in this repository—the plugin is PHP, CSS, and block assets as committed.
+
+---
+
+## Configuration & data
+
+- **Season and API behavior** are driven through ACF/options-style values consumed in `class-api.php` (e.g. season year, season type). Adjust those in WordPress per environment.
+- **URLs / taxonomies**: The plugin registers the public query variable `season_year` and uses it with the `season-type` taxonomy archive query so season URLs do not collide with WordPress core’s reserved `year` query var (see `basebelles.php`).
+
+---
+
+## Development
+
+- **Coding standards**: `phpcs.xml.dist` is provided for PHPCS runs against the PHP in this plugin.
+- **Version**: The canonical plugin version is set in the plugin header in `basebelles.php` (keep internal `$version` usage in sync when bumping releases).
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v2.0** — see [LICENSE](LICENSE).
+
+---
+
+## Author
+
+**Ipstenu** — plugin URI and upstream repository: [github.com/basebelles/basebelles](https://github.com/basebelles/basebelles).

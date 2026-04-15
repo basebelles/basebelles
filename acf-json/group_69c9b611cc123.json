@@ -1,0 +1,209 @@
+{
+    "key": "group_69c9b611cc123",
+    "title": "Series Results",
+    "fields": [
+        {
+            "key": "field_69c9b65a0d4e8",
+            "label": "Home Game?",
+            "name": "home_game",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ui_on_text": "",
+            "ui_off_text": ""
+        },
+        {
+            "key": "field_69caeaeb128f1",
+            "label": "Game Dates",
+            "name": "game_dates",
+            "aria-label": "",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_69caebbe128f2",
+                    "label": "First Game",
+                    "name": "first_game",
+                    "aria-label": "",
+                    "type": "date_picker",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "M j",
+                    "return_format": "M j",
+                    "first_day": 0,
+                    "default_to_current_date": 1,
+                    "allow_in_bindings": 0
+                },
+                {
+                    "key": "field_69caebf0128f3",
+                    "label": "Last Game",
+                    "name": "last_game",
+                    "aria-label": "",
+                    "type": "date_picker",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "M j",
+                    "return_format": "M j",
+                    "first_day": 0,
+                    "default_to_current_date": 1,
+                    "allow_in_bindings": 0
+                }
+            ]
+        },
+        {
+            "key": "field_69c9b6120d4e7",
+            "label": "Opponent",
+            "name": "opponent",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "tbd": "To Be Determined",
+                "d-backs": "Arizona Diamondbacks",
+                "braves": "Atlanta Braves",
+                "orioles": "Baltimore Orioles",
+                "red-sox": "Boston Red Sox",
+                "cubs": "Chicago Cubs",
+                "white-sox": "Chicago White Sox",
+                "reds": "Cincinnati Reds",
+                "rockies": "Colorado Rockies",
+                "tigers": "Detroit Tigers",
+                "astros": "Houston Astros",
+                "royals": "Kansas City Royals",
+                "angels": "Los Angeles Angels",
+                "dodgers": "Los Angeles Dodgers",
+                "marlins": "Miami Marlins",
+                "brewers": "Milwaukee Brewers",
+                "twins": "Minnesota Twins",
+                "mets": "New York Mets",
+                "yankees": "New York Yankees",
+                "athletics": "Oakland Athletics",
+                "phillies": "Philadelphia Phillies",
+                "pirates": "Pittsburgh Pirates",
+                "padres": "San Diego Padres",
+                "giants": "San Francisco Giants",
+                "mariners": "Seattle Mariners",
+                "cardinals": "St. Louis Cardinals",
+                "rays": "Tampa Bay Rays",
+                "rangers": "Texas Rangers",
+                "blue-jays": "Toronto Blue Jays",
+                "nationals": "Washington Nationals"
+            },
+            "default_value": "tbd",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": "",
+            "create_options": 0,
+            "save_options": 0
+        },
+        {
+            "key": "field_69c9b67b0d4e9",
+            "label": "Guards Won",
+            "name": "guards_won",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": "",
+            "max": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_69c9b6880d4ea",
+            "label": "Oppo. Won",
+            "name": "oppo_won",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": "",
+            "max": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf/basebelles-series"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Results of a Series",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": ""
+}

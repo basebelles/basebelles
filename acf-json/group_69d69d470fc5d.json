@@ -1,0 +1,49 @@
+{
+    "key": "group_69d69d470fc5d",
+    "title": "Streamable MLB Video",
+    "fields": [
+        {
+            "key": "field_69d69d4716ab7",
+            "label": "Streamable URL",
+            "name": "streamable_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Paste a Streamable link (for example https://streamable.com/m/… or https://www.mlb.com/video/…).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "allow_in_bindings": 0,
+            "placeholder": "https://streamable.com/m/"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf/basebelles-streamable"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "acfe_autosync": "",
+    "acfe_form": 0,
+    "acfe_meta": "",
+    "acfe_note": ""
+}
