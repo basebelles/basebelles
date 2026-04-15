@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.2.1';
+		self::$version = '1.2.2';
 
 		require_once __DIR__ . '/blocks/class-acf-json.php';
 		Basebelles_ACF_JSON::register_hooks();
