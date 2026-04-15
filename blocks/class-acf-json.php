@@ -18,7 +18,7 @@ class Basebelles_ACF_JSON {
 	 * @return string
 	 */
 	public static function json_dir() {
-		return trailingslashit( dirname( __DIR__ ) ) . 'acf-json';
+		return trailingslashit( dirname( __DIR__ ) . '/acf-json' );
 	}
 
 	/**

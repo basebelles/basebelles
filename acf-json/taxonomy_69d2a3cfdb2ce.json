@@ -62,7 +62,7 @@
         "with_front": "1",
         "rewrite_hierarchical": "0"
     },
-    "query_var": "post_type_key",
+    "query_var": "taxonomy_key",
     "query_var_name": "",
     "default_term": {
         "default_term_enabled": "0"
