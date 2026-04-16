@@ -91,8 +91,8 @@ class Basebelles {
 	public function register_patterns() {
 		$patterns = array(
 			'game-series' => array(
-				'title'       => 'Game Series Template',
-				'description' => 'Standard layout for basebelles game recaps.',
+				'title'       => __( 'Game Series Template', 'basebelles' ),
+				'description' => __( 'Standard layout for basebelles game recaps.', 'basebelles' ),
 				'file'        => 'patterns/game-series.php',
 				'categories'  => array( 'featured', 'text' ),
 			),
@@ -105,10 +105,8 @@ class Basebelles {
 				ob_start();
 				include $filepath;
 
-				$content = preg_replace( '/^<\?php.*?\?>/ms', '', ob_get_clean() );
-
-				$data['content'] = trim( $content );
-				unset( $data['file'] ); // Don't pass 'file' to the registration function
+				$data['content'] = trim( ob_get_clean() );
+				unset( $data['file'] );
 
 				register_block_pattern( 'basebelles/' . $slug, $data );
 			}
