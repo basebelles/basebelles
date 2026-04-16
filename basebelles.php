@@ -26,6 +26,7 @@ class Basebelles {
 
 		// ACF
 		require_once 'blocks/class-acf-json.php';
+		new Basebelles_ACF_JSON();
 
 		// Quality of Life
 		add_action( 'pre_ping', array( $this, 'no_self_ping' ) );
