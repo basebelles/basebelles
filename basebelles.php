@@ -34,6 +34,7 @@ class Basebelles {
 
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_styles' ), 5 );
+		add_action( 'init', array( $this, 'register_patterns' ), 5 );
 		add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
@@ -80,6 +81,36 @@ class Basebelles {
 	 */
 	public function register_styles() {
 		wp_register_style( 'basebelles-style', plugin_dir_url( __FILE__ ) . 'basebelles.css', array(), self::$version );
+	}
+
+	/**
+	 * Register the patterns for the plugin.
+	 *
+	 * @return void
+	 */
+	public function register_patterns() {
+		$patterns = array(
+			'game-series' => array(
+				'title'       => __( 'Game Series Template', 'basebelles' ),
+				'description' => __( 'Standard layout for basebelles game recaps.', 'basebelles' ),
+				'file'        => 'patterns/game-series.php',
+				'categories'  => array( 'featured', 'text' ),
+			),
+		);
+
+		foreach ( $patterns as $slug => $data ) {
+			$filepath = plugin_dir_path( __FILE__ ) . $data['file'];
+
+			if ( file_exists( $filepath ) ) {
+				ob_start();
+				include $filepath;
+
+				$data['content'] = trim( ob_get_clean() );
+				unset( $data['file'] );
+
+				register_block_pattern( 'basebelles/' . $slug, $data );
+			}
+		}
 	}
 
 	/**
