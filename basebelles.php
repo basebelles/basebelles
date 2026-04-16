@@ -24,8 +24,9 @@ class Basebelles {
 	public function __construct() {
 		self::$version = '1.2.2';
 
-		require_once __DIR__ . '/blocks/class-acf-json.php';
-		Basebelles_ACF_JSON::register_hooks();
+		// ACF
+		require_once 'blocks/class-acf-json.php';
+		new Basebelles_ACF_JSON();
 
 		// Quality of Life
 		add_action( 'pre_ping', array( $this, 'no_self_ping' ) );

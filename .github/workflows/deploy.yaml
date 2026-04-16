@@ -25,9 +25,22 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.BELLES_SSH_KEY }}
           # Standard rsync flags: archive, compress, verbose, delete extraneous
-          ARGS: "-azv --delete" 
+          ARGS: "-azv --delete"
           REMOTE_HOST: ${{ secrets.BELLES_HOST }}
           REMOTE_USER: ${{ secrets.BELLES_USER }}
           # Pathing for DreamHost standalone
           TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_FOLDER }}/wp-content/plugins/basebelles/"
           EXCLUDE: "/.git/, /.github/, /node_modules/, .DS_Store"
+
+      - name: Sync ACF JSON on Server
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.BELLES_HOST }}
+          username: ${{ secrets.BELLES_USER }}
+          key: ${{ secrets.BELLES_SSH_KEY }}
+          script: |
+            # Navigate to the WordPress root
+            cd /home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_FOLDER }}
+
+            # Run the ACF Sync
+            /usr/bin/wp acf json sync --quiet
