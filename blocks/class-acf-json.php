@@ -29,6 +29,11 @@ class Basebelles_ACF_JSON {
 		add_filter( 'acf/settings/save_json', array( $this, 'save_json_path' ) );
 		add_filter( 'acf/settings/load_json', array( $this, 'load_json_paths' ) );
 		add_filter( 'acf/json/load_paths', array( $this, 'load_json_paths' ) );
+
+		// Only hide the UI on Production
+		if ( defined( 'WP_ENVIRONMENT_TYPE' ) && WP_ENVIRONMENT_TYPE === 'production' ) {
+			add_filter( 'acf/settings/show_admin', '__return_false' );
+		}
 	}
 
 	/**
