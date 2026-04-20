@@ -7,14 +7,15 @@
 	border: 1px solid var(--bb-slate-blue);
 	font-family: sans-serif;
 	width: 95%; /* Better fit for mobile */
-	max-width: 650px;
 	margin: 20px auto;
+	container-type: inline-size;
+	container-name: game-results;
 }
 
 .results-header {
 	display: flex;
 	/* Stack header by default for mobile */
-	flex-direction: column; 
+	flex-direction: column;
 	align-items: center;
 	gap: 10px;
 	text-align: center;
@@ -31,12 +32,31 @@
 
 .results-header .team-summary {
 	flex: 1;
+	min-width: 0;
 }
 
 .results-header .team-name {
 	font-weight: bold;
 	font-size: 1.2em;
 	line-height: 1.2;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@container game-results (max-width: 380px) {
+	.results-header .team-name {
+		display: none;
+	}
+}
+
+@supports not (container-type: inline-size) {
+	@media (max-width: 400px) {
+		.results-header .team-name {
+			display: none;
+		}
+	}
 }
 
 .results-header .team-record,
@@ -94,7 +114,13 @@
 	font-weight: bold;
 }
 
-/* Sticky Team Labels (CLE / ATL) */
+/* Sticky Team Labels (CLE / ATL) — ~3 letters; keep column minimal */
+.results-innings-table thead th:first-child {
+	width: 1%;
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
 .results-innings-table .team-label {
 	position: sticky;
 	left: 0;
@@ -102,7 +128,12 @@
 	text-align: left;
 	font-weight: bold;
 	z-index: 2;
-	min-width: 40px;
+	width: 1%;
+	min-width: 0;
+	max-width: 4ch;
+	padding: 6px 2px;
+	white-space: nowrap;
+	box-sizing: border-box;
 	border-right: 2px solid var(--bb-sandstone-cream);
 }
 

@@ -8,8 +8,9 @@
 	font-family: sans-serif;
 	/* Width fix for mobile: use 95% on small screens, 75% on desktop */
 	width: 95%;
-	max-width: 600px;
 	margin: 20px auto;
+	container-type: inline-size;
+	container-name: series-results;
 }
 
 .series-date {
@@ -52,6 +53,24 @@
 	font-weight: bold;
 	font-size: 1.2em;
 	line-height: 1.2;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@container series-results (max-width: 380px) {
+	.series-results .team-name {
+		display: none;
+	}
+}
+
+@supports not (container-type: inline-size) {
+	@media (max-width: 400px) {
+		.series-results .team-name {
+			display: none;
+		}
+	}
 }
 
 .series-results .team-series-record {
