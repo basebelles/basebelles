@@ -198,82 +198,6 @@
                     "append": ""
                 },
                 {
-                    "key": "field_69c706e3ee280",
-                    "label": "Runs",
-                    "name": "runs",
-                    "aria-label": "",
-                    "type": "group",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": [
-                        [
-                            {
-                                "field": "field_69c70d26cd56b",
-                                "operator": "==empty"
-                            }
-                        ]
-                    ],
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "layout": "block",
-                    "acfe_seamless_style": 0,
-                    "acfe_group_modal": 0,
-                    "sub_fields": [
-                        {
-                            "key": "field_69c70791ee281",
-                            "label": "Guardians",
-                            "name": "guardians",
-                            "aria-label": "",
-                            "type": "number",
-                            "instructions": "",
-                            "required": 0,
-                            "conditional_logic": 0,
-                            "wrapper": {
-                                "width": "",
-                                "class": "",
-                                "id": ""
-                            },
-                            "default_value": 0,
-                            "min": "",
-                            "max": "",
-                            "allow_in_bindings": 0,
-                            "placeholder": "",
-                            "step": "",
-                            "prepend": "",
-                            "append": ""
-                        },
-                        {
-                            "key": "field_69c7079fee282",
-                            "label": "Opposition",
-                            "name": "opposition",
-                            "aria-label": "",
-                            "type": "number",
-                            "instructions": "",
-                            "required": 0,
-                            "conditional_logic": 0,
-                            "wrapper": {
-                                "width": "",
-                                "class": "",
-                                "id": ""
-                            },
-                            "default_value": 0,
-                            "min": "",
-                            "max": "",
-                            "allow_in_bindings": 0,
-                            "placeholder": "",
-                            "step": "",
-                            "prepend": "",
-                            "append": ""
-                        }
-                    ],
-                    "acfe_group_modal_close": 0,
-                    "acfe_group_modal_button": "",
-                    "acfe_group_modal_size": "large"
-                },
-                {
                     "key": "field_69c707c05892a",
                     "label": "Hits",
                     "name": "hits",
@@ -494,5 +418,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1744754400
+    "modified": 1777407757
 }
