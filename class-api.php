@@ -19,6 +19,10 @@ class Basebelles_API {
 	const AL_LEAGUE_ID      = 103; // American League
 	const CL_LEAGUE_ID      = 114; // Cactus League (spring training)
 	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
+	/** Calendar days included in Guardians transactions API query (inclusive). */
+	const TRANSACTIONS_LOOKBACK_DAYS = 30;
+	/** Upper bound for how many transactions the block may list. */
+	const TRANSACTIONS_DISPLAY_MAX = 50;
 	/** Cache TTL for season archive snapshots (past years are immutable). */
 	const API_ARCHIVE_CACHE_TTL = DAY_IN_SECONDS;
 
@@ -655,6 +659,56 @@ class Basebelles_API {
 		$timestamp = strtotime( $date );
 
 		return $timestamp ? wp_date( 'Y-m-d', $timestamp ) : wp_date( 'Y-m-d' );
+	}
+
+	/**
+	 * Fetch Guardians transactions for the last TRANSACTIONS_LOOKBACK_DAYS calendar days, newest first.
+	 *
+	 * @param int $limit Max rows after sorting (clamped 1..TRANSACTIONS_DISPLAY_MAX).
+	 * @return array<int, array<string, mixed>>|WP_Error Transaction rows from the MLB API.
+	 */
+	public function get_guardians_recent_transactions( $limit ) {
+		$limit = (int) $limit;
+		if ( $limit < 1 ) {
+			$limit = 1;
+		}
+		if ( $limit > self::TRANSACTIONS_DISPLAY_MAX ) {
+			$limit = self::TRANSACTIONS_DISPLAY_MAX;
+		}
+
+		$tz  = wp_timezone();
+		$end = new DateTime( 'now', $tz );
+		$end->setTime( 0, 0, 0 );
+		$start = clone $end;
+		$start->modify( '-' . ( self::TRANSACTIONS_LOOKBACK_DAYS - 1 ) . ' days' );
+
+		$query = array(
+			'teamId'    => self::GUARDIANS_TEAM_ID,
+			'startDate' => $start->format( 'Y-m-d' ),
+			'endDate'   => $end->format( 'Y-m-d' ),
+		);
+
+		$data = $this->request_json( 'transactions', $query, self::API_CACHE_TTL );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		$transactions = isset( $data['transactions'] ) && is_array( $data['transactions'] ) ? $data['transactions'] : array();
+
+		usort(
+			$transactions,
+			static function ( $a, $b ) {
+				$da  = isset( $a['effectiveDate'] ) ? (string) $a['effectiveDate'] : ( isset( $a['date'] ) ? (string) $a['date'] : '' );
+				$db  = isset( $b['effectiveDate'] ) ? (string) $b['effectiveDate'] : ( isset( $b['date'] ) ? (string) $b['date'] : '' );
+				$cmp = strcmp( $db, $da );
+				if ( 0 !== $cmp ) {
+					return $cmp;
+				}
+				return (int) ( $b['id'] ?? 0 ) <=> (int) ( $a['id'] ?? 0 );
+			}
+		);
+
+		return array_slice( $transactions, 0, $limit );
 	}
 
 	/**
