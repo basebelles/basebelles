@@ -4,7 +4,8 @@
       "Bash(find ~/Websites ~/Sites ~/Local -name \"acf.php\" -path \"*/advanced-custom-fields-pro/*\" 2>/dev/null | head -3 | xargs grep -h \"Version:\" 2>/dev/null)",
       "Bash(find /Users/ipstenu/Development -name \"debug.log\" -path \"*/wp-content/*\" 2>/dev/null | head -5)",
       "Bash(find /Users/ipstenu -path \"*/advanced-custom-fields-pro/includes/local-meta.php\" 2>/dev/null | head -3)",
-      "Bash(find /Users/ipstenu -path \"*/advanced-custom-fields-pro/includes/blocks*\" -name \"*.php\" 2>/dev/null)"
+      "Bash(find /Users/ipstenu -path \"*/advanced-custom-fields-pro/includes/blocks*\" -name \"*.php\" 2>/dev/null)",
+      "Bash(grep -E '\\\\.\\(css|js\\)$')"
     ]
   }
 }

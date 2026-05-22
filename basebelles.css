@@ -120,3 +120,111 @@ a.wp-block-latest-posts__post-title {
 footer ul.wp-block-list li {
 	font-size: .9em!important;
 }
+
+/* -------------------------------------------------------------------------
+ * Transactions slide-in panel
+ * ---------------------------------------------------------------------- */
+
+.bb-transactions-toggle {
+	background: transparent;
+	border: 1px solid rgba(243, 239, 224, 0.5);
+	border-radius: 4px;
+	color: #f3efe0;
+	cursor: pointer;
+	font-size: 0.875rem;
+	line-height: 1;
+	padding: 0.4em 0.8em;
+	transition: background 0.15s ease, border-color 0.15s ease;
+	white-space: nowrap;
+}
+
+.bb-transactions-toggle:hover,
+.bb-transactions-toggle:focus-visible {
+	background: rgba(243, 239, 224, 0.15);
+	border-color: #f3efe0;
+	outline: none;
+}
+
+.bb-transactions-overlay {
+	display: none;
+	background: rgba(0, 0, 0, 0.5);
+	inset: 0;
+	position: fixed;
+	z-index: 9998;
+}
+
+.bb-transactions-overlay.is-open {
+	display: block;
+}
+
+.bb-transactions-panel {
+	background: var(--bb-sandstone-cream, #f3efe0);
+	box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
+	color: var(--bb-deep-navy, #002d62);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	max-width: 90vw;
+	overflow-y: auto;
+	padding: 1.5rem;
+	position: fixed;
+	right: 0;
+	top: 0;
+	transform: translateX(100%);
+	transition: transform 0.25s ease;
+	width: 380px;
+	z-index: 9999;
+}
+
+.bb-transactions-panel.is-open {
+	transform: translateX(0);
+}
+
+/* Account for the WP admin bar when logged in */
+.admin-bar .bb-transactions-panel {
+	height: calc(100% - var(--wp-admin--admin-bar--height, 32px));
+	top: var(--wp-admin--admin-bar--height, 32px);
+}
+
+.bb-transactions-panel-header {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+.bb-transactions-panel-title {
+	color: var(--bb-deep-navy, #002d62);
+	font-size: 1.1rem;
+	font-weight: 700;
+}
+
+.bb-transactions-close {
+	background: transparent;
+	border: none;
+	color: var(--bb-deep-navy, #002d62);
+	cursor: pointer;
+	font-size: 1.5rem;
+	line-height: 1;
+	padding: 0;
+}
+
+.bb-transactions-close:hover {
+	color: var(--bb-wine, #84172c);
+}
+
+.bb-transactions-panel ul.basebelles-transactions {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.bb-transactions-panel ul.basebelles-transactions li {
+	border-bottom: 1px solid rgba(0, 45, 98, 0.15);
+	font-size: 0.875rem;
+	padding: 0.6rem 0;
+}
+
+.bb-transactions-panel ul.basebelles-transactions li:last-child {
+	border-bottom: none;
+}

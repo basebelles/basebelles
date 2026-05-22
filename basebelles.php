@@ -35,7 +35,7 @@ class Basebelles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'register_styles' ), 5 );
 		add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles_and_scripts' ) );
 		add_action( 'admin_init', array( $this, 'admin_color_scheme' ) );
 
 		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
@@ -43,6 +43,7 @@ class Basebelles {
 
 		add_action( 'admin_menu', array( $this, 'set_guardians_menu_icon' ), 99 );
 		add_filter( 'render_block_data', array( $this, 'sanitize_acf_block_nulls' ) );
+		add_action( 'wp_footer', array( $this, 'render_transactions_panel' ) );
 	}
 
 	/**
@@ -93,8 +94,18 @@ class Basebelles {
 	 *
 	 * @return void
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles_and_scripts() {
 		wp_enqueue_style( 'basebelles-style' );
+		wp_enqueue_script(
+			'basebelles',
+			plugin_dir_url( __FILE__ ) . '/basebelles.js',
+			array(),
+			self::$version,
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => false,
+			)
+		);
 	}
 
 	/**
@@ -204,6 +215,34 @@ class Basebelles {
 	 * @param array $parsed_block The parsed block data.
 	 * @return array
 	 */
+	/**
+	 * Inject the transactions slide-in panel before </body>.
+	 *
+	 * @return void
+	 */
+	public function render_transactions_panel() {
+		if ( ! class_exists( 'Basebelles_API' ) ) {
+			return;
+		}
+		?>
+		<div id="bb-transactions-overlay" class="bb-transactions-overlay" aria-hidden="true"></div>
+		<aside
+			id="bb-transactions-panel"
+			class="bb-transactions-panel"
+			role="complementary"
+			aria-label="<?php esc_attr_e( 'Recent Transactions', 'basebelles' ); ?>"
+			aria-hidden="true"
+			tabindex="-1"
+		>
+			<div class="bb-transactions-panel-header">
+				<span class="bb-transactions-panel-title"><?php esc_html_e( 'Recent Transactions', 'basebelles' ); ?></span>
+				<button type="button" class="bb-transactions-close" aria-label="<?php esc_attr_e( 'Close', 'basebelles' ); ?>">&times;</button>
+			</div>
+			<?php echo do_blocks( '<!-- wp:acf/basebelles-transactions /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</aside>
+		<?php
+	}
+
 	public function sanitize_acf_block_nulls( $parsed_block ) {
 		if ( empty( $parsed_block['attrs']['data'] ) || ! is_array( $parsed_block['attrs']['data'] ) ) {
 			return $parsed_block;

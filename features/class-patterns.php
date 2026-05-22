@@ -35,6 +35,20 @@ class Basebelles_Patterns {
 	 */
 	public function register_patterns() {
 		$patterns = array(
+			'header'               => array(
+				'title'       => __( 'Header', 'basebelles' ),
+				'slug'        => 'basebelles/header',
+				'description' => __( 'Site header for Base*Belles.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'header', 'site title', 'navigation' ),
+				'file'        => 'patterns/header.php',
+			),
+			'footer'               => array(
+				'title'       => __( 'Footer', 'basebelles' ),
+				'slug'        => 'basebelles/footer',
+				'description' => __( 'Site footer for Base*Belles.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'footer', 'site info', 'contact info' ),
+				'file'        => 'patterns/footer.php',
+			),
 			'game-series'          => array(
 				'title'       => __( 'Game Series Template', 'basebelles' ),
 				'slug'        => 'basebelles/game-series',
@@ -45,7 +59,7 @@ class Basebelles_Patterns {
 			'game-series-one-game' => array(
 				'title'       => __( 'Game Series: One Game', 'basebelles' ),
 				'slug'        => 'basebelles/game-series-one-game',
-				'description' => __( 'Layout for a game series recap when only one game has been played.', 'basebelles' ),
+				'description' => __( 'Layout for a single game recap.', 'basebelles' ),
 				'keywords'    => array( 'basebelles', 'game', 'series', 'recap', 'one game' ),
 				'file'        => 'patterns/game-series-one-game.php',
 			),
@@ -66,7 +80,7 @@ class Basebelles_Patterns {
 		);
 
 		foreach ( $patterns as $slug => $data ) {
-			$filepath = plugin_dir_path( dirname( __FILE__ ) ) . $data['file'];
+			$filepath = plugin_dir_path( __DIR__ ) . $data['file'];
 
 			if ( file_exists( $filepath ) ) {
 				ob_start();
