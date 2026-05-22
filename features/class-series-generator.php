@@ -70,14 +70,11 @@ class Basebelles_Series_Generator {
 		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
 		$season_type = get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) ? get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) : 'regular-season';
 
-		// Look up the team taxonomy term slug from list.json.
+		// Look up the team taxonomy term slug via the API class.
 		$team_term = '';
-		$list_file = plugin_dir_path( __DIR__ ) . 'team-info/list.json';
-		if ( file_exists( $list_file ) ) {
-			$team_list = json_decode( file_get_contents( $list_file ), true );
-			if ( ! empty( $team_list[ $opponent ]['taxonomy_term'] ) ) {
-				$team_term = $team_list[ $opponent ]['taxonomy_term'];
-			}
+		if ( class_exists( 'Basebelles_API' ) ) {
+			$team_data = Basebelles_API::get_instance()->get_team( $opponent );
+			$team_term = $team_data['taxonomy_term'] ?? '';
 		}
 
 		if ( empty( $date ) || false === strtotime( $date ) ) {

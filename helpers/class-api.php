@@ -1061,6 +1061,33 @@ class Basebelles_API {
 	}
 
 	/**
+	 * Return team metadata for a given list.json key (e.g. 'yankees').
+	 *
+	 * @param string $key The team key as stored in list.json.
+	 * @return array Team data array, or empty array if not found.
+	 */
+	public function get_team( $key ) {
+		$teams = $this->get_team_info_list();
+		return $teams[ $key ] ?? array();
+	}
+
+	/**
+	 * Return team metadata by matching the taxonomy_term slug (e.g. 'new-york-yankees').
+	 *
+	 * @param string $taxonomy_slug The term slug used in the team taxonomy.
+	 * @return array Team data array (with 'slug' key added), or empty array if not found.
+	 */
+	public function get_team_by_taxonomy_slug( $taxonomy_slug ) {
+		foreach ( $this->get_team_info_list() as $key => $team ) {
+			if ( ( $team['taxonomy_term'] ?? '' ) === $taxonomy_slug ) {
+				$team['slug'] = $key;
+				return $team;
+			}
+		}
+		return array();
+	}
+
+	/**
 	 * Get team info from the local metadata file.
 	 *
 	 * @param string $abbreviation Team abbreviation.

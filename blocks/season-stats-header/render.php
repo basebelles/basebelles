@@ -28,40 +28,43 @@ if ( ! is_tax( 'season-type' ) && ! is_tax( 'team' ) ) {
 	return;
 }
 
-/**
- * Standings-derived contextual line by season segment.
- *
- * @param array  $stats    Archive stats from API.
- * @return string
- */
-function basebelles_season_snapshot_context_note( $stats ) {
-	$l10 = (string) ( $stats['last_ten'] ?? null );
-	$stk = (string) ( $stats['streak'] ?? null );
-	$gb  = (string) ( $stats['games_back'] ?? null );
+// Since block render templates can be executed multiple times on a single page (e.g., when multiple instances of the block are present or during certain editor operations), we have to check if the function already exists before declaring it to avoid fatal errors. This is a common practice in WordPress development to ensure compatibility and prevent issues when code is loaded multiple times.
+if ( ! function_exists( 'basebelles_season_snapshot_context_note' ) ) {
+	/**
+	 * Standings-derived contextual line by season segment.
+	 *
+	 * @param array  $stats    Archive stats from API.
+	 * @return string
+	 */
+	function basebelles_season_snapshot_context_note( $stats ) {
+		$l10 = (string) ( $stats['last_ten'] ?? null );
+		$stk = (string) ( $stats['streak'] ?? null );
+		$gb  = (string) ( $stats['games_back'] ?? null );
 
-	// If the value is NOT - then don't show it
-	if ( ! is_null( $gb ) && '-' !== $gb ) {
-		// translators: %1$s is the games back
-		$gb = sprintf( __( 'GB: %1$s', 'basebelles' ), $gb );
-	}
-	if ( ! is_null( $l10 ) && '-' !== $l10 ) {
-		// translators: %1$s is the last ten record
-		$l10 = sprintf( __( 'L10: %1$s', 'basebelles' ), $l10 );
-	}
-	if ( ! is_null( $stk ) && '-' !== $stk ) {
-		// translators: %1$s is the streak code
-		$stk = sprintf( __( 'STK: %1$s', 'basebelles' ), $stk );
-	}
-
-	$context_note = array( $gb, $l10, $stk );
-
-	foreach ( $context_note as $key => $note ) {
-		if ( '-' === $note ) {
-			unset( $context_note[ $key ] );
+		// If the value is NOT - then don't show it
+		if ( ! is_null( $gb ) && '-' !== $gb ) {
+			// translators: %1$s is the games back
+			$gb = sprintf( __( 'GB: %1$s', 'basebelles' ), $gb );
 		}
-	}
+		if ( ! is_null( $l10 ) && '-' !== $l10 ) {
+			// translators: %1$s is the last ten record
+			$l10 = sprintf( __( 'L10: %1$s', 'basebelles' ), $l10 );
+		}
+		if ( ! is_null( $stk ) && '-' !== $stk ) {
+			// translators: %1$s is the streak code
+			$stk = sprintf( __( 'STK: %1$s', 'basebelles' ), $stk );
+		}
 
-	return implode( ' <br /> ', $context_note );
+		$context_note = array( $gb, $l10, $stk );
+
+		foreach ( $context_note as $key => $note ) {
+			if ( '-' === $note ) {
+				unset( $context_note[ $key ] );
+			}
+		}
+
+		return implode( ' <br /> ', $context_note );
+	}
 }
 
 // Defaults
@@ -101,33 +104,11 @@ if ( $season_year < 1900 ) {
 	$season_year = (int) gmdate( 'Y' );
 }
 
-// If we're on a team archive, look up the MLB team ID from list.json.
+// If we're on a team archive, look up the MLB team ID via the API class.
 if ( is_tax( 'team' ) ) {
-	$team_id     = 0; // Reset so the guard below correctly catches a failed lookup.
-	$plugin_path = dirname( __DIR__, 2 );
-	$teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_contents( $plugin_path . '/team-info/list.json' ) : '{}';
+	$team_data = Basebelles_API::get_instance()->get_team_by_taxonomy_slug( $queried_season_term->slug );
+	$team_id   = (int) ( $team_data['mlb_team_id'] ?? 0 );
 
-	// If there's no team data, bail early.
-	if ( ! $teams_json || empty( $teams_json ) ) {
-		if ( is_admin() ) {
-			echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--error" role="alert"><p>Team data unavailable.</p></div>';
-			return;
-		}
-	}
-
-	// Decode the JSON and look up the team ID from the slug.
-	$teams_data = json_decode( $teams_json, true );
-	$team_slug  = $queried_season_term->slug;
-
-	// Taxonomy slugs are chicago-cubs but the slug in the json is just cubs, so we need to do some reverse mapping to find the right team.
-	foreach ( $teams_data as $slug => $team ) {
-		if ( $team['taxonomy_term'] === $team_slug ) {
-			$team_id = $team['mlb_team_id'];
-			break;
-		}
-	}
-
-	// If we couldn't find a team ID and we're in the admin, show an error. If we're on the frontend, just bail silently.
 	if ( ! $team_id ) {
 		if ( is_admin() ) {
 			echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--error" role="alert"><p>Team not found.</p></div>';
