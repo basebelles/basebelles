@@ -35,23 +35,33 @@ class Basebelles_Patterns {
 	 */
 	public function register_patterns() {
 		$patterns = array(
-			'game-series' => array(
+			'game-series'          => array(
 				'title'       => __( 'Game Series Template', 'basebelles' ),
 				'slug'        => 'basebelles/game-series',
 				'description' => __( 'Standard layout for basebelles game recaps.', 'basebelles' ),
 				'keywords'    => array( 'basebelles', 'game', 'series', 'recap', 'template' ),
-				'postTypes'   => array( 'post' ),
 				'file'        => 'patterns/game-series.php',
-				'categories'  => array( 'featured', 'text', 'basebelles/custom' ),
 			),
-			'one-game' => array(
-				'title'       => __( 'One Game Template', 'basebelles' ),
-				'slug'        => 'basebelles/one-game',
-				'description' => __( 'Layout for a single game recap.', 'basebelles' ),
-				'keywords'    => array( 'basebelles', 'game', 'recap', 'template' ),
-				'postTypes'   => array( 'post' ),
+			'game-series-one-game' => array(
+				'title'       => __( 'Game Series: One Game', 'basebelles' ),
+				'slug'        => 'basebelles/game-series-one-game',
+				'description' => __( 'Layout for a game series recap when only one game has been played.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'game', 'series', 'recap', 'one game' ),
 				'file'        => 'patterns/one-game.php',
-				'categories'  => array( 'featured', 'text', 'basebelles/custom' ),
+			),
+			'game-series-header'   => array(
+				'title'       => __( 'Game Series Header', 'basebelles' ),
+				'slug'        => 'basebelles/game-series-header',
+				'description' => __( 'Header for game series recaps.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'game', 'series', 'header' ),
+				'file'        => 'patterns/game-series-header.php',
+			),
+			'game-series-end'      => array(
+				'title'       => __( 'Game Series End', 'basebelles' ),
+				'slug'        => 'basebelles/game-series-end',
+				'description' => __( 'End section for game series recaps.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'game', 'series', 'end' ),
+				'file'        => 'patterns/game-series-end.php',
 			),
 		);
 
@@ -64,6 +74,11 @@ class Basebelles_Patterns {
 
 				$data['content'] = trim( ob_get_clean() );
 				unset( $data['file'] );
+
+				// For simplicity, all patterns are registered to post editor and categorized
+				// under 'featured', 'text', and 'basebelles/custom'.
+				$data['postTypes']  = array( 'post' );
+				$data['categories'] = array( 'featured', 'text', 'basebelles/custom' );
 
 				register_block_pattern( 'basebelles/' . $slug, $data );
 			}

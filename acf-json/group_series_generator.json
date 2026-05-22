@@ -100,6 +100,52 @@
             "allow_in_bindings": 0
         },
         {
+            "key": "field_sgen_game_count",
+            "label": "Games in Series",
+            "name": "sgen_game_count",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "How many games are in this series.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 3,
+            "min": 1,
+            "max": 7,
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_sgen_game_number",
+            "label": "Current Game Number",
+            "name": "sgen_game_number",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Season game number for the first game of this series (e.g. 56). Each subsequent game increments by one.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 1,
+            "max": 162,
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_sgen_home_away",
             "label": "Home Game?",
             "name": "sgen_home_away",

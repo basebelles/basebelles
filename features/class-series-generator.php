@@ -60,10 +60,12 @@ class Basebelles_Series_Generator {
 		// Reset the trigger before doing anything so a failed run can't re-fire on refresh.
 		update_field( 'field_sgen_generate', 0, self::OPTIONS_POST_ID );
 
-		$opponent = get_field( 'sgen_opponent',  self::OPTIONS_POST_ID ) ?: 'tbd';
-		$date     = get_field( 'sgen_date',      self::OPTIONS_POST_ID ) ?: '';
-		$end_date = get_field( 'sgen_end_date',  self::OPTIONS_POST_ID ) ?: '';
-		$is_home  = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
+		$opponent    = get_field( 'sgen_opponent',    self::OPTIONS_POST_ID ) ?: 'tbd';
+		$date        = get_field( 'sgen_date',        self::OPTIONS_POST_ID ) ?: '';
+		$end_date    = get_field( 'sgen_end_date',    self::OPTIONS_POST_ID ) ?: '';
+		$game_count  = (int) ( get_field( 'sgen_game_count',  self::OPTIONS_POST_ID ) ?: 3 );
+		$game_number = (int) ( get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) ?: 1 );
+		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
 
 		if ( empty( $date ) || false === strtotime( $date ) ) {
 			$this->set_notice( 'error', 'Please set a valid series start date before generating.' );
@@ -89,10 +91,12 @@ class Basebelles_Series_Generator {
 		$post_content .= $this->paragraph_block( 'Series Notes' ) . "\n\n";
 		$post_content .= $this->heading_block( 'Game Results' ) . "\n\n";
 
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$post_content .= $this->game_section( $i, $opponent, $is_home, $opponent_display_name );
+		for ( $i = 1; $i <= $game_count; $i++ ) {
+			$season_game   = $game_number + ( $i - 1 );
+			$post_content .= $this->game_section( $i, $opponent, $is_home, $opponent_display_name, $season_game );
 		}
 
+		$post_content .= $this->separator_block() . "\n\n";
 		$post_content .= $this->paragraph_block( 'Who are we playing next?' );
 
 		$new_post_id = wp_insert_post( array(
@@ -209,13 +213,20 @@ class Basebelles_Series_Generator {
 		return '<!-- wp:acf/basebelles-streamable ' . wp_json_encode( $data ) . ' /-->';
 	}
 
-	protected function game_section( $num, $opponent, $is_home, $opponent_display_name ) {
-		$label = strtoupper( $opponent_display_name );
-		$out   = $this->heading_block( "Game {$num} ({$label}) - WONLOST", 3 ) . "\n\n";
+	protected function game_section( $num, $opponent, $is_home, $opponent_display_name, $season_game = 0 ) {
+		$label        = strtoupper( $opponent_display_name );
+		$game_display = $season_game > 0 ? $season_game : '??';
+		$out   = $this->heading_block( "Game {$num} ({$game_display}) - WONLOST", 3 ) . "\n\n";
 		$out  .= $this->results_block( $opponent, $is_home ) . "\n\n";
 		$out  .= "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>TBD</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n";
 		$out  .= $this->streamable_block() . "\n\n";
 		return $out;
+	}
+
+	protected function separator_block() {
+		return '<!-- wp:separator {"backgroundColor":"custom-wine","className":"is-style-dots"} -->' . "\n" .
+			'<hr class="wp-block-separator has-text-color has-custom-wine-color has-alpha-channel-opacity has-custom-wine-background-color has-background is-style-dots"/>' . "\n" .
+			'<!-- /wp:separator -->';
 	}
 }
 
