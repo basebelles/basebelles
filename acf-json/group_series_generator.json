@@ -36,7 +36,7 @@
                 "twins": "Minnesota Twins",
                 "mets": "New York Mets",
                 "yankees": "New York Yankees",
-                "athletics": "Oakland Athletics",
+                "athletics": "Athletics",
                 "phillies": "Philadelphia Phillies",
                 "pirates": "Pittsburgh Pirates",
                 "padres": "San Diego Padres",
@@ -165,6 +165,36 @@
             "ui": 1,
             "ui_on_text": "Home",
             "ui_off_text": "Away"
+        },
+        {
+            "key": "field_sgen_season_type",
+            "label": "Season Type",
+            "name": "sgen_season_type",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "The type of season this series belongs to.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "regular-season": "Regular Season",
+                "post-season": "Post-Season",
+                "spring-training": "Spring Training"
+            },
+            "default_value": "regular-season",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": "",
+            "create_options": 0,
+            "save_options": 0
         },
         {
             "key": "field_sgen_generate",

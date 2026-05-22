@@ -56,11 +56,11 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 }
 
 if ( is_admin() ) {
-	echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>Season Snapshot appears on <strong>season-type</strong> archives with <code>?season_year=</code>.</p></div>';
+	echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>Season Snapshot appears on <strong>season-type</strong> and <strong>team</strong> archives with <code>?season_year=</code>.</p></div>';
 	return;
 }
 
-if ( ! is_tax( 'season-type' ) ) {
+if ( ! is_tax( 'season-type' ) && ! is_tax( 'team' ) ) {
 	return;
 }
 

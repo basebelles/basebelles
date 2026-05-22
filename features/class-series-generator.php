@@ -68,13 +68,24 @@ class Basebelles_Series_Generator {
 		$game_count  = (int) ( get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) : 3 );
 		$game_number = (int) ( get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) : 1 );
 		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
+		$season_type = get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) ? get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) : 'regular-season';
+
+		// Look up the team taxonomy term slug from list.json.
+		$team_term = '';
+		$list_file = plugin_dir_path( __DIR__ ) . 'team-info/list.json';
+		if ( file_exists( $list_file ) ) {
+			$team_list = json_decode( file_get_contents( $list_file ), true );
+			if ( ! empty( $team_list[ $opponent ]['taxonomy_term'] ) ) {
+				$team_term = $team_list[ $opponent ]['taxonomy_term'];
+			}
+		}
 
 		if ( empty( $date ) || false === strtotime( $date ) ) {
 			$this->set_notice( 'error', 'Please set a valid series start date before generating.' );
 			return;
 		}
 
-		// Fall back to start date if end date is blank or unparseable.
+		// Fall back to start date if end date is blank or un-parseable.
 		if ( empty( $end_date ) || false === strtotime( $end_date ) ) {
 			$end_date = $date;
 		}
@@ -87,19 +98,22 @@ class Basebelles_Series_Generator {
 
 		$post_date = wp_date( 'F j, Y', strtotime( $date ) );
 
-		$post_content  = $this->paragraph_block( 'Intro' ) . "\n\n";
-		$post_content .= $this->heading_block( 'Series Results' ) . "\n\n";
-		$post_content .= $this->series_block( $opponent, $date, $end_date, $is_home ) . "\n\n";
-		$post_content .= $this->paragraph_block( 'Series Notes' ) . "\n\n";
-		$post_content .= $this->heading_block( 'Game Results' ) . "\n\n";
+		$post_content = $this->pattern_content(
+			'game-series-header',
+			array(
+				'"field_69c9b65a0d4e8":"0"'        => '"field_69c9b65a0d4e8":"' . $is_home . '"',
+				'"field_69caebbe128f2":"20260520"' => '"field_69caebbe128f2":"' . $date . '"',
+				'"field_69caebf0128f3":"20260520"' => '"field_69caebf0128f3":"' . $end_date . '"',
+				'"field_69c9b6120d4e7":"tbd"'      => '"field_69c9b6120d4e7":"' . $opponent . '"',
+			)
+		) . "\n\n";
 
 		for ( $i = 1; $i <= $game_count; $i++ ) {
 			$season_game   = $game_number + ( $i - 1 );
-			$post_content .= $this->game_section( $i, $opponent, $is_home, $opponent_display_name, $season_game );
+			$post_content .= $this->game_section( $i, $opponent, $is_home, $season_game );
 		}
 
-		$post_content .= $this->separator_block() . "\n\n";
-		$post_content .= $this->paragraph_block( 'Who are we playing next?' );
+		$post_content .= $this->pattern_content( 'game-series-end' );
 
 		$new_post_id = wp_insert_post(
 			array(
@@ -107,10 +121,18 @@ class Basebelles_Series_Generator {
 				'post_content' => $post_content,
 				'post_status'  => 'draft',
 				'post_type'    => 'post',
+				'tags_input'   => array( sprintf( '%d game series', $game_count ) ),
 			)
 		);
 
 		if ( ! is_wp_error( $new_post_id ) ) {
+			if ( $team_term ) {
+				wp_set_object_terms( $new_post_id, $team_term, 'team' );
+			}
+			wp_set_object_terms( $new_post_id, $season_type, 'season-type' );
+			wp_set_object_terms( $new_post_id, $is_home === '1' ? 'home' : 'away', 'venue-type' );
+			wp_set_object_terms( $new_post_id, 'games', 'category' );
+
 			$this->set_notice(
 				'success',
 				sprintf(
@@ -155,96 +177,51 @@ class Basebelles_Series_Generator {
 		set_transient( self::NOTICE_TRANSIENT . '_' . get_current_user_id(), array( $type, $message ), 60 );
 	}
 
-	// --- Block markup builders ---------------------------------------------------
-
-	protected function paragraph_block( $text ) {
-		return "<!-- wp:paragraph -->\n<p>" . esc_html( $text ) . "</p>\n<!-- /wp:paragraph -->";
-	}
-
-	protected function heading_block( $text, $level = 2 ) {
-		$tag  = 'h' . $level;
-		$attr = 2 === $level ? '' : ' {"level":' . $level . '}';
-		return "<!-- wp:heading{$attr} -->\n<{$tag} class=\"wp-block-heading\">" . esc_html( $text ) . "</{$tag}>\n<!-- /wp:heading -->";
-	}
-
-	protected function series_block( $opponent, $date, $end_date, $is_home ) {
-		$data = array(
-			'name' => 'acf/basebelles-series',
-			'data' => array(
-				'field_69c9b65a0d4e8' => $is_home,
-				'field_69caeaeb128f1' => array(
-					'field_69caebbe128f2' => $date,
-					'field_69caebf0128f3' => $end_date,
-				),
-				'field_69c9b6120d4e7' => $opponent,
-				'field_69c9b67b0d4e9' => '',
-				'field_69c9b6880d4ea' => '',
-			),
-			'mode' => 'preview',
-		);
-		return '<!-- wp:acf/basebelles-series ' . wp_json_encode( $data ) . ' /-->';
-	}
-
-	protected function results_block( $opponent, $is_home ) {
-		$blank_innings = array_fill(
-			0,
-			9,
-			array(
-				'field_69c70d3fcd56c' => '',
-				'field_69c70d4acd56d' => '',
-			)
-		);
-		$data          = array(
-			'name' => 'acf/basebelles-results',
-			'data' => array(
-				'field_69c707ee1ddb3' => array( 'field_69c7084e1ddb6' => '1 - 0' ),
-				'field_69c708d15fdff' => array(
-					'field_69c708d15fe00' => $opponent,
-					'field_69c708d15fe04' => '0 - 1',
-				),
-				'field_69c7087fc99cf' => array(
-					'field_69c706cbee27f' => $is_home,
-					'field_69c706bdee27e' => '9',
-					'field_69c707c05892a' => array(
-						'field_69c707c05892b' => '0',
-						'field_69c707c05892c' => '0',
-					),
-					'field_69c707cedc16b' => array(
-						'field_69c707cedc16c' => '0',
-						'field_69c707cedc16d' => '0',
-					),
-					'field_69c70d26cd56b' => $blank_innings,
-				),
-			),
-			'mode' => 'preview',
-		);
-		return '<!-- wp:acf/basebelles-results ' . wp_json_encode( $data ) . ' /-->';
-	}
-
-	protected function streamable_block() {
-		$data = array(
-			'name' => 'acf/basebelles-streamable',
-			'data' => array( 'field_69d69d4716ab7' => '' ),
-			'mode' => 'preview',
-		);
-		return '<!-- wp:acf/basebelles-streamable ' . wp_json_encode( $data ) . ' /-->';
-	}
-
-	protected function game_section( $num, $opponent, $is_home, $opponent_display_name, $season_game = 0 ) {
-		$label        = strtoupper( $opponent_display_name );
+	/**
+	 * Build one game section from the pattern file, substituting dynamic values.
+	 *
+	 * @param int    $num         Game number in the series (1, 2, 3…).
+	 * @param string $opponent    Opponent team slug.
+	 * @param string $is_home     '1' for home, '0' for away.
+	 * @param int    $season_game Season game number for the heading (0 → '??').
+	 * @return string
+	 */
+	protected function game_section( $num, $opponent, $is_home, $season_game = 0 ) {
 		$game_display = $season_game > 0 ? $season_game : '??';
 
-		$out  = $this->heading_block( "Game {$num} ({$game_display}) - WONLOST", 3 ) . "\n\n";
-		$out .= $this->results_block( $opponent, $is_home ) . "\n\n";
-		$out .= "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>TBD</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n";
-		$out .= $this->streamable_block() . "\n\n";
-		return $out;
+		return $this->pattern_content(
+			'game-series-one-game',
+			array(
+				'Game 1 (00) - WONLOST'            => "Game {$num} ({$game_display}) - WONLOST",
+				'"field_69c708d15fe00": "tbd"'      => '"field_69c708d15fe00": "' . $opponent . '"',
+				'"field_69c706cbee27f": "1"'        => '"field_69c706cbee27f": "' . $is_home . '"',
+			)
+		) . "\n\n";
 	}
 
-	protected function separator_block() {
-		return '<!-- wp:separator {"backgroundColor":"custom-wine","className":"is-style-dots"} -->' . "\n" .
-			'<hr class="wp-block-separator has-text-color has-custom-wine-color has-alpha-channel-opacity has-custom-wine-background-color has-background is-style-dots"/>' . "\n" .
-			'<!-- /wp:separator -->';
+	/**
+	 * Load a pattern file, optionally replacing placeholder values, and return
+	 * the trimmed content.
+	 *
+	 * @param string               $slug         Pattern slug (filename without .php).
+	 * @param array<string,string> $replacements Search => replacement pairs applied
+	 *                                           with str_replace after the file loads.
+	 * @return string
+	 */
+	protected function pattern_content( $slug, $replacements = array() ) {
+		$file = plugin_dir_path( __DIR__ ) . 'patterns/' . $slug . '.php';
+		if ( ! file_exists( $file ) ) {
+			return '';
+		}
+		ob_start();
+		include $file;
+		$content = trim( ob_get_clean() );
+
+		if ( ! empty( $replacements ) ) {
+			$content = str_replace( array_keys( $replacements ), array_values( $replacements ), $content );
+		}
+
+		return $content;
 	}
 }
 
