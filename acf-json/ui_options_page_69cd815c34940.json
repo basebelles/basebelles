@@ -13,8 +13,8 @@
     "redirect": 0,
     "description": "Global settings used by multiple aspects of the site.",
     "menu_icon": {
-        "type": "dashicons",
-        "value": "dashicons-smiley"
+        "type": "url",
+        "value": "\/wp-content\/plugins\/basebelles\/baseball-bat-ball-solid-full.svg"
     },
     "update_button": "Update",
     "updated_message": "Options Updated",
@@ -22,5 +22,5 @@
     "data_storage": "options",
     "post_id": "",
     "autoload": 0,
-    "modified": 1744754400
+    "modified": 1779465997
 }

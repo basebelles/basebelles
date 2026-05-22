@@ -11,12 +11,13 @@ if ( ! function_exists( 'get_field' ) ) {
 }
 
 // ACF Group: Series Results (group_69c9b611cc123)
-$home_game    = (bool) get_field( 'home_game' ) ?? true;
-$guards_won   = (int) get_field( 'guards_won' ) ?? 0;
+$home_game    = (bool) ( get_field( 'home_game' ) ?? true );
+$guards_won   = (int) ( get_field( 'guards_won' ) ?? 0 );
 $opponent     = get_field( 'opponent' );
-$opponent_won = (int) get_field( 'oppo_won' ) ?? 0;
-$first_game   = get_field( 'game_dates' )['first_game'] ?? '';
-$last_game    = get_field( 'game_dates' )['last_game'] ?? '';
+$opponent_won = (int) ( get_field( 'oppo_won' ) ?? 0 );
+$game_dates   = get_field( 'game_dates' ) ?? array();
+$first_game   = $game_dates['first_game'] ?? '';
+$last_game    = $game_dates['last_game'] ?? '';
 
 // If data is missing and not in admin, just return.
 if ( ! is_admin() && ! $opponent ) {
@@ -30,8 +31,16 @@ $teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_c
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
-$opponent_slug = $opponent;
-$opponent_info = $teams_data[ $opponent ] ?? array();
+$opponent_slug = $opponent ?? 'tbd';
+
+// If the opponent field contains a colon, split it to get the
+// slug (e.g. "mariners: Seattle Mariners" -> "mariners")
+if ( str_contains( $opponent_slug, ':' ) ) {
+	$parts         = explode( ':', $opponent_slug );
+	$opponent_slug = trim( $parts[0] );
+}
+
+$opponent_info = $teams_data[ $opponent_slug ] ?? array();
 
 // Determine Home/Away objects
 if ( $home_game ) {

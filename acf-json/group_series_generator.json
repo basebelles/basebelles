@@ -1,0 +1,213 @@
+{
+    "key": "group_series_generator",
+    "title": "Series Generator",
+    "fields": [
+        {
+            "key": "field_sgen_opponent",
+            "label": "Opponent",
+            "name": "sgen_opponent",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "The team the Guardians are playing this series.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "tbd": "To Be Determined",
+                "d-backs": "Arizona Diamondbacks",
+                "braves": "Atlanta Braves",
+                "orioles": "Baltimore Orioles",
+                "red-sox": "Boston Red Sox",
+                "cubs": "Chicago Cubs",
+                "white-sox": "Chicago White Sox",
+                "reds": "Cincinnati Reds",
+                "rockies": "Colorado Rockies",
+                "tigers": "Detroit Tigers",
+                "astros": "Houston Astros",
+                "royals": "Kansas City Royals",
+                "angels": "Los Angeles Angels",
+                "dodgers": "Los Angeles Dodgers",
+                "marlins": "Miami Marlins",
+                "brewers": "Milwaukee Brewers",
+                "twins": "Minnesota Twins",
+                "mets": "New York Mets",
+                "yankees": "New York Yankees",
+                "athletics": "Oakland Athletics",
+                "phillies": "Philadelphia Phillies",
+                "pirates": "Pittsburgh Pirates",
+                "padres": "San Diego Padres",
+                "giants": "San Francisco Giants",
+                "mariners": "Seattle Mariners",
+                "cardinals": "St. Louis Cardinals",
+                "rays": "Tampa Bay Rays",
+                "rangers": "Texas Rangers",
+                "blue-jays": "Toronto Blue Jays",
+                "nationals": "Washington Nationals"
+            },
+            "default_value": "tbd",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": "",
+            "create_options": 0,
+            "save_options": 0
+        },
+        {
+            "key": "field_sgen_date",
+            "label": "Series Start Date",
+            "name": "sgen_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "The date the first game of this series is played.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "Ymd",
+            "first_day": 0,
+            "default_to_current_date": 1,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_sgen_end_date",
+            "label": "Series End Date",
+            "name": "sgen_end_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "The date the last game of this series is played. Defaults to the start date for single-game or unfinished series.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "Ymd",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_sgen_game_count",
+            "label": "Games in Series",
+            "name": "sgen_game_count",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "How many games are in this series.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 3,
+            "min": 1,
+            "max": 7,
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_sgen_game_number",
+            "label": "Current Game Number",
+            "name": "sgen_game_number",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Season game number for the first game of this series (e.g. 56). Each subsequent game increments by one.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 1,
+            "max": 162,
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": 1,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_sgen_home_away",
+            "label": "Home Game?",
+            "name": "sgen_home_away",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "Home game (at Guardians Stadium)",
+            "default_value": 1,
+            "allow_in_bindings": 0,
+            "ui": 1,
+            "ui_on_text": "Home",
+            "ui_off_text": "Away"
+        },
+        {
+            "key": "field_sgen_generate",
+            "label": "Generate Draft Post",
+            "name": "sgen_generate",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Check this box and click Save to create a new series draft post. The box resets automatically after the post is generated.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "Create series draft post now",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ui_on_text": "",
+            "ui_off_text": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "series-generator"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Fields for the Series Generator options sub-page.",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1748000000
+}

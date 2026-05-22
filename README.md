@@ -11,8 +11,8 @@ The plugin wires together the block editor, [Advanced Custom Fields (ACF)](https
 | Area              | Role |
 |-------------------|------------|
 | **Blocks**        | Registers a dedicated **Base\*Belles** block category and ships multiple **ACF-powered blocks** (see below). Each block has `block.json`, `render.php`, and block-scoped CSS. |
-| **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `class-api.php`. |
-| **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`class-embeds.php`, `streamable-oembed-helpers.php`). |
+| **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `features/class-api.php`. |
+| **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`features/class-embeds.php`, `helpers/class-streamable-oembed.php`). |
 | **Site behavior** | Loads small feature modules under `features/` (comment moderation hooks, anti-spam, query tweaks for season archives, optional privacy-related HTTP filters, automatic updates policy, etc.). |
 
 **ACF field definitions** (field groups, options screens, taxonomies, and other synced ACF JSON) live in **`acf-json/`** as the version-controlled source. Each file is a single JSON object named **`{key}.json`** (matching the top-level `"key"`). Saving a field group in wp-admin writes back to that folder via **`acf/settings/save_json`**. The plugin registers load/save paths in [`blocks/class-acf-json.php`](blocks/class-acf-json.php) (theme Local JSON paths remain; the plugin directory is appended for loading).
@@ -29,7 +29,7 @@ If your exports include **`acfe_*`** keys from [ACF Extended](https://github.com
 - **Advanced Custom Fields PRO** — blocks use the `acf/` block type and `renderTemplate` in `block.json`; ACF must be active for blocks to register and render correctly.
 - **PHP** compatible with your WordPress install (the codebase follows typical WordPress PHP patterns; `phpcs.xml.dist` is present for coding standards).
 
-Optional but expected in production: object/transient caching as provided by WordPress for API responses (TTLs are defined in `class-api.php`).
+Optional but expected in production: object/transient caching as provided by WordPress for API responses (TTLs are defined in `features/class-api.php`).
 
 ---
 
@@ -56,18 +56,30 @@ Shared front-end styling is coordinated via `basebelles.css` and per-block `bloc
 ```
 basebelles.php          # Plugin bootstrap, hooks, query var (season_year), style registration
 basebelles.css          # Shared plugin styles
-class-api.php           # MLB Stats API client, caching, Guardians-focused helpers
-class-embeds.php        # oEmbed providers, Streamable/MLB handlers, shortcode
-streamable-oembed-helpers.php
+features/
+  class-api.php                 # MLB Stats API client, caching, Guardians-focused helpers
+  class-comment-probation.php   # Comment moderation / anti-spam hooks
+  class-embeds.php              # oEmbed providers, Streamable/MLB handlers, shortcode
+  class-impostercide.php        # Blocks unauthenticated comments posted as registered users
+  class-in-progress.php         # Dashboard widget: unpublished / in-progress posts
+  class-no-tracking.php         # Strips plugin/theme telemetry from outbound HTTP requests
+  class-series-generator.php    # Quick-draft generator for game-series posts (options page UI)
+  class-upgrades.php            # Automatic plugin update policy
+helpers/
+  class-streamable-oembed.php   # Streamable oEmbed provider registration and response handling
 acf-json/               # ACF Local JSON (field groups, options UI, taxonomies, etc.)
 blocks/
+  baseball.svg          # Block category icon
   class-acf-json.php    # acf/settings/load_json + save_json → plugin acf-json/
   class-blocks.php      # register_block_type() for each block; category; CSS enqueue
   */block.json          # Block metadata (ACF render templates)
   */render.php          # Server-side render
   */block.css           # Block styles
-features/               # Optional behavior modules (comments, upgrades, privacy filters, …)
-team-info/              # Team-related static data (e.g. list JSON)
+patterns/
+  game-series.php       # Block pattern: game-series post scaffold
+team-info/
+  list.json             # Static team data
+  logos/                # Per-team logo PNGs (slug-named, e.g. guardians.png)
 ```
 
 ---
@@ -84,7 +96,7 @@ There is no Composer/npm build step in this repository—the plugin is PHP, CSS,
 
 ## Configuration & data
 
-- **Season and API behavior** are driven through ACF/options-style values consumed in `class-api.php` (e.g. season year, season type). Adjust those in WordPress per environment.
+- **Season and API behavior** are driven through ACF/options-style values consumed in `features/class-api.php` (e.g. season year, season type). Adjust those in WordPress per environment.
 - **URLs / taxonomies**: The plugin registers the public query variable `season_year` and uses it with the `season-type` taxonomy archive query so season URLs do not collide with WordPress core’s reserved `year` query var (see `basebelles.php`).
 
 ---

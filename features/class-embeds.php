@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/streamable-oembed-helpers.php';
+require_once dirname( __DIR__, 1 ) . '/helpers/class-streamable-oembed.php';
 
 class Basebelles_Embeds {
 	public function __construct() {
