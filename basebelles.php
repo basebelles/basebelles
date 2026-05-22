@@ -39,6 +39,8 @@ class Basebelles {
 
 		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
+
+		add_action( 'admin_menu', array( $this, 'set_guardians_menu_icon' ), 99 );
 	}
 
 	/**
@@ -153,6 +155,27 @@ class Basebelles {
 
 			if ( $year && is_numeric( $year ) ) {
 				$query->set( 'year', (int) $year );
+			}
+		}
+	}
+
+	/**
+	 * Replace the Guardians Settings menu icon with the custom baseball SVG.
+	 *
+	 * ACFE registers the page via add_menu_page() using a dashicon; we swap in
+	 * a base64 data URI after registration so WordPress's SVG painter can tint
+	 * it correctly for the active admin color scheme.
+	 *
+	 * @return void
+	 */
+	public function set_guardians_menu_icon() {
+		global $menu;
+		$icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIj48cGF0aCBkPSJNNDk2LjEgNjA4QzQ1MS45IDYwOCA0MTYuMSA1NzIuMiA0MTYuMSA1MjhDNDE2LjEgNDgzLjggNDUxLjkgNDQ4IDQ5Ni4xIDQ0OEM1NDAuMyA0NDggNTc2LjEgNDgzLjggNTc2LjEgNTI4QzU3Ni4xIDU3Mi4yIDU0MC4zIDYwOCA0OTYuMSA2MDh6TTUwNC41IDMyQzUxOS42IDMyIDUzNC4yIDM3LjggNTQ1LjIgNDguMkw1OTIuNCA5M0M2MDUgMTA1IDYxMS41IDEyMiA2MDkuOSAxMzkuM0M2MDguNyAxNTIuNiA2MDIuOSAxNjUuMSA1OTMuNCAxNzQuNUwzOTUuMSAzNzNDMzg3LjggMzgwLjMgMzc5LjQgMzg2LjQgMzcwLjEgMzkxTDIzOCA0NTdDMjI4LjggNDYxLjYgMjIwLjMgNDY3LjcgMjEzIDQ3NUwxMjEgNTY3TDEyMi43IDU2OC44QzEzMC40IDU3OC4yIDEyOS44IDU5Mi4xIDEyMSA2MDAuOUMxMTIuMiA2MDkuNyA5OC4zIDYxMC4yIDg4LjkgNjAyLjZMODcuMSA2MDAuOUwzOS4xIDU1Mi45TDM3LjQgNTUxLjFDMjkuNyA1NDEuNyAzMC4zIDUyNy44IDM5LjEgNTE5QzQ3LjkgNTEwLjIgNjEuOCA1MDkuNyA3MS4yIDUxNy4zTDczIDUxOUwxNjUgNDI3QzE3Mi4zIDQxOS43IDE3OC40IDQxMS4zIDE4MyA0MDJMMjQ5LjEgMjY5LjlDMjUzLjcgMjYwLjcgMjU5LjggMjUyLjIgMjY3LjEgMjQ0LjlMNDYyLjggNDkuM0M0NzMuOSAzOC4yIDQ4OC45IDMyIDUwNC41IDMyeiIvPjwvc3ZnPg==';
+
+		foreach ( $menu as $key => $item ) {
+			if ( isset( $item[2] ) && 'guardians-settings' === $item[2] ) {
+				$menu[ $key ][6] = $icon; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				break;
 			}
 		}
 	}
