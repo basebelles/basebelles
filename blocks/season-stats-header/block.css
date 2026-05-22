@@ -85,6 +85,10 @@
 	word-break: break-word;
 }
 
+.season-stats-heading {
+	text-align: center;
+}
+
 /* Mirror Season Header “over” treatment for completed seasons */
 .basebelles-season-stats-header.is-past .season-stats-value {
 	text-decoration: line-through;

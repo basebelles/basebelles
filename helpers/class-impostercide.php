@@ -273,7 +273,7 @@ class HELF_Impostercide {
 	public function impostercide_protect_email( $data ) {
 		global $wpdb, $user_ID, $user_login, $user_email;
 
-		extract( $data ); // phpcs:ignore WordPress.PHP.DontExtract
+		extract( (array) $data ); // phpcs:ignore WordPress.PHP.DontExtract
 
 		if ( 'comment' !== $comment_type ) {
 			// it's not a comment, let it through

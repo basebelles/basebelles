@@ -52,6 +52,8 @@
 <!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}},"elements":{"link":{"color":{"text":"var:preset|color|custom-sandstone-cream"}}}},"textColor":"custom-sandstone-cream","layout":{"type":"flex","flexWrap":"wrap"}} -->
 <div class="wp-block-group alignwide has-custom-sandstone-cream-color has-text-color has-link-color" style="margin-top:var(--wp--preset--spacing--60)"><!-- wp:paragraph {"fontSize":"x-small"} -->
 <p class="has-x-small-font-size">© 2026. Made with ❤️ for ⚾️, powered by <a href="https://twentig.com" target="_blank" rel="noreferrer noopener">Twentig</a> and <a href="https://wordpress.org">WordPress</a>.</p>
+<!-- /wp:paragraph --><!-- wp:paragraph {"fontSize":"x-small"} -->
+<p class="has-x-small-font-size">Live stats and game results are powered by MLB Advanced Media, L.P. and complies with their <a href="http://gdx.mlb.com/components/copyright.txt" target="_blank" rel="noreferrer noopener">copyright terms</a>.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

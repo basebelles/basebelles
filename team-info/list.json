@@ -1,6 +1,7 @@
 {
 	"angels": {
 		"name": "Los Angeles Angels",
+		"taxonomy_term": "anaheim-angels",
 		"short_name": "Angels",
 		"abbreviation": "LAA",
 		"city": "Los Angeles",
@@ -11,6 +12,7 @@
 	},
 	"astros": {
 		"name": "Houston Astros",
+		"taxonomy_term": "houston-astros",
 		"short_name": "Astros",
 		"abbreviation": "HOU",
 		"city": "Houston",
@@ -21,6 +23,7 @@
 	},
 	"athletics": {
 		"name": "Athletics",
+		"taxonomy_term": "athletics",
 		"short_name": "Athletics",
 		"abbreviation": "OAK",
 		"city": "Sacremento",
@@ -31,6 +34,7 @@
 	},
 	"blue-jays": {
 		"name": "Toronto Blue Jays",
+		"taxonomy_term": "toronto-blue-jays",
 		"short_name": "Blue Jays",
 		"abbreviation": "TOR",
 		"city": "Toronto",
@@ -41,6 +45,7 @@
 	},
 	"braves": {
 		"name": "Atlanta Braves",
+		"taxonomy_term": "atlanta-braves",
 		"short_name": "Braves",
 		"abbreviation": "ATL",
 		"city": "Atlanta",
@@ -51,6 +56,7 @@
 	},
 	"brewers": {
 		"name": "Milwaukee Brewers",
+		"taxonomy_term": "milwaukee-brewers",
 		"short_name": "Brewers",
 		"abbreviation": "MIL",
 		"city": "Milwaukee",
@@ -61,6 +67,7 @@
 	},
 	"cardinals": {
 		"name": "St. Louis Cardinals",
+		"taxonomy_term": "st-louis-cardinals",
 		"short_name": "Cardinals",
 		"abbreviation": "STL",
 		"city": "St. Louis",
@@ -71,6 +78,7 @@
 	},
 	"cubs": {
 		"name": "Chicago Cubs",
+		"taxonomy_term": "chicago-cubs",
 		"short_name": "Cubs",
 		"abbreviation": "CHC",
 		"city": "Chicago",
@@ -81,6 +89,7 @@
 	},
 	"d-backs": {
 		"name": "Arizona Diamondbacks",
+		"taxonomy_term": "arizona-diamondbacks",
 		"short_name": "Diamondbacks",
 		"abbreviation": "ARI",
 		"city": "Phoenix",
@@ -91,6 +100,7 @@
 	},
 	"dodgers": {
 		"name": "Los Angeles Dodgers",
+		"taxonomy_term": "los-angeles-dodgers",
 		"short_name": "Dodgers",
 		"abbreviation": "LAD",
 		"city": "Los Angeles",
@@ -101,6 +111,7 @@
 	},
 	"giants": {
 		"name": "San Francisco Giants",
+		"taxonomy_term": "san-francisco-giants",
 		"short_name": "Giants",
 		"abbreviation": "SFG",
 		"city": "San Francisco",
@@ -111,6 +122,7 @@
 	},
 	"guardians": {
 		"name": "Cleveland Guardians",
+		"taxonomy_term": "cleveland-guardians",
 		"short_name": "Guardians",
 		"abbreviation": "CLE",
 		"city": "Cleveland",
@@ -121,6 +133,7 @@
 	},
 	"mariners": {
 		"name": "Seattle Mariners",
+		"taxonomy_term": "seattle-mariners",
 		"short_name": "Mariners",
 		"abbreviation": "SEA",
 		"city": "Seattle",
@@ -131,6 +144,7 @@
 	},
 	"marlins": {
 		"name": "Miami Marlins",
+		"taxonomy_term": "miami-marlins",
 		"short_name": "Marlins",
 		"abbreviation": "MIA",
 		"city": "Miami",
@@ -141,6 +155,7 @@
 	},
 	"mets": {
 		"name": "New York Mets",
+		"taxonomy_term": "new-york-mets",
 		"short_name": "Mets",
 		"abbreviation": "NYM",
 		"city": "New York",
@@ -151,6 +166,7 @@
 	},
 	"nationals": {
 		"name": "Washington Nationals",
+		"taxonomy_term": "washington-nationals",
 		"short_name": "Nationals",
 		"abbreviation": "WSN",
 		"city": "Washington",
@@ -161,6 +177,7 @@
 	},
 	"orioles": {
 		"name": "Baltimore Orioles",
+		"taxonomy_term": "baltimore-orioles",
 		"short_name": "Orioles",
 		"abbreviation": "BAL",
 		"city": "Baltimore",
@@ -171,6 +188,7 @@
 	},
 	"padres": {
 		"name": "San Diego Padres",
+		"taxonomy_term": "san-diego-padres",
 		"short_name": "Padres",
 		"abbreviation": "SD",
 		"city": "San Diego",
@@ -181,6 +199,7 @@
 	},
 	"phillies": {
 		"name": "Philadelphia Phillies",
+		"taxonomy_term": "philadelphia-phillies",
 		"short_name": "Phillies",
 		"abbreviation": "PHI",
 		"city": "Philadelphia",
@@ -191,6 +210,7 @@
 	},
 	"pirates": {
 		"name": "Pittsburgh Pirates",
+		"taxonomy_term": "pittsburgh-pirates",
 		"short_name": "Pirates",
 		"abbreviation": "PIT",
 		"city": "Pittsburgh",
@@ -201,6 +221,7 @@
 	},
 	"rangers": {
 		"name": "Texas Rangers",
+		"taxonomy_term": "texas-rangers",
 		"short_name": "Rangers",
 		"abbreviation": "TEX",
 		"city": "Arlington",
@@ -211,6 +232,7 @@
 	},
 	"rays": {
 		"name": "Tampa Bay Rays",
+		"taxonomy_term": "tampa-bay-rays",
 		"short_name": "Rays",
 		"abbreviation": "TB",
 		"city": "Tampa",
@@ -221,6 +243,7 @@
 	},
 	"red-sox": {
 		"name": "Boston Red Sox",
+		"taxonomy_term": "boston-red-sox",
 		"short_name": "Red Sox",
 		"abbreviation": "BOS",
 		"city": "Boston",
@@ -231,6 +254,7 @@
 	},
 	"reds": {
 		"name": "Cincinnati Reds",
+		"taxonomy_term": "cincinnati-reds",
 		"short_name": "Reds",
 		"abbreviation": "CIN",
 		"city": "Cincinnati",
@@ -241,6 +265,7 @@
 	},
 	"rockies": {
 		"name": "Colorado Rockies",
+		"taxonomy_term": "colorado-rockies",
 		"short_name": "Rockies",
 		"abbreviation": "COL",
 		"city": "Denver",
@@ -251,6 +276,7 @@
 	},
 	"royals": {
 		"name": "Kansas City Royals",
+		"taxonomy_term": "kansas-city-royals",
 		"short_name": "Royals",
 		"abbreviation": "KC",
 		"city": "Kansas City",
@@ -261,6 +287,7 @@
 	},
 	"tigers": {
 		"name": "Detroit Tigers",
+		"taxonomy_term": "detroit-tigers",
 		"short_name": "Tigers",
 		"abbreviation": "DET",
 		"city": "Detroit",
@@ -271,6 +298,7 @@
 	},
 	"twins": {
 		"name": "Minnesota Twins",
+		"taxonomy_term": "minnesota-twins",
 		"short_name": "Twins",
 		"abbreviation": "MIN",
 		"city": "Minneapolis",
@@ -281,6 +309,7 @@
 	},
 	"white-sox": {
 		"name": "Chicago White Sox",
+		"taxonomy_term": "chicago-white-sox",
 		"short_name": "White Sox",
 		"abbreviation": "CHW",
 		"city": "Chicago",
@@ -291,6 +320,7 @@
 	},
 	"yankees": {
 		"name": "New York Yankees",
+		"taxonomy_term": "new-york-yankees",
 		"short_name": "Yankees",
 		"abbreviation": "NYY",
 		"city": "New York",

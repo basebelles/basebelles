@@ -76,21 +76,22 @@ class Basebelles_API {
 	}
 
 	/**
-	 * Fetch and normalize Guardians standings data.
+	 * Fetch and normalize standings data.
 	 *
 	 * @param string   $season_type  The season type.
 	 * @param int|null $season_year  Optional season year; defaults to ACF/options season.
+	 * @param int      $team_id      Optional team ID for validation; defaults to Guardians.
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_guardians_standings( $season_type = 'regularSeason', $season_year = null ) {
+	public function fetch_standings( $season_type = 'regularSeason', $season_year = null, $team_id = self::GUARDIANS_TEAM_ID ) {
 		$settings = $this->get_season_settings( $season_type );
 		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
 		if ( $year < 1900 ) {
 			$year = (int) gmdate( 'Y' );
 		}
 
-		return $this->fetch_guardians_standings_normalized( $year, $settings['season_type'], null, self::API_CACHE_TTL );
+		return $this->fetch_standings_normalized( $year, $settings['season_type'], $team_id, null, self::API_CACHE_TTL );
 	}
 
 	/**
@@ -98,9 +99,10 @@ class Basebelles_API {
 	 *
 	 * @param int    $year        Season year (e.g. 2024).
 	 * @param string $season_type springTraining|regularSeason|wildCard|postseason.
+	 * @param int    $team_id     Optional team ID for validation; defaults to Guardians.
 	 * @return array|WP_Error Normalized stats array, or error if unavailable.
 	 */
-	public function get_season_archive_stats( $year, $season_type ) {
+	public function get_season_archive_stats( $year, $season_type, $team_id = self::GUARDIANS_TEAM_ID ) {
 		$year = (int) $year;
 		if ( $year < 1900 ) {
 			return new WP_Error( 'basebelles_api_bad_year', 'Invalid season year.' );
@@ -123,13 +125,13 @@ class Basebelles_API {
 
 		$date = null;
 		if ( 'springTraining' === $season_type ) {
-			$date = $this->get_spring_training_freeze_date( $year );
+			$date = $this->get_spring_training_freeze_date( $year, $team_id );
 		}
 
 		if ( 'postseason' === $season_type ) {
-			$full = $this->fetch_guardians_standings_normalized( $year, 'postseason', null, self::API_ARCHIVE_CACHE_TTL );
+			$full = $this->fetch_standings_normalized( $year, 'postseason', $team_id, null, self::API_ARCHIVE_CACHE_TTL );
 			if ( is_wp_error( $full ) || ( is_array( $full ) && ! empty( $full['_empty_records'] ) ) ) {
-				$fallback = $this->get_postseason_record_from_schedule( $year );
+				$fallback = $this->get_postseason_record_from_schedule( $year, $team_id );
 				if ( is_wp_error( $fallback ) ) {
 					return is_wp_error( $full ) ? $full : $fallback;
 				}
@@ -139,7 +141,8 @@ class Basebelles_API {
 			return $this->map_full_standings_to_archive_stats( $full, $year, 'postseason' );
 		}
 
-		$full = $this->fetch_guardians_standings_normalized( $year, $season_type, $date, self::API_ARCHIVE_CACHE_TTL );
+		$full = $this->fetch_standings_normalized( $year, $season_type, $team_id, $date, self::API_ARCHIVE_CACHE_TTL );
+
 		if ( is_wp_error( $full ) ) {
 			return $full;
 		}
@@ -152,26 +155,28 @@ class Basebelles_API {
 	}
 
 	/**
-	 * Load standings from the API and return the same shape as the legacy get_guardians_standings array.
+	 * Load standings from the API and return the same shape as the legacy fetch_standings array.
 	 *
 	 * @param int         $year         Season year.
 	 * @param string      $season_type  Standings type.
+	 * @param int         $team_id      Optional team ID for validation; defaults to Guardians.
 	 * @param string|null $date         Optional YYYY-MM-DD snapshot (Spring Training).
 	 * @param int         $cache_ttl    Transient TTL in seconds.
 	 * @return array|WP_Error
 	 */
-	private function fetch_guardians_standings_normalized( $year, $season_type, $date = null, $cache_ttl = self::API_CACHE_TTL ) {
+	private function fetch_standings_normalized( $year, $season_type, $team_id = self::GUARDIANS_TEAM_ID, $date = null, $cache_ttl = self::API_CACHE_TTL ) {
 		$allowed_types = array(
 			'springTraining',
 			'regularSeason',
 			'wildCard',
 			'postseason',
 		);
+
 		if ( ! in_array( $season_type, $allowed_types, true ) ) {
 			$season_type = 'regularSeason';
 		}
 
-		$league_id = ( 'springTraining' === $season_type ) ? self::CL_LEAGUE_ID : self::AL_LEAGUE_ID;
+		$league_id = $this->get_league_id_by_season_type( $season_type, $team_id );
 		$query     = array(
 			'leagueId'       => $league_id,
 			'season'         => (int) $year,
@@ -195,10 +200,10 @@ class Basebelles_API {
 			);
 		}
 
-		$team_record = $this->find_team_record( $data['records'], self::GUARDIANS_TEAM_ID );
+		$team_record = $this->find_team_record( $data['records'], $team_id );
 
 		if ( empty( $team_record ) ) {
-			return new WP_Error( 'basebelles_api_team_missing', 'Could not find the Guardians in the standings response.' );
+			return new WP_Error( 'basebelles_api_team_missing', 'Could not find the specified team in the standings response.' );
 		}
 
 		$division_name = $team_record['division']['nameShort'] ?? 'AL Central';
@@ -229,18 +234,52 @@ class Basebelles_API {
 	}
 
 	/**
+	 * Get the league ID to query for a given season type (e.g. AL for regular season, CL for spring training).
+	 *
+	 * @param string $season_type The season type.
+	 * @param int    $team_id    Optional team ID for validation; defaults to Guardians.
+	 * @return int League ID to use in API queries.
+	 */
+	private function get_league_id_by_season_type( $season_type, $team_id = self::GUARDIANS_TEAM_ID ) {
+		// If it's the Guards, it's easier.
+		if ( self::GUARDIANS_TEAM_ID === $team_id ) {
+			if ( 'springTraining' === $season_type ) {
+				return self::CL_LEAGUE_ID;
+			}
+
+			return self::AL_LEAGUE_ID;
+		}
+
+		// Else we use the team ID.
+		// https://statsapi.mlb.com/api/v1/teams/$team_id
+		$team_data = $this->request_json( 'teams/' . $team_id, array(), self::API_CACHE_TTL );
+
+		if ( is_wp_error( $team_data ) || empty( $team_data['teams'] ) || ! is_array( $team_data['teams'] ) ) {
+			return self::AL_LEAGUE_ID;
+		}
+
+		// Different IDs for spring training vs regular season, so we have to look it up from the team data.
+		switch ( $season_type ) {
+			case 'springTraining':
+				return (int) ( $team_data['teams'][0]['springLeague']['id'] ?? self::CL_LEAGUE_ID );
+			default:
+				return (int) ( $team_data['teams'][0]['league']['id'] ?? self::AL_LEAGUE_ID );
+		}
+	}
+
+	/**
 	 * Last calendar day of Guardians spring training for a season (for standings snapshot).
 	 *
 	 * @param int $year Season year.
 	 * @return string YYYY-MM-DD.
 	 */
-	private function get_spring_training_freeze_date( $year ) {
+	private function get_spring_training_freeze_date( $year, $team_id = self::GUARDIANS_TEAM_ID ) {
 		$year = (int) $year;
 		$data = $this->request_json(
 			'schedule',
 			array(
 				'sportId'  => 1,
-				'teamId'   => self::GUARDIANS_TEAM_ID,
+				'teamId'   => $team_id,
 				'season'   => $year,
 				'gameType' => 'S',
 			),
@@ -282,12 +321,12 @@ class Basebelles_API {
 	 * @param int $year Season year.
 	 * @return array|WP_Error team_record-shaped array plus division_name, or error.
 	 */
-	private function get_postseason_record_from_schedule( $year ) {
+	private function get_postseason_record_from_schedule( $year, $team_id = self::GUARDIANS_TEAM_ID ) {
 		$data = $this->request_json(
 			'schedule',
 			array(
 				'sportId'   => 1,
-				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'teamId'    => $team_id,
 				'season'    => (int) $year,
 				'startDate' => $year . '-04-01',
 				'endDate'   => $year . '-11-30',
@@ -368,12 +407,13 @@ class Basebelles_API {
 	}
 
 	/**
-	 * @param array  $full Full normalized standings from fetch_guardians_standings_normalized.
+	 * @param array  $full Full normalized standings from fetch_standings_normalized.
 	 * @param int    $year Season year.
 	 * @param string $season_type API season type.
 	 * @return array
 	 */
 	private function map_full_standings_to_archive_stats( $full, $year, $season_type ) {
+
 		return $this->map_team_record_to_archive_stats(
 			$full,
 			$year,
@@ -1018,6 +1058,33 @@ class Basebelles_API {
 			'era'    => (string) ( $split['era'] ?? '--' ),
 			'url'    => 'https://www.mlb.com/player/' . $player_id,
 		);
+	}
+
+	/**
+	 * Return team metadata for a given list.json key (e.g. 'yankees').
+	 *
+	 * @param string $key The team key as stored in list.json.
+	 * @return array Team data array, or empty array if not found.
+	 */
+	public function get_team( $key ) {
+		$teams = $this->get_team_info_list();
+		return $teams[ $key ] ?? array();
+	}
+
+	/**
+	 * Return team metadata by matching the taxonomy_term slug (e.g. 'new-york-yankees').
+	 *
+	 * @param string $taxonomy_slug The term slug used in the team taxonomy.
+	 * @return array Team data array (with 'slug' key added), or empty array if not found.
+	 */
+	public function get_team_by_taxonomy_slug( $taxonomy_slug ) {
+		foreach ( $this->get_team_info_list() as $key => $team ) {
+			if ( ( $team['taxonomy_term'] ?? '' ) === $taxonomy_slug ) {
+				$team['slug'] = $key;
+				return $team;
+			}
+		}
+		return array();
 	}
 
 	/**

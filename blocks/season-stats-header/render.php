@@ -9,15 +9,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// If there's no API, we can't do anything, so show a placeholder in the editor and bail.
+if ( ! class_exists( 'Basebelles_API' ) ) {
+	if ( is_admin() ) {
+		echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>API unavailable.</p></div>';
+	}
+	return;
+}
+
+// This block only makes sense on season-type or team archives, so if we're in the editor, show a placeholder and bail.
+if ( is_admin() ) {
+	echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>Season Snapshot appears on <strong>season-type</strong> and <strong>team</strong> archives with <code>?season_year=</code>.</p></div>';
+	return;
+}
+
+// This block only makes sense on season-type or team archives, so if we're on the frontend and not on one of those archive types, bail.
+if ( ! is_tax( 'season-type' ) && ! is_tax( 'team' ) ) {
+	return;
+}
+
+// Since block render templates can be executed multiple times on a single page (e.g., when multiple instances of the block are present or during certain editor operations), we have to check if the function already exists before declaring it to avoid fatal errors. This is a common practice in WordPress development to ensure compatibility and prevent issues when code is loaded multiple times.
 if ( ! function_exists( 'basebelles_season_snapshot_context_note' ) ) {
 	/**
 	 * Standings-derived contextual line by season segment.
 	 *
 	 * @param array  $stats    Archive stats from API.
-	 * @param string $api_type API season type.
 	 * @return string
 	 */
-	function basebelles_season_snapshot_context_note( $stats, $api_type ) {
+	function basebelles_season_snapshot_context_note( $stats ) {
 		$l10 = (string) ( $stats['last_ten'] ?? null );
 		$stk = (string) ( $stats['streak'] ?? null );
 		$gb  = (string) ( $stats['games_back'] ?? null );
@@ -48,46 +67,59 @@ if ( ! function_exists( 'basebelles_season_snapshot_context_note' ) ) {
 	}
 }
 
-if ( ! class_exists( 'Basebelles_API' ) ) {
-	if ( is_admin() ) {
-		echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>API unavailable.</p></div>';
-	}
-	return;
-}
+// Defaults
+$team_id = Basebelles_API::GUARDIANS_TEAM_ID;
 
-if ( is_admin() ) {
-	echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--placeholder"><p>Season Snapshot appears on <strong>season-type</strong> archives with <code>?season_year=</code>.</p></div>';
-	return;
-}
-
-if ( ! is_tax( 'season-type' ) ) {
-	return;
-}
-
-// Get the current year from ACF Options
+// Get the current year from ACF Options and default to current calendar year if not set.
 $season_settings = get_field( 'season_settings', 'option' ) ?? array();
 $current_season  = (int) ( $season_settings['current_season'] ?? (int) gmdate( 'Y' ) );
+$season_year     = $current_season;
 
 $queried_season_term = get_queried_object();
 if ( ! $queried_season_term || empty( $queried_season_term->slug ) ) {
 	return;
 }
 
+// Get the expected season type from ACF Options.
 $slug_to_type = array(
 	'spring-training' => 'springTraining',
 	'regular-season'  => 'regularSeason',
 	'post-season'     => 'postseason',
 );
+$season_type  = $season_settings['current_type'] ?? 'regularSeason';
 
-$api_type = $slug_to_type[ $queried_season_term->slug ] ?? 'regularSeason';
+// Read the season_year query var for both archive types.
+$season_year_qv = (int) get_query_var( 'season_year' );
+if ( $season_year_qv >= 1900 ) {
+	$season_year = $season_year_qv;
+}
 
-$season_year = (int) get_query_var( 'season_year' );
+// On a season-type archive, also override the season type from the term slug.
+if ( is_tax( 'season-type' ) ) {
+	$season_type = $slug_to_type[ $queried_season_term->slug ] ?? 'regularSeason';
+}
+
+// If we somehow ended up pre 1900, default to the current year to avoid bad API calls.
 if ( $season_year < 1900 ) {
 	$season_year = (int) gmdate( 'Y' );
 }
 
+// If we're on a team archive, look up the MLB team ID via the API class.
+if ( is_tax( 'team' ) ) {
+	$team_data = Basebelles_API::get_instance()->get_team_by_taxonomy_slug( $queried_season_term->slug );
+	$team_id   = (int) ( $team_data['mlb_team_id'] ?? 0 );
+
+	if ( ! $team_id ) {
+		if ( is_admin() ) {
+			echo '<div class="basebelles-season-stats-header basebelles-season-stats-header--error" role="alert"><p>Team not found.</p></div>';
+		}
+		return;
+	}
+}
+
+// Call the API
 $api     = Basebelles_API::get_instance();
-$stats   = $api->get_season_archive_stats( $season_year, $api_type );
+$stats   = $api->get_season_archive_stats( $season_year, $season_type, $team_id );
 $is_past = $season_year < (int) wp_date( 'Y' );
 
 if ( is_wp_error( $stats ) ) {
@@ -106,13 +138,25 @@ if ( is_wp_error( $stats ) ) {
 	return;
 }
 
-$record_label = sprintf( '%d – %d', (int) ( $stats['wins'] ?? 0 ), (int) ( $stats['losses'] ?? 0 ) );
-$context_note = basebelles_season_snapshot_context_note( $stats, $api_type );
+$record_label     = sprintf( '%d – %d', (int) ( $stats['wins'] ?? 0 ), (int) ( $stats['losses'] ?? 0 ) );
+$context_note     = basebelles_season_snapshot_context_note( $stats );
+$snapshot_heading = sprintf( '%d Standings', $season_year );
+
+// For teams we show the season type of "now" since the context is the team, not the season type.
+if ( is_tax( 'team' ) ) {
+	$season_type_labels = array(
+		'springTraining' => 'Spring Training',
+		'regularSeason'  => 'Regular Season',
+		'postseason'     => 'Post-Season',
+	);
+	$season_type_label  = $season_type_labels[ $season_type ] ?? 'Regular Season';
+	$snapshot_heading   = sprintf( 'Current %d %s Standing', $season_year, $season_type_label );
+}
 
 $class_season_type = 'basebelles-season-stats-header-regular';
-if ( 'springTraining' === $api_type ) {
+if ( 'springTraining' === $season_type ) {
 	$class_season_type = 'basebelles-season-stats-header-spring';
-} elseif ( 'postseason' === $api_type ) {
+} elseif ( 'postseason' === $season_type ) {
 	$class_season_type = 'basebelles-season-stats-header-postseason';
 }
 
@@ -128,8 +172,9 @@ if ( $is_past ) {
 }
 
 printf(
-	'<div class="%1$s"><div class="season-stats-inner"><div class="season-stats-ghost" aria-hidden="true"></div><div class="season-stats-grid">',
-	esc_attr( implode( ' ', $classes ) )
+	'<div class="%1$s"><div class="season-stats-inner"><div class="season-stats-ghost" aria-hidden="true"></div><div class="season-stats-heading"><h4>%2$s</h4></div><div class="season-stats-grid">',
+	esc_attr( implode( ' ', $classes ) ),
+	esc_html( $snapshot_heading )
 );
 ?>
 	<div class="season-stats-cell season-stats-record">

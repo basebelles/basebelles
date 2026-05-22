@@ -29,7 +29,7 @@ if ( ! is_numeric( $season_year ) ) {
 
 // Get the standings from the API.
 $api       = Basebelles_API::get_instance();
-$standings = $api->get_guardians_standings( (string) $season_type, (int) $season_year );
+$standings = $api->fetch_standings( (string) $season_type, (int) $season_year );
 
 if ( is_wp_error( $standings ) ) {
 	if ( is_admin() ) {
