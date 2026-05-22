@@ -39,12 +39,19 @@ $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
 $opponent_slug = $opponent_details['opponent'] ?? 'tbd';
+
+// If the opponent field contains a colon, split it to get the
+// slug (e.g. "mariners: Seattle Mariners" -> "mariners")
+if ( str_contains( $opponent_details['opponent'], ':' ) ) {
+	$parts         = explode( ':', $opponent_details['opponent'] );
+	$opponent_slug = trim( $parts[0] );
+}
+
 $opponent_info = $teams_data[ $opponent_slug ] ?? array();
 
 // Extract just the short team name (e.g. "Mariners" from "mariners")
 $opponent_short_name = $opponent_info['short_name'] ?? ucwords( str_replace( '-', ' ', $opponent_slug ) );
 $guards_info         = $teams_data['guardians'] ?? array();
-
 
 // Set Team Data
 $cleveland = array(

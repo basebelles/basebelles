@@ -63,8 +63,8 @@ textarea:focus {
 /* Core UI */
 .wp-core-ui .button,
 .wp-core-ui .button-secondary {
-  color: #009ddc;
-  border-color: #009ddc;
+  color: #4a6274;
+  border-color: #325b76c9;
 }
 
 .wp-core-ui .button.hover,
@@ -99,13 +99,13 @@ textarea:focus {
 }
 
 .wp-core-ui .button-primary {
-  background: #009ddc;
-  border-color: #009ddc;
+  background: #4a6274;
+  border-color: #325b76c9;
   color: #fff;
 }
 
 .wp-core-ui .button-primary:hover, .wp-core-ui .button-primary:focus {
-  background: #00a8eb;
+  background: #4a6274;
   border-color: #0092cd;
   color: #fff;
 }
@@ -192,11 +192,11 @@ textarea:focus {
 }
 
 #adminmenu a {
-  color: #f3efe0;
+  color: #f3efe0!important;
 }
 
 #adminmenu div.wp-menu-image:before {
-  color: #f1f2f3;
+  color: #f3efe0!important;
 }
 
 #adminmenu a:hover,

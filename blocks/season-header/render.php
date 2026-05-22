@@ -26,7 +26,7 @@ $season_details    = array(
 
 // Overall Settings
 $season_type = $season_settings['season_type'] ?? 'regularSeason';
-$this_season = (int) $season_settings['current_season'] ?? wp_date( 'Y' );
+$this_season = (int) ( $season_settings['current_season'] ?? wp_date( 'Y' ) );
 $plugin_url  = plugin_dir_url( dirname( __DIR__, 2 ) . '/basebelles.php' );
 $off_season  = $plugin_url . 'blocks/season-header/off-season.jpg';
 

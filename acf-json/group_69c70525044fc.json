@@ -20,7 +20,7 @@
             "sub_fields": [
                 {
                     "key": "field_69c7084e1ddb6",
-                    "label": "Won / Lost",
+                    "label": "Won \/ Lost",
                     "name": "guards_wl",
                     "aria-label": "",
                     "type": "text",
@@ -116,7 +116,7 @@
                 },
                 {
                     "key": "field_69c708d15fe04",
-                    "label": "Won/Lost",
+                    "label": "Won\/Lost",
                     "name": "opponent_wl",
                     "aria-label": "",
                     "type": "text",
@@ -402,7 +402,7 @@
             {
                 "param": "block",
                 "operator": "==",
-                "value": "acf/basebelles-results"
+                "value": "acf\/basebelles-results"
             }
         ]
     ],
@@ -418,5 +418,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1777407757
+    "modified": 1779469801
 }

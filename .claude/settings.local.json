@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find ~/Websites ~/Sites ~/Local -name \"acf.php\" -path \"*/advanced-custom-fields-pro/*\" 2>/dev/null | head -3 | xargs grep -h \"Version:\" 2>/dev/null)"
+    ]
+  }
+}

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
- * Description: All the base code for Base*Belles - This controls all the blocks.
- * Version: 1.2.2
+ * Description: All the base code for Base*Belles - This controls all the amazing features.
+ * Version: 1.3.0
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -106,10 +106,8 @@ class Basebelles {
 			'basebelles',
 			__( 'BaseBelles' ),
 			plugin_dir_url( __FILE__ ) . '/admin-color-scheme.css',
-			array( '#002d62', '#f3efe0', '#84172c' , '#009ddc' ),
+			array( '#002d62', '#f3efe0', '#84172c', '#009ddc', '#f3efe0' ),
 		);
-
-		//wp_enqueue_style( 'basebelles-admin-color-scheme', plugin_dir_url( __FILE__ ) . 'admin-color-scheme.css', array(), self::$version );
 	}
 
 	/*
@@ -187,7 +185,7 @@ class Basebelles {
 	 */
 	public function set_guardians_menu_icon() {
 		global $menu;
-		$icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIj48cGF0aCBkPSJNNDk2LjEgNjA4QzQ1MS45IDYwOCA0MTYuMSA1NzIuMiA0MTYuMSA1MjhDNDE2LjEgNDgzLjggNDUxLjkgNDQ4IDQ5Ni4xIDQ0OEM1NDAuMyA0NDggNTc2LjEgNDgzLjggNTc2LjEgNTI4QzU3Ni4xIDU3Mi4yIDU0MC4zIDYwOCA0OTYuMSA2MDh6TTUwNC41IDMyQzUxOS42IDMyIDUzNC4yIDM3LjggNTQ1LjIgNDguMkw1OTIuNCA5M0M2MDUgMTA1IDYxMS41IDEyMiA2MDkuOSAxMzkuM0M2MDguNyAxNTIuNiA2MDIuOSAxNjUuMSA1OTMuNCAxNzQuNUwzOTUuMSAzNzNDMzg3LjggMzgwLjMgMzc5LjQgMzg2LjQgMzcwLjEgMzkxTDIzOCA0NTdDMjI4LjggNDYxLjYgMjIwLjMgNDY3LjcgMjEzIDQ3NUwxMjEgNTY3TDEyMi43IDU2OC44QzEzMC40IDU3OC4yIDEyOS44IDU5Mi4xIDEyMSA2MDAuOUMxMTIuMiA2MDkuNyA5OC4zIDYxMC4yIDg4LjkgNjAyLjZMODcuMSA2MDAuOUwzOS4xIDU1Mi45TDM3LjQgNTUxLjFDMjkuNyA1NDEuNyAzMC4zIDUyNy44IDM5LjEgNTE5QzQ3LjkgNTEwLjIgNjEuOCA1MDkuNyA3MS4yIDUxNy4zTDczIDUxOUwxNjUgNDI3QzE3Mi4zIDQxOS43IDE3OC40IDQxMS4zIDE4MyA0MDJMMjQ5LjEgMjY5LjlDMjUzLjcgMjYwLjcgMjU5LjggMjUyLjIgMjY3LjEgMjQ0LjlMNDYyLjggNDkuM0M0NzMuOSAzOC4yIDQ4OC45IDMyIDUwNC41IDMyeiIvPjwvc3ZnPg==';
+		$icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIj48cGF0aCBmaWxsPSIjMDAwMDAwIiBkPSJNNDk2LjEgNjA4QzQ1MS45IDYwOCA0MTYuMSA1NzIuMiA0MTYuMSA1MjhDNDE2LjEgNDgzLjggNDUxLjkgNDQ4IDQ5Ni4xIDQ0OEM1NDAuMyA0NDggNTc2LjEgNDgzLjggNTc2LjEgNTI4QzU3Ni4xIDU3Mi4yIDU0MC4zIDYwOCA0OTYuMSA2MDh6TTUwNC41IDMyQzUxOS42IDMyIDUzNC4yIDM3LjggNTQ1LjIgNDguMkw1OTIuNCA5M0M2MDUgMTA1IDYxMS41IDEyMiA2MDkuOSAxMzkuM0M2MDguNyAxNTIuNiA2MDIuOSAxNjUuMSA1OTMuNCAxNzQuNUwzOTUuMSAzNzNDMzg3LjggMzgwLjMgMzc5LjQgMzg2LjQgMzcwLjEgMzkxTDIzOCA0NTdDMjI4LjggNDYxLjYgMjIwLjMgNDY3LjcgMjEzIDQ3NUwxMjEgNTY3TDEyMi43IDU2OC44QzEzMC40IDU3OC4yIDEyOS44IDU5Mi4xIDEyMSA2MDAuOUMxMTIuMiA2MDkuNyA5OC4zIDYxMC4yIDg4LjkgNjAyLjZMODcuMSA2MDAuOUwzOS4xIDU1Mi45TDM3LjQgNTUxLjFDMjkuNyA1NDEuNyAzMC4zIDUyNy44IDM5LjEgNTE5QzQ3LjkgNTEwLjIgNjEuOCA1MDkuNyA3MS4yIDUxNy4zTDczIDUxOUwxNjUgNDI3QzE3Mi4zIDQxOS43IDE3OC40IDQxMS4zIDE4MyA0MDJMMjQ5LjEgMjY5LjlDMjUzLjcgMjYwLjcgMjU5LjggMjUyLjIgMjY3LjEgMjQ0LjlMNDYyLjggNDkuM0M0NzMuOSAzOC4yIDQ4OC45IDMyIDUwNC41IDMyeiIvPjwvc3ZnPg==';
 
 		foreach ( $menu as $key => $item ) {
 			if ( isset( $item[2] ) && 'guardians-settings' === $item[2] ) {

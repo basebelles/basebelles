@@ -1017,7 +1017,7 @@ class Basebelles_API {
 			return $teams;
 		}
 
-		$file = plugin_dir_path( __FILE__ ) . 'team-info/list.json';
+		$file = dirname( __DIR__, 1 ) . '/team-info/list.json';
 
 		if ( ! file_exists( $file ) ) {
 			$teams = array();
@@ -1042,12 +1042,12 @@ class Basebelles_API {
 			return '';
 		}
 
-		$file = plugin_dir_path( __FILE__ ) . 'team-info/logos/' . $slug . '.png';
+		$file = dirname( __DIR__, 1 ) . '/team-info/logos/' . $slug . '.png';
 
 		if ( ! file_exists( $file ) ) {
 			return '';
 		}
 
-		return plugin_dir_url( __FILE__ ) . 'team-info/logos/' . $slug . '.png';
+		return plugin_dir_url( __DIR__ ) . '/team-info/logos/' . $slug . '.png';
 	}
 }
