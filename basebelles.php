@@ -42,6 +42,7 @@ class Basebelles {
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
 		add_action( 'admin_menu', array( $this, 'set_guardians_menu_icon' ), 99 );
+		add_filter( 'render_block_data', array( $this, 'sanitize_acf_block_nulls' ) );
 	}
 
 	/**
@@ -193,6 +194,31 @@ class Basebelles {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Replace null values in ACF block data attributes with empty strings before
+	 * ACF calls acf_setup_meta(), which passes nulls through acf_is_field_key()
+	 * and triggers "Using null as an array offset" on PHP 8.1+.
+	 *
+	 * @param array $parsed_block The parsed block data.
+	 * @return array
+	 */
+	public function sanitize_acf_block_nulls( $parsed_block ) {
+		if ( empty( $parsed_block['attrs']['data'] ) || ! is_array( $parsed_block['attrs']['data'] ) ) {
+			return $parsed_block;
+		}
+
+		array_walk_recursive(
+			$parsed_block['attrs']['data'],
+			function ( &$value ) {
+				if ( is_null( $value ) ) {
+					$value = '';
+				}
+			}
+		);
+
+		return $parsed_block;
 	}
 }
 

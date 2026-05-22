@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Basebelles_Patterns {
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_pattern_categories' ) );
-		add_action( 'init', array( $this, 'register_patterns' ) );
+		$this->register_pattern_categories();
+		$this->register_patterns();
 	}
 
 	/**
@@ -20,7 +20,7 @@ class Basebelles_Patterns {
 	 */
 	public function register_pattern_categories() {
 		register_block_pattern_category(
-			'basebelles/custom',
+			'basebelles',
 			array(
 				'label'       => __( 'Base*Belles: Custom', 'basebelles' ),
 				'description' => __( 'Custom patterns for Base*Belles.', 'basebelles' ),
@@ -47,7 +47,7 @@ class Basebelles_Patterns {
 				'slug'        => 'basebelles/game-series-one-game',
 				'description' => __( 'Layout for a game series recap when only one game has been played.', 'basebelles' ),
 				'keywords'    => array( 'basebelles', 'game', 'series', 'recap', 'one game' ),
-				'file'        => 'patterns/one-game.php',
+				'file'        => 'patterns/game-series-one-game.php',
 			),
 			'game-series-header'   => array(
 				'title'       => __( 'Game Series Header', 'basebelles' ),
@@ -66,7 +66,7 @@ class Basebelles_Patterns {
 		);
 
 		foreach ( $patterns as $slug => $data ) {
-			$filepath = plugin_dir_path( __FILE__ ) . $data['file'];
+			$filepath = plugin_dir_path( dirname( __FILE__ ) ) . $data['file'];
 
 			if ( file_exists( $filepath ) ) {
 				ob_start();
@@ -76,12 +76,13 @@ class Basebelles_Patterns {
 				unset( $data['file'] );
 
 				// For simplicity, all patterns are registered to post editor and categorized
-				// under 'featured', 'text', and 'basebelles/custom'.
-				$data['postTypes']  = array( 'post' );
-				$data['categories'] = array( 'featured', 'text', 'basebelles/custom' );
+				// under 'featured', 'text', and 'basebelles'.
+				$data['categories'] = array( 'featured', 'text', 'basebelles' );
 
-				register_block_pattern( 'basebelles/' . $slug, $data );
+				register_block_pattern( $slug, $data );
 			}
 		}
 	}
 }
+
+new Basebelles_Patterns();

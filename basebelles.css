@@ -117,3 +117,6 @@ a.wp-block-latest-posts__post-title {
 	font-style: italic;
 }
 
+footer ul.wp-block-list li {
+	font-size: .9em!important;
+}
