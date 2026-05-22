@@ -712,6 +712,39 @@ class Basebelles_API {
 	}
 
 	/**
+	 * Return true if any Guardians transaction carries today's date.
+	 *
+	 * Result is cached in a transient that expires at midnight so the API is
+	 * hit at most once per calendar day.
+	 *
+	 * @return bool
+	 */
+	public function has_transactions_today() {
+		$cached = get_transient( 'bb_transactions_today' );
+		if ( false !== $cached ) {
+			return '1' === $cached;
+		}
+
+		$has_today    = false;
+		$today        = wp_date( 'Y-m-d' );
+		$transactions = $this->get_guardians_recent_transactions( self::TRANSACTIONS_DISPLAY_MAX );
+
+		if ( ! is_wp_error( $transactions ) && ! empty( $transactions ) ) {
+			foreach ( $transactions as $row ) {
+				$date = (string) ( $row['effectiveDate'] ?? $row['date'] ?? '' );
+				if ( str_starts_with( $date, $today ) ) {
+					$has_today = true;
+					break;
+				}
+			}
+		}
+
+		set_transient( 'bb_transactions_today', $has_today ? '1' : '0', strtotime( 'tomorrow' ) - time() );
+
+		return $has_today;
+	}
+
+	/**
 	 * Request JSON data from the MLB API.
 	 *
 	 * @param string $endpoint The endpoint path.

@@ -106,6 +106,12 @@ class Basebelles {
 				'in_footer' => false,
 			)
 		);
+		$has_today = class_exists( 'Basebelles_API' ) && Basebelles_API::get_instance()->has_transactions_today();
+		wp_add_inline_script(
+			'basebelles',
+			'window.bbHasTransactionsToday = ' . ( $has_today ? 'true' : 'false' ) . ';',
+			'before'
+		);
 	}
 
 	/**

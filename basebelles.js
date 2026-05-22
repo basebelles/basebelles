@@ -8,6 +8,10 @@
 		return;
 	}
 
+	if ( window.bbHasTransactionsToday ) {
+		toggle.setAttribute( 'data-has-transactions', 'true' );
+	}
+
 	function openPanel() {
 		panel.classList.add( 'is-open' );
 		panel.setAttribute( 'aria-hidden', 'false' );

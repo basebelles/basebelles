@@ -228,3 +228,21 @@ footer ul.wp-block-list li {
 .bb-transactions-panel ul.basebelles-transactions li:last-child {
 	border-bottom: none;
 }
+
+/* Transactions today indicator — red dot badge on the toggle button */
+.bb-transactions-toggle {
+	position: relative;
+}
+
+.bb-transactions-toggle[data-has-transactions="true"]::after {
+	background: #e82c2c;
+	border: 2px solid var(--bb-deep-navy, #002d62);
+	border-radius: 50%;
+	content: '';
+	display: block;
+	height: 10px;
+	position: absolute;
+	right: -5px;
+	top: -5px;
+	width: 10px;
+}

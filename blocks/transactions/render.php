@@ -69,7 +69,7 @@ foreach ( $transactions as $row ) {
 	$effective = isset( $row['effectiveDate'] ) ? (string) $row['effectiveDate'] : ( isset( $row['date'] ) ? (string) $row['date'] : '' );
 	$dmy       = '';
 	if ( '' !== $effective && preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $effective, $m ) ) {
-		$dmy = $m[3] . '/' . $m[2];
+		$dmy = $m[2] . '/' . $m[3];
 	}
 
 	$desc = isset( $row['description'] ) ? (string) $row['description'] : '';
