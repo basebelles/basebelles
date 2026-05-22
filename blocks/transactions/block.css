@@ -1,0 +1,20 @@
+.basebelles-transactions {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.basebelles-transactions li {
+	margin-bottom: 0.75em;
+	line-height: 1.45;
+}
+
+.basebelles-transactions li:last-child {
+	margin-bottom: 0;
+}
+
+.basebelles-transactions.placeholder {
+	padding: 1.25rem;
+	border: 2px dashed #ccc;
+	text-align: center;
+}
