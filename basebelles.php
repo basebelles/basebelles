@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.2.2';
+		self::$version = '1.3.0';
 
 		// ACF
 		require_once 'blocks/class-acf-json.php';
@@ -36,6 +36,7 @@ class Basebelles {
 		add_action( 'init', array( $this, 'register_styles' ), 5 );
 		add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'admin_init', array( $this, 'admin_color_scheme' ) );
 
 		add_action( 'wp_head', array( $this, 'wp_head' ), 20 );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
@@ -93,6 +94,22 @@ class Basebelles {
 	 */
 	public function enqueue_styles() {
 		wp_enqueue_style( 'basebelles-style' );
+	}
+
+	/**
+	 * Enqueue the admin color scheme stylesheet.
+	 *
+	 * @return void
+	 */
+	public function admin_color_scheme() {
+		wp_admin_css_color(
+			'basebelles',
+			__( 'BaseBelles' ),
+			plugin_dir_url( __FILE__ ) . '/admin-color-scheme.css',
+			array( '#002d62', '#f3efe0', '#84172c' , '#009ddc' ),
+		);
+
+		//wp_enqueue_style( 'basebelles-admin-color-scheme', plugin_dir_url( __FILE__ ) . 'admin-color-scheme.css', array(), self::$version );
 	}
 
 	/*

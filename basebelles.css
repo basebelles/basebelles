@@ -10,6 +10,7 @@
 	--bb-deep-navy: #002d62;
 	--bb-slate-blue: #00385d;
 	--bb-accent-slate: #4a6274;
+	--bb-slate-blue-light: #325b76c9;
 	--bb-light-blue: #009ddc;
 	--bb-green: #078025;
 	--bb-red: #C41E3A;
@@ -115,3 +116,4 @@ a.wp-block-latest-posts__post-title {
 	font-size: .5em!important;
 	font-style: italic;
 }
+
