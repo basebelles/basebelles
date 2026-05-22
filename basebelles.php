@@ -44,7 +44,6 @@ class Basebelles {
 		add_action( 'admin_menu', array( $this, 'set_guardians_menu_icon' ), 99 );
 		add_filter( 'render_block_data', array( $this, 'sanitize_acf_block_nulls' ) );
 		add_action( 'wp_footer', array( $this, 'render_transactions_panel' ) );
-		add_filter( 'term_link', array( $this, 'team_term_link_with_year' ), 10, 3 );
 	}
 
 	/**
@@ -56,26 +55,6 @@ class Basebelles {
 	public function register_query_vars( $vars ) {
 		$vars[] = 'season_year';
 		return $vars;
-	}
-
-	/**
-	 * Append ?season_year= to team taxonomy term links on single posts so the
-	 * linked archive pre-filters to the season the post was published in.
-	 *
-	 * @param string  $termlink The term URL.
-	 * @param WP_Term $term     The term object.
-	 * @param string  $taxonomy The taxonomy slug.
-	 * @return string
-	 */
-	public function team_term_link_with_year( $termlink, $term, $taxonomy ) {
-		if ( 'team' !== $taxonomy || ! is_singular() ) {
-			return $termlink;
-		}
-		$year = get_the_date( 'Y' );
-		if ( $year ) {
-			$termlink = add_query_arg( 'season_year', $year, $termlink );
-		}
-		return $termlink;
 	}
 
 	/**

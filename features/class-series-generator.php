@@ -130,7 +130,7 @@ class Basebelles_Series_Generator {
 				wp_set_object_terms( $new_post_id, $team_term, 'team' );
 			}
 			wp_set_object_terms( $new_post_id, $season_type, 'season-type' );
-			wp_set_object_terms( $new_post_id, $is_home === '1' ? 'home' : 'away', 'venue-type' );
+			wp_set_object_terms( $new_post_id, '1' === $is_home ? 'home' : 'away', 'venue-type' );
 			wp_set_object_terms( $new_post_id, 'games', 'category' );
 
 			$this->set_notice(
