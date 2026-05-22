@@ -739,7 +739,9 @@ class Basebelles_API {
 			}
 		}
 
-		set_transient( 'bb_transactions_today', $has_today ? '1' : '0', strtotime( 'tomorrow' ) - time() );
+		$now = current_datetime()->getTimestamp();
+		$ttl = strtotime( 'tomorrow', $now ) - $now;
+		set_transient( 'bb_transactions_today', $has_today ? '1' : '0', $ttl );
 
 		return $has_today;
 	}
@@ -1081,6 +1083,6 @@ class Basebelles_API {
 			return '';
 		}
 
-		return plugin_dir_url( __DIR__ ) . '/team-info/logos/' . $slug . '.png';
+		return plugin_dir_url( __DIR__ ) . 'team-info/logos/' . $slug . '.png';
 	}
 }

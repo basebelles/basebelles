@@ -31,14 +31,16 @@ class Basebelles_Series_Generator {
 			return;
 		}
 
-		acf_add_options_sub_page( array(
-			'page_title'  => 'Series Generator',
-			'menu_title'  => 'Series Generator',
-			'parent_slug' => 'guardians-settings',
-			'menu_slug'   => 'series-generator',
-			'post_id'     => self::OPTIONS_POST_ID,
-			'capability'  => 'edit_posts',
-		) );
+		acf_add_options_sub_page(
+			array(
+				'page_title'  => 'Series Generator',
+				'menu_title'  => 'Series Generator',
+				'parent_slug' => 'guardians-settings',
+				'menu_slug'   => 'series-generator',
+				'post_id'     => self::OPTIONS_POST_ID,
+				'capability'  => 'edit_posts',
+			)
+		);
 	}
 
 	/**
@@ -49,7 +51,7 @@ class Basebelles_Series_Generator {
 	 * @param string|int $post_id ACF save context identifier.
 	 */
 	public function maybe_generate_series_post( $post_id ) {
-		if ( $post_id !== self::OPTIONS_POST_ID ) {
+		if ( self::OPTIONS_POST_ID !== $post_id ) {
 			return;
 		}
 
@@ -60,11 +62,11 @@ class Basebelles_Series_Generator {
 		// Reset the trigger before doing anything so a failed run can't re-fire on refresh.
 		update_field( 'field_sgen_generate', 0, self::OPTIONS_POST_ID );
 
-		$opponent    = get_field( 'sgen_opponent',    self::OPTIONS_POST_ID ) ?: 'tbd';
-		$date        = get_field( 'sgen_date',        self::OPTIONS_POST_ID ) ?: '';
-		$end_date    = get_field( 'sgen_end_date',    self::OPTIONS_POST_ID ) ?: '';
-		$game_count  = (int) ( get_field( 'sgen_game_count',  self::OPTIONS_POST_ID ) ?: 3 );
-		$game_number = (int) ( get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) ?: 1 );
+		$opponent    = get_field( 'sgen_opponent', self::OPTIONS_POST_ID ) ? get_field( 'sgen_opponent', self::OPTIONS_POST_ID ) : 'tbd';
+		$date        = get_field( 'sgen_date', self::OPTIONS_POST_ID ) ? get_field( 'sgen_date', self::OPTIONS_POST_ID ) : '';
+		$end_date    = get_field( 'sgen_end_date', self::OPTIONS_POST_ID ) ? get_field( 'sgen_end_date', self::OPTIONS_POST_ID ) : '';
+		$game_count  = (int) ( get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) : 3 );
+		$game_number = (int) ( get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) : 1 );
 		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
 
 		if ( empty( $date ) || false === strtotime( $date ) ) {
@@ -83,7 +85,7 @@ class Basebelles_Series_Generator {
 			? $choices[ $opponent ]
 			: strtoupper( str_replace( '-', ' ', $opponent ) );
 
-		$post_date = date( 'F j, Y', strtotime( $date ) );
+		$post_date = wp_date( 'F j, Y', strtotime( $date ) );
 
 		$post_content  = $this->paragraph_block( 'Intro' ) . "\n\n";
 		$post_content .= $this->heading_block( 'Series Results' ) . "\n\n";
@@ -99,20 +101,25 @@ class Basebelles_Series_Generator {
 		$post_content .= $this->separator_block() . "\n\n";
 		$post_content .= $this->paragraph_block( 'Who are we playing next?' );
 
-		$new_post_id = wp_insert_post( array(
-			'post_title'   => sprintf( 'Series vs %s - %s', $opponent_display_name, $post_date ),
-			'post_content' => $post_content,
-			'post_status'  => 'draft',
-			'post_type'    => 'post',
-		) );
+		$new_post_id = wp_insert_post(
+			array(
+				'post_title'   => sprintf( 'Series vs %s - %s', $opponent_display_name, $post_date ),
+				'post_content' => $post_content,
+				'post_status'  => 'draft',
+				'post_type'    => 'post',
+			)
+		);
 
 		if ( ! is_wp_error( $new_post_id ) ) {
-			$this->set_notice( 'success', sprintf(
-				'Draft created: <a href="%s" target="_blank">Series vs %s &mdash; %s</a>',
-				esc_url( get_edit_post_link( $new_post_id ) ),
-				esc_html( $opponent_display_name ),
-				esc_html( $post_date )
-			) );
+			$this->set_notice(
+				'success',
+				sprintf(
+					'Draft created: <a href="%s" target="_blank">Series vs %s &mdash; %s</a>',
+					esc_url( get_edit_post_link( $new_post_id ) ),
+					esc_html( $opponent_display_name ),
+					esc_html( $post_date )
+				)
+			);
 		} else {
 			$this->set_notice( 'error', 'Failed to create the series draft post: ' . esc_html( $new_post_id->get_error_message() ) );
 		}
@@ -156,7 +163,7 @@ class Basebelles_Series_Generator {
 
 	protected function heading_block( $text, $level = 2 ) {
 		$tag  = 'h' . $level;
-		$attr = $level === 2 ? '' : ' {"level":' . $level . '}';
+		$attr = 2 === $level ? '' : ' {"level":' . $level . '}';
 		return "<!-- wp:heading{$attr} -->\n<{$tag} class=\"wp-block-heading\">" . esc_html( $text ) . "</{$tag}>\n<!-- /wp:heading -->";
 	}
 
@@ -179,11 +186,15 @@ class Basebelles_Series_Generator {
 	}
 
 	protected function results_block( $opponent, $is_home ) {
-		$blank_innings = array_fill( 0, 9, array(
-			'field_69c70d3fcd56c' => '',
-			'field_69c70d4acd56d' => '',
-		) );
-		$data = array(
+		$blank_innings = array_fill(
+			0,
+			9,
+			array(
+				'field_69c70d3fcd56c' => '',
+				'field_69c70d4acd56d' => '',
+			)
+		);
+		$data          = array(
 			'name' => 'acf/basebelles-results',
 			'data' => array(
 				'field_69c707ee1ddb3' => array( 'field_69c7084e1ddb6' => '1 - 0' ),
@@ -194,8 +205,14 @@ class Basebelles_Series_Generator {
 				'field_69c7087fc99cf' => array(
 					'field_69c706cbee27f' => $is_home,
 					'field_69c706bdee27e' => '9',
-					'field_69c707c05892a' => array( 'field_69c707c05892b' => '0', 'field_69c707c05892c' => '0' ),
-					'field_69c707cedc16b' => array( 'field_69c707cedc16c' => '0', 'field_69c707cedc16d' => '0' ),
+					'field_69c707c05892a' => array(
+						'field_69c707c05892b' => '0',
+						'field_69c707c05892c' => '0',
+					),
+					'field_69c707cedc16b' => array(
+						'field_69c707cedc16c' => '0',
+						'field_69c707cedc16d' => '0',
+					),
 					'field_69c70d26cd56b' => $blank_innings,
 				),
 			),
@@ -216,10 +233,11 @@ class Basebelles_Series_Generator {
 	protected function game_section( $num, $opponent, $is_home, $opponent_display_name, $season_game = 0 ) {
 		$label        = strtoupper( $opponent_display_name );
 		$game_display = $season_game > 0 ? $season_game : '??';
-		$out   = $this->heading_block( "Game {$num} ({$game_display}) - WONLOST", 3 ) . "\n\n";
-		$out  .= $this->results_block( $opponent, $is_home ) . "\n\n";
-		$out  .= "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>TBD</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n";
-		$out  .= $this->streamable_block() . "\n\n";
+
+		$out  = $this->heading_block( "Game {$num} ({$game_display}) - WONLOST", 3 ) . "\n\n";
+		$out .= $this->results_block( $opponent, $is_home ) . "\n\n";
+		$out .= "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>TBD</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n";
+		$out .= $this->streamable_block() . "\n\n";
 		return $out;
 	}
 

@@ -42,7 +42,7 @@ $opponent_slug = $opponent_details['opponent'] ?? 'tbd';
 
 // If the opponent field contains a colon, split it to get the
 // slug (e.g. "mariners: Seattle Mariners" -> "mariners")
-if ( str_contains( $opponent_details['opponent'], ':' ) ) {
+if ( str_contains( $opponent_slug, ':' ) ) {
 	$parts         = explode( ':', $opponent_details['opponent'] );
 	$opponent_slug = trim( $parts[0] );
 }

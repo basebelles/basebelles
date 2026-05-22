@@ -214,14 +214,6 @@ class Basebelles {
 	}
 
 	/**
-	 * Replace null values in ACF block data attributes with empty strings before
-	 * ACF calls acf_setup_meta(), which passes nulls through acf_is_field_key()
-	 * and triggers "Using null as an array offset" on PHP 8.1+.
-	 *
-	 * @param array $parsed_block The parsed block data.
-	 * @return array
-	 */
-	/**
 	 * Inject the transactions slide-in panel before </body>.
 	 *
 	 * @return void
@@ -249,6 +241,12 @@ class Basebelles {
 		<?php
 	}
 
+	/**
+	 * Sanitize ACF block data attributes by replacing nulls with empty strings.
+	 *
+	 * @param array $parsed_block The parsed block data.
+	 * @return array
+	 */
 	public function sanitize_acf_block_nulls( $parsed_block ) {
 		if ( empty( $parsed_block['attrs']['data'] ) || ! is_array( $parsed_block['attrs']['data'] ) ) {
 			return $parsed_block;

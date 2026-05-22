@@ -31,12 +31,12 @@ $teams_json  = file_exists( $plugin_path . '/team-info/list.json' ) ? file_get_c
 $teams_data  = json_decode( $teams_json, true );
 
 // Opponent identification
-$opponent_slug = $opponent;
+$opponent_slug = $opponent ?? 'tbd';
 
 // If the opponent field contains a colon, split it to get the
 // slug (e.g. "mariners: Seattle Mariners" -> "mariners")
-if ( str_contains( $opponent, ':' ) ) {
-	$parts         = explode( ':', $opponent );
+if ( str_contains( $opponent_slug, ':' ) ) {
+	$parts         = explode( ':', $opponent_slug );
 	$opponent_slug = trim( $parts[0] );
 }
 
