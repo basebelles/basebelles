@@ -61,14 +61,14 @@ class Basebelles {
 		// Belle Features
 		require_once 'features/class-comment-probation.php';
 		require_once 'features/class-embeds.php';
-		require_once 'features/class-impostercide.php';
-		require_once 'features/class-in-progress.php';
-		require_once 'features/class-no-tracking.php';
 		require_once 'features/class-patterns.php';
 		require_once 'features/class-series-generator.php';
 
-		// Helpers
+		// General Helpers
 		require_once 'helpers/class-api.php';
+		require_once 'helpers/class-impostercide.php';
+		require_once 'helpers/class-in-progress.php';
+		require_once 'helpers/class-no-tracking.php';
 		require_once 'helpers/class-upgrades.php';
 
 		// Blocks
