@@ -69,7 +69,7 @@
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
@@ -85,11 +85,11 @@
             "name": "sgen_end_date",
             "aria-label": "",
             "type": "date_picker",
-            "instructions": "The date the last game of this series is played. Defaults to the start date for single-game or unfinished series.",
+            "instructions": "The date the last game of this series is played.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
@@ -105,11 +105,11 @@
             "name": "sgen_game_count",
             "aria-label": "",
             "type": "number",
-            "instructions": "How many games are in this series.",
+            "instructions": "How many games are in this series. Usually three, but on rare occasions 2 or 4. Don't ask.",
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
@@ -128,11 +128,11 @@
             "name": "sgen_game_number",
             "aria-label": "",
             "type": "number",
-            "instructions": "Season game number for the first game of this series (e.g. 56). Each subsequent game increments by one.",
-            "required": 1,
+            "instructions": "Season game number for the first game of this series. Auto-detected if left blank; fill in to override.",
+            "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
@@ -151,15 +151,15 @@
             "name": "sgen_home_away",
             "aria-label": "",
             "type": "true_false",
-            "instructions": "",
+            "instructions": "Is the game home or away?",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
-            "message": "Home game (at Guardians Stadium)",
+            "message": "Home game (at the Jake)",
             "default_value": 1,
             "allow_in_bindings": 0,
             "ui": 1,
@@ -176,7 +176,7 @@
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "",
+                "width": "50%",
                 "class": "",
                 "id": ""
             },
@@ -213,9 +213,9 @@
             "message": "Create series draft post now",
             "default_value": 0,
             "allow_in_bindings": 0,
-            "ui": 0,
-            "ui_on_text": "",
-            "ui_off_text": ""
+            "ui": 1,
+            "ui_on_text": "Create",
+            "ui_off_text": "Just Save"
         }
     ],
     "location": [
@@ -239,5 +239,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1748000000
+    "modified": 1748000010
 }

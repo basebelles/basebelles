@@ -66,15 +66,47 @@ class Basebelles_Series_Generator {
 		$date        = get_field( 'sgen_date', self::OPTIONS_POST_ID ) ? get_field( 'sgen_date', self::OPTIONS_POST_ID ) : '';
 		$end_date    = get_field( 'sgen_end_date', self::OPTIONS_POST_ID ) ? get_field( 'sgen_end_date', self::OPTIONS_POST_ID ) : '';
 		$game_count  = (int) ( get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_count', self::OPTIONS_POST_ID ) : 3 );
-		$game_number = (int) ( get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) ? get_field( 'sgen_game_number', self::OPTIONS_POST_ID ) : 1 );
+		$game_number = (int) get_field( 'sgen_game_number', self::OPTIONS_POST_ID );
 		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
 		$season_type = get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) ? get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) : 'regular-season';
 
-		// Look up the team taxonomy term slug via the API class.
+		// Look up team data and pre-fill current W/L records from the API.
 		$team_term = '';
+		$guards_wl = '1 - 0';
+		$oppo_wl   = '0 - 1';
+
 		if ( class_exists( 'Basebelles_API' ) ) {
-			$team_data = Basebelles_API::get_instance()->get_team( $opponent );
+			$api       = Basebelles_API::get_instance();
+			$team_data = $api->get_team( $opponent );
 			$team_term = $team_data['taxonomy_term'] ?? '';
+
+			$api_season_types = array(
+				'regular-season'  => 'regularSeason',
+				'post-season'     => 'postseason',
+				'spring-training' => 'springTraining',
+			);
+			$api_season_type = $api_season_types[ $season_type ] ?? 'regularSeason';
+
+			$guards_data = $api->fetch_standings( $api_season_type );
+			if ( ! is_wp_error( $guards_data ) && isset( $guards_data['wins'], $guards_data['losses'] ) ) {
+				$guards_wl = $guards_data['wins'] . ' - ' . $guards_data['losses'];
+			}
+
+			$oppo_team_id = ! empty( $team_data['mlb_team_id'] ) ? (int) $team_data['mlb_team_id'] : 0;
+			if ( $oppo_team_id ) {
+				$oppo_data = $api->fetch_standings( $api_season_type, null, $oppo_team_id );
+				if ( ! is_wp_error( $oppo_data ) && isset( $oppo_data['wins'], $oppo_data['losses'] ) ) {
+					$oppo_wl = $oppo_data['wins'] . ' - ' . $oppo_data['losses'];
+				}
+			}
+
+			// Auto-detect season game number from schedule unless manually overridden.
+			if ( ! $game_number ) {
+				$detected = $api->get_season_game_number_for_date( $date, $api_season_type );
+				if ( ! is_wp_error( $detected ) ) {
+					$game_number = $detected;
+				}
+			}
 		}
 
 		if ( empty( $date ) || false === strtotime( $date ) ) {
@@ -107,7 +139,7 @@ class Basebelles_Series_Generator {
 
 		for ( $i = 1; $i <= $game_count; $i++ ) {
 			$season_game   = $game_number + ( $i - 1 );
-			$post_content .= $this->game_section( $i, $opponent, $is_home, $season_game );
+			$post_content .= $this->game_section( $i, $opponent, $is_home, $season_game, $guards_wl, $oppo_wl );
 		}
 
 		$post_content .= $this->pattern_content( 'game-series-end' );
@@ -181,17 +213,21 @@ class Basebelles_Series_Generator {
 	 * @param string $opponent    Opponent team slug.
 	 * @param string $is_home     '1' for home, '0' for away.
 	 * @param int    $season_game Season game number for the heading (0 → '??').
+	 * @param string $guards_wl   Guardians current W/L record (e.g. '34 - 20').
+	 * @param string $oppo_wl     Opponent current W/L record (e.g. '28 - 26').
 	 * @return string
 	 */
-	protected function game_section( $num, $opponent, $is_home, $season_game = 0 ) {
+	protected function game_section( $num, $opponent, $is_home, $season_game = 0, $guards_wl = '1 - 0', $oppo_wl = '0 - 1' ) {
 		$game_display = $season_game > 0 ? $season_game : '??';
 
 		return $this->pattern_content(
 			'game-series-one-game',
 			array(
-				'Game 1 (00) - WONLOST'            => "Game {$num} ({$game_display}) - WONLOST",
-				'"field_69c708d15fe00": "tbd"'      => '"field_69c708d15fe00": "' . $opponent . '"',
-				'"field_69c706cbee27f": "1"'        => '"field_69c706cbee27f": "' . $is_home . '"',
+				'Game 1 (00) - WONLOST'           => "Game {$num} ({$game_display}) - WONLOST",
+				'"field_69c708d15fe00": "tbd"'     => '"field_69c708d15fe00": "' . $opponent . '"',
+				'"field_69c706cbee27f": "1"'       => '"field_69c706cbee27f": "' . $is_home . '"',
+				'"field_69c7084e1ddb6": "1 - 0"'   => '"field_69c7084e1ddb6": "' . $guards_wl . '"',
+				'"field_69c708d15fe04": "0 - 1"'   => '"field_69c708d15fe04": "' . $oppo_wl . '"',
 			)
 		) . "\n\n";
 	}

@@ -151,11 +151,11 @@
             ]
         },
         {
-            "key": "field_69d00b59a3c60",
+            "key": "field_6a347f08d9a84",
             "label": "Spring Training",
-            "name": "spring_training",
+            "name": "",
             "aria-label": "",
-            "type": "group",
+            "type": "tab",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -164,77 +164,77 @@
                 "class": "",
                 "id": ""
             },
-            "layout": "block",
-            "sub_fields": [
-                {
-                    "key": "field_69d00b67a3c61",
-                    "label": "Start",
-                    "name": "start",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d00bd171ba8",
-                    "label": "End",
-                    "name": "end",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d53c844313d",
-                    "label": "Record",
-                    "name": "record",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": ""
-                }
-            ]
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
         },
         {
-            "key": "field_69d00b9b8b685",
+            "key": "field_69d00b67a3c61",
+            "label": "Start",
+            "name": "start",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d00bd171ba8",
+            "label": "End",
+            "name": "end",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d520a16e88e",
+            "label": "Record",
+            "name": "record",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6a347f62f11e5",
             "label": "Regular Season",
-            "name": "regular_season",
+            "name": "",
             "aria-label": "",
-            "type": "group",
+            "type": "tab",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -243,77 +243,16 @@
                 "class": "",
                 "id": ""
             },
-            "layout": "block",
-            "sub_fields": [
-                {
-                    "key": "field_69d00b9b8b686",
-                    "label": "Start",
-                    "name": "start",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d00baf8b687",
-                    "label": "End",
-                    "name": "end",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d53c994313e",
-                    "label": "Record",
-                    "name": "record",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": ""
-                }
-            ]
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
         },
         {
-            "key": "field_69d00bffdee9d",
-            "label": "Post Season",
-            "name": "post_season",
+            "key": "field_69d00b9b8b686",
+            "label": "Start",
+            "name": "start",
             "aria-label": "",
-            "type": "group",
+            "type": "date_picker",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -322,70 +261,131 @@
                 "class": "",
                 "id": ""
             },
-            "layout": "block",
-            "sub_fields": [
-                {
-                    "key": "field_69d00bffdee9e",
-                    "label": "Start",
-                    "name": "start",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d00bffdee9f",
-                    "label": "End",
-                    "name": "end",
-                    "aria-label": "",
-                    "type": "date_picker",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "display_format": "F j, Y",
-                    "return_format": "F j, Y",
-                    "first_day": 0,
-                    "default_to_current_date": 0,
-                    "allow_in_bindings": 0
-                },
-                {
-                    "key": "field_69d53ca24313f",
-                    "label": "Record",
-                    "name": "record",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": ""
-                }
-            ]
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d00baf8b687",
+            "label": "End",
+            "name": "end",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d520b06e88f",
+            "label": "Record",
+            "name": "record",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6a347f6ef11e6",
+            "label": "Post Season",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_69d00bffdee9e",
+            "label": "Start",
+            "name": "start",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d00bffdee9f",
+            "label": "End",
+            "name": "end",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "F j, Y",
+            "return_format": "F j, Y",
+            "first_day": 0,
+            "default_to_current_date": 0,
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_69d520bd6e890",
+            "label": "Record",
+            "name": "record",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -409,5 +409,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1744754400
+    "modified": 1781825410
 }
