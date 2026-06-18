@@ -171,7 +171,7 @@
         {
             "key": "field_69d00b67a3c61",
             "label": "Start",
-            "name": "start",
+            "name": "spring_start",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -191,7 +191,7 @@
         {
             "key": "field_69d00bd171ba8",
             "label": "End",
-            "name": "end",
+            "name": "spring_end",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -211,7 +211,7 @@
         {
             "key": "field_69d520a16e88e",
             "label": "Record",
-            "name": "record",
+            "name": "spring_record",
             "aria-label": "",
             "type": "text",
             "instructions": "",
@@ -250,7 +250,7 @@
         {
             "key": "field_69d00b9b8b686",
             "label": "Start",
-            "name": "start",
+            "name": "reg_start",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -270,7 +270,7 @@
         {
             "key": "field_69d00baf8b687",
             "label": "End",
-            "name": "end",
+            "name": "reg_end",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -290,7 +290,7 @@
         {
             "key": "field_69d520b06e88f",
             "label": "Record",
-            "name": "record",
+            "name": "reg_record",
             "aria-label": "",
             "type": "text",
             "instructions": "",
@@ -329,7 +329,7 @@
         {
             "key": "field_69d00bffdee9e",
             "label": "Start",
-            "name": "start",
+            "name": "post_start",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -349,7 +349,7 @@
         {
             "key": "field_69d00bffdee9f",
             "label": "End",
-            "name": "end",
+            "name": "post_end",
             "aria-label": "",
             "type": "date_picker",
             "instructions": "",
@@ -369,7 +369,7 @@
         {
             "key": "field_69d520bd6e890",
             "label": "Record",
-            "name": "record",
+            "name": "post_record",
             "aria-label": "",
             "type": "text",
             "instructions": "",
@@ -409,5 +409,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1781825410
+    "modified": 1781826573
 }
