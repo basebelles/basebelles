@@ -474,6 +474,77 @@ class Basebelles_API {
 	}
 
 	/**
+	 * Return the sequential season game number for the first game of a series.
+	 *
+	 * Counts all Guardians games of the appropriate type that appear in the
+	 * schedule from the start of the season through the day before $date.
+	 * Returns that count + 1, i.e. "the next game number."
+	 *
+	 * Only supported for regularSeason ('R') and springTraining ('S').
+	 * Returns WP_Error for other season types or on API failure.
+	 *
+	 * @param string $date        Series start date in Ymd or Y-m-d format.
+	 * @param string $season_type API season type ('regularSeason', 'springTraining').
+	 * @return int|WP_Error
+	 */
+	public function get_season_game_number_for_date( $date, $season_type = 'regularSeason' ) {
+		$settings = $this->get_season_settings( $season_type );
+		$year     = (int) $settings['season'];
+
+		// Normalize Ymd → Y-m-d.
+		if ( preg_match( '/^\d{8}$/', $date ) ) {
+			$date = substr( $date, 0, 4 ) . '-' . substr( $date, 4, 2 ) . '-' . substr( $date, 6, 2 );
+		}
+
+		if ( ! $date || false === strtotime( $date ) ) {
+			return new WP_Error( 'basebelles_api_bad_date', 'Invalid series start date.' );
+		}
+
+		$game_type_map = array(
+			'regularSeason'  => 'R',
+			'springTraining' => 'S',
+		);
+
+		if ( ! isset( $game_type_map[ $season_type ] ) ) {
+			return new WP_Error( 'basebelles_api_unsupported', 'Auto-detect not supported for this season type.' );
+		}
+
+		$game_type  = $game_type_map[ $season_type ];
+		$start_date = $year . ( 'springTraining' === $season_type ? '-02-01' : '-03-01' );
+		$end_date   = gmdate( 'Y-m-d', strtotime( $date . ' -1 day' ) );
+
+		if ( $end_date < $start_date ) {
+			return 1;
+		}
+
+		$data = $this->request_json(
+			'schedule',
+			array(
+				'sportId'   => 1,
+				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'season'    => $year,
+				'startDate' => $start_date,
+				'endDate'   => $end_date,
+				'gameType'  => $game_type,
+			),
+			self::API_CACHE_TTL
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		$game_count = 0;
+		if ( ! empty( $data['dates'] ) && is_array( $data['dates'] ) ) {
+			foreach ( $data['dates'] as $day ) {
+				$game_count += count( $day['games'] ?? array() );
+			}
+		}
+
+		return $game_count + 1;
+	}
+
+	/**
 	 * Fetch and normalize the Guardians schedule for a single day.
 	 *
 	 * @param string $date Optional YYYY-MM-DD date.
