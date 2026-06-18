@@ -11,17 +11,24 @@ if ( ! function_exists( 'get_field' ) ) {
 }
 
 // ACF Group: Season Info (group_69cd81d38a341)
-$season_settings   = get_field( 'season_settings', 'option' );
-$season_settings   = $season_settings ? $season_settings : array();
-$default_start_end = array(
-	'start'  => 'TBD',
-	'end'    => 'TBD',
-	'record' => '',
-);
-$season_details    = array(
-	'spring_training' => get_field( 'spring_training', 'option' ) ?? $default_start_end,
-	'regular_season'  => get_field( 'regular_season', 'option' ) ?? $default_start_end,
-	'post_season'     => get_field( 'post_season', 'option' ) ?? $default_start_end,
+$season_settings = get_field( 'season_settings', 'option' );
+$season_settings = $season_settings ? $season_settings : [];
+$season_details  = array(
+	'spring_training' => [
+		'start'  => get_field( 'spring_start', 'option' ) ?: 'TBD',
+		'end'    => get_field( 'spring_end', 'option' ) ?: 'TBD',
+		'record' => get_field( 'spring_record', 'option' ) ?? '',
+	],
+	'regular_season'  => [
+		'start'  => get_field( 'reg_start', 'option' ) ?: 'TBD',
+		'end'    => get_field( 'reg_end', 'option' ) ?: 'TBD',
+		'record' => get_field( 'regular_record', 'option' ) ?? '',
+	],
+	'post_season'     => [
+		'start'  => get_field( 'post_start', 'option' ) ?: 'TBD',
+		'end'    => get_field( 'post_end', 'option' ) ?: 'TBD',
+		'record' => get_field( 'post_record', 'option' ) ?? '',
+	],
 );
 
 // Overall Settings
@@ -32,7 +39,7 @@ $off_season  = $plugin_url . 'blocks/season-header/off-season.jpg';
 
 // Season Data
 $season_data = array(
-	'spring_training' => array(
+	'spring_training' => [
 		'name'   => 'Spring Training',
 		'type'   => 'springTraining',
 		'start'  => empty( $season_details['spring_training']['start'] ) ? 'TBD' : $season_details['spring_training']['start'],
@@ -40,8 +47,8 @@ $season_data = array(
 		'class'  => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
 		'link'   => '/season-type/spring-training/?season_year=' . $this_season,
 		'record' => empty( $season_details['spring_training']['record'] ) ? '' : $season_details['spring_training']['record'],
-	),
-	'regular_season'  => array(
+	],
+	'regular_season'  => [
 		'name'   => 'Regular Season',
 		'type'   => 'regularSeason',
 		'start'  => empty( $season_details['regular_season']['start'] ) ? 'TBD' : $season_details['regular_season']['start'],
@@ -49,8 +56,8 @@ $season_data = array(
 		'class'  => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array( $season_type, array( 'postSeason', 'wildCard', 'offSeason' ), true ) ? 'over' : '' ),
 		'link'   => '/season-type/regular-season/?season_year=' . $this_season,
 		'record' => empty( $season_details['regular_season']['record'] ) ? '' : $season_details['regular_season']['record'],
-	),
-	'post_season'     => array(
+	],
+	'post_season'     => [
 		'name'   => 'Post Season',
 		'type'   => 'postSeason',
 		'start'  => empty( $season_details['post_season']['start'] ) ? 'TBD' : $season_details['post_season']['start'],
@@ -58,7 +65,7 @@ $season_data = array(
 		'class'  => ( 'postSeason' === $season_type || 'wildCard' === $season_type ) ? 'active' : '',
 		'link'   => '/season-type/post-season/?season_year=' . $this_season,
 		'record' => empty( $season_details['post_season']['record'] ) ? '' : $season_details['post_season']['record'],
-	),
+	],
 );
 
 // Season Data Double Check

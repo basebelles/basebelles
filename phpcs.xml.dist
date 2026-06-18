@@ -22,5 +22,7 @@
 		<exclude name="WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents" />
 		<exclude name="WordPress.WP.DeprecatedFunctions.sanitize_urlFound" />
 		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+		<exclude name="Universal.Operators.DisallowShortTernary.Found" />
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
 	</rule>
 </ruleset>
