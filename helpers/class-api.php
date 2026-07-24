@@ -534,10 +534,22 @@ class Basebelles_API {
 			return $data;
 		}
 
+		// Postponed and cancelled games are not played on that date: MLB returns the
+		// postponed entry AND the makeup game (on its rescheduled date) as separate
+		// objects, so counting the postponed entry would inflate the game number by one
+		// per postponement. The makeup game is counted on the date it is actually played.
+		$skip_states = array( 'Postponed', 'Cancelled' );
+
 		$game_count = 0;
 		if ( ! empty( $data['dates'] ) && is_array( $data['dates'] ) ) {
 			foreach ( $data['dates'] as $day ) {
-				$game_count += count( $day['games'] ?? array() );
+				foreach ( $day['games'] ?? array() as $game ) {
+					$detailed_state = $game['status']['detailedState'] ?? '';
+					if ( in_array( $detailed_state, $skip_states, true ) ) {
+						continue;
+					}
+					++$game_count;
+				}
 			}
 		}
 
