@@ -7,7 +7,12 @@
       "Bash(find /Users/ipstenu -path \"*/advanced-custom-fields-pro/includes/blocks*\" -name \"*.php\" 2>/dev/null)",
       "Bash(grep -E '\\\\.\\(css|js\\)$')",
       "Bash(gh pr *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(curl -s \"https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=114&season=2026&startDate=2026-03-01&endDate=2026-07-16&gameType=R\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=114&season=2026&startDate=2026-03-01&endDate=2026-07-25&gameType=R\")",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('scripts:',d.get\\('scripts'\\)\\);print\\('require-dev:',d.get\\('require-dev'\\)\\)\")",
+      "Bash(php -l helpers/class-api.php)"
     ]
   }
 }
