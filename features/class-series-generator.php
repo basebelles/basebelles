@@ -125,7 +125,7 @@ class Basebelles_Series_Generator {
 			? $choices[ $opponent ]
 			: strtoupper( str_replace( '-', ' ', $opponent ) );
 
-		$post_date = wp_date( 'F j, Y', strtotime( $date ) );
+		$post_date = wp_date( 'F j, Y', strtotime( $date . ' 12:00:00' ) );
 
 		$post_content = $this->pattern_content(
 			'game-series-header',

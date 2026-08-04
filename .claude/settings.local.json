@@ -12,7 +12,8 @@
       "Bash(python3 -c ' *)",
       "Bash(curl -s \"https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=114&season=2026&startDate=2026-03-01&endDate=2026-07-25&gameType=R\")",
       "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('scripts:',d.get\\('scripts'\\)\\);print\\('require-dev:',d.get\\('require-dev'\\)\\)\")",
-      "Bash(php -l helpers/class-api.php)"
+      "Bash(php -l helpers/class-api.php)",
+      "Bash(php -r ' *)"
     ]
   }
 }
