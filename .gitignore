@@ -35,6 +35,9 @@ wp-config.php
 # htaccess
 /.htaccess
 
+# Claude
+.claude/settings.local.json
+
 # All plugins
 #
 # Note: If you wish to whitelist plugins,
