@@ -98,6 +98,8 @@ if ( is_wp_error( $schedule ) ) {
 						<div class="team-logo">
 							<?php if ( ! empty( $game['home_team']['logo_url'] ) ) : ?>
 								<img src="<?php echo esc_url( $game['home_team']['logo_url'] ); ?>" alt="<?php echo esc_attr( $game['home_team']['name'] ); ?> logo" />
+							<?php else : ?>
+								<div class="placeholder-logo"><?php echo esc_html( $game['home_team']['abbreviation'] ); ?></div>
 							<?php endif; ?>
 						</div>
 						<div class="team-record"><?php echo esc_html( $game['home_team']['record'] ); ?></div>

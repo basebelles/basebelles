@@ -157,6 +157,10 @@ if ( ! $is_home && $home_team['winner'] ) {
 
 				if ( 'tbd' !== $opponent_slug ) {
 					echo 'FINAL';
+
+					if ( $num_innings > 9 ) {
+						echo '/' . esc_html( $num_innings );
+					}
 				} else {
 					echo 'TBD';
 				}
