@@ -103,3 +103,249 @@
 /* Off Day / Hedgey Vibes */
 .off-day-box { text-align: center; }
 .off-day-box img { max-width: 100%; height: auto; border-radius: 4px; }
+
+/* --- Tabs (Score / Plays / Stats / Players) --- */
+.tg-tabs {
+	margin-top: 15px;
+	border-top: 1px solid var(--bb-sandstone-cream);
+	padding-top: 15px;
+}
+
+.tg-tab-bar {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 15px;
+}
+
+.tg-tab {
+	flex: 1 1 auto;
+	background: none;
+	border: 1px solid var(--bb-slate-blue);
+	border-radius: 4px;
+	padding: 8px 4px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
+	cursor: pointer;
+}
+
+.tg-tab.is-active {
+	background: var(--bb-deep-navy);
+	border-color: var(--bb-deep-navy);
+	color: #fff;
+}
+
+.tg-panel { display: none; }
+.tg-panel.is-active { display: block; }
+
+.tg-empty {
+	text-align: center;
+	color: var(--bb-accent-slate);
+	font-size: 0.9rem;
+	margin: 10px 0;
+}
+
+/* Score tab: countdown to first pitch (far-phase, below the matchup; near-phase, on its own) */
+.tg-far-countdown {
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px dashed var(--bb-sandstone-cream);
+}
+
+.tg-countdown {
+	text-align: center;
+	font-size: 1rem;
+	font-weight: 700;
+	margin-bottom: 15px;
+}
+
+.tg-far-countdown .tg-countdown {
+	margin-bottom: 0;
+}
+
+.tg-countdown-value {
+	font-variant-numeric: tabular-nums;
+	color: var(--bb-deep-navy);
+}
+
+.tg-near-records,
+.tg-near-starters {
+	display: flex;
+	justify-content: space-between;
+	gap: 15px;
+	text-align: center;
+	margin-bottom: 10px;
+	font-size: 0.9rem;
+}
+
+/* Score tab: live at-bat */
+.tg-at-bat {
+	text-align: center;
+}
+
+.tg-at-bat-inning {
+	font-weight: 700;
+	color: var(--bb-accent-slate);
+	margin-bottom: 6px;
+}
+
+.tg-at-bat-count {
+	font-size: 1.4rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	margin: 8px 0;
+}
+
+.tg-bases {
+	position: relative;
+	width: 60px;
+	height: 60px;
+	margin: 10px auto 0;
+}
+
+.tg-base {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	background: var(--bb-sandstone-cream);
+	border: 1px solid var(--bb-slate-blue);
+	transform: rotate(45deg);
+}
+
+.tg-base.is-occupied { background: var(--bb-deep-navy); }
+.tg-base-second { top: 0; left: 22px; }
+.tg-base-third  { top: 22px; left: 0; }
+.tg-base-first  { top: 22px; left: 44px; }
+
+/* Stats tab: season form */
+.tg-season-form {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px dashed var(--bb-sandstone-cream);
+	text-align: center;
+}
+
+.tg-season-form-col strong { display: block; font-size: 1.1rem; }
+.tg-season-form-col span { font-size: 0.75rem; color: var(--bb-accent-slate); }
+.tg-season-form-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bb-accent-slate);
+}
+
+/* Plays tab */
+.tg-plays {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+.tg-plays li {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--bb-sandstone-cream);
+	font-size: 0.85rem;
+}
+
+.tg-play-inning {
+	display: block;
+	font-weight: 700;
+	color: var(--bb-accent-slate);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+}
+
+/* Players tab */
+.tg-subtabs { margin: 0; }
+
+.tg-subtab-bar {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+
+.tg-subtab {
+	flex: 1 1 auto;
+	background: none;
+	border: 1px solid var(--bb-sandstone-cream);
+	border-radius: 4px;
+	padding: 6px 4px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
+	cursor: pointer;
+}
+
+.tg-subtab.is-active {
+	background: var(--bb-sandstone-cream);
+	border-color: var(--bb-sandstone-cream);
+	color: var(--bb-deep-navy);
+}
+
+.tg-subpanel { display: none; }
+.tg-subpanel.is-active { display: block; }
+
+.tg-section-label {
+	margin: 0 0 6px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bb-accent-slate);
+}
+
+.tg-lineup,
+.tg-pitching-log {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 15px;
+	font-size: 0.8rem;
+}
+
+.tg-lineup caption,
+.tg-pitching-log caption {
+	text-align: left;
+	font-weight: 700;
+	color: var(--bb-deep-navy);
+	margin-bottom: 6px;
+}
+
+.tg-lineup th,
+.tg-lineup td,
+.tg-pitching-log th,
+.tg-pitching-log td {
+	padding: 4px 2px;
+	text-align: center;
+	border-bottom: 1px solid var(--bb-sandstone-cream);
+}
+
+.tg-lineup-name {
+	text-align: left !important;
+	white-space: nowrap;
+}
+
+.tg-lineup-pos {
+	color: var(--bb-accent-slate);
+	font-size: 0.7rem;
+}
+
+.tg-decision {
+	display: inline-block;
+	margin-left: 4px;
+	padding: 0 4px;
+	border: 1px solid var(--bb-accent-slate);
+	border-radius: 3px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: var(--bb-accent-slate);
+}
