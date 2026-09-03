@@ -252,6 +252,12 @@ class Basebelles_Today_Game_Panels {
 			</div>
 			<div class="score-home"><?php echo esc_html( $game['scores']['home'] ); ?></div>
 		</div>
+		<?php if ( ! empty( $game['scores']['isFinal'] ) && ! empty( $game['scores']['winner'] ) ) : ?>
+			<?php $guardians_win = $home_or_away === $game['scores']['winner']; ?>
+			<div class="tg-result-headline <?php echo $guardians_win ? 'is-win' : 'is-loss'; ?>">
+				The Guardians <?php echo $guardians_win ? 'WIN' : 'LOSE'; ?>
+			</div>
+		<?php endif; ?>
 		<?php
 		return (string) ob_get_clean();
 	}
