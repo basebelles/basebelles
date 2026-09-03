@@ -52,6 +52,21 @@ if ( is_wp_error( $schedule ) ) {
 					<div class="game-label">Game <?php echo esc_html( (string) $game['game_number'] ); ?></div>
 				<?php endif; ?>
 
+				<?php
+				// Always ask MLB for the live feed -- lineups and plays show up on MLB's own
+				// schedule (often 60-90+ minutes out), not tied to the Score tab's 30-minute
+				// countdown threshold below. The 60s cache in get_live_feed() bounds the real
+				// request cost regardless of how early this runs. Fetched here (rather than
+				// after the header) because the header's score line needs it too.
+				$phase       = Basebelles_Today_Game_Panels::get_phase( $game );
+				$live_feed   = array();
+				$feed_result = $api->get_live_feed( $game['game_pk'] );
+
+				if ( ! is_wp_error( $feed_result ) ) {
+					$live_feed = $feed_result;
+				}
+				?>
+
 				<div class="today-game-header">
 					<div class="away-team">
 						<div class="team-logo">
@@ -73,6 +88,7 @@ if ( is_wp_error( $schedule ) ) {
 								<?php echo esc_html( $game['game_time'] ); ?>
 							<?php endif; ?>
 						</div>
+						<?php echo Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
 							<div class="tg-series-status">
 								Game <?php echo esc_html( $game['series']['game_number'] ); ?> of <?php echo esc_html( $game['series']['games_total'] ); ?>
@@ -107,21 +123,7 @@ if ( is_wp_error( $schedule ) ) {
 					<?php endif; ?>
 				</div>
 
-				<?php
-				// Always ask MLB for the live feed -- lineups and plays show up on MLB's own
-				// schedule (often 60-90+ minutes out), not tied to the Score tab's 30-minute
-				// countdown threshold below. The 60s cache in get_live_feed() bounds the real
-				// request cost regardless of how early this runs.
-				$phase       = Basebelles_Today_Game_Panels::get_phase( $game );
-				$live_feed   = array();
-				$feed_result = $api->get_live_feed( $game['game_pk'] );
-
-				if ( ! is_wp_error( $feed_result ) ) {
-					$live_feed = $feed_result;
-				}
-
-				echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				?>
+				<?php echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 		<?php endforeach; ?>
 

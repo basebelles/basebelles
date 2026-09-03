@@ -87,8 +87,9 @@ class Basebelles_Today_Game_Rest {
 		}
 
 		return array(
-			'phase'  => $phase,
-			'panels' => array(
+			'phase'       => $phase,
+			'header_score' => Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ),
+			'panels'      => array(
 				'score'   => Basebelles_Today_Game_Panels::render_score_panel( $game, $phase, $live_feed ),
 				'plays'   => Basebelles_Today_Game_Panels::render_plays_panel( $live_feed ),
 				'stats'   => Basebelles_Today_Game_Panels::render_stats_panel( $game, $phase, $live_feed ),

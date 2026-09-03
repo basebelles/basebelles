@@ -81,6 +81,14 @@
 	50% { opacity: 0.35; transform: scale(0.7); }
 }
 
+.tg-header-score {
+	margin-top: 2px;
+	font-size: 1.4rem;
+	font-weight: 800;
+	color: var(--bb-deep-navy);
+	font-variant-numeric: tabular-nums;
+}
+
 .tg-series-status {
 	margin-top: 4px;
 	font-size: 0.7rem;
@@ -358,8 +366,9 @@
 }
 
 .tg-plays li {
-	padding: 8px 0;
+	padding: 8px 0 8px 8px;
 	border-bottom: 1px solid var(--bb-sandstone-cream);
+	border-left: 3px solid transparent;
 	font-size: 0.85rem;
 }
 
@@ -369,6 +378,19 @@
 	color: var(--bb-accent-slate);
 	font-size: 0.75rem;
 	text-transform: uppercase;
+}
+
+.tg-play-scoring {
+	border-left-color: var(--bb-red)!important;
+}
+
+.tg-play-scoring .tg-play-desc {
+	font-weight: 700;
+	color: var(--bb-deep-navy)!important;
+}
+
+.tg-play-scoring .tg-play-inning {
+	color: var(--bb-red);
 }
 
 /* Players tab */
@@ -445,6 +467,17 @@
 .tg-lineup-pos {
 	color: var(--bb-accent-slate);
 	font-size: 0.7rem;
+}
+
+.tg-lineup-replaced .tg-lineup-name {
+	text-decoration: line-through;
+	color: var(--bb-accent-slate);
+}
+
+.tg-lineup-sub-arrow {
+	display: inline-block;
+	color: var(--bb-accent-slate);
+	margin-right: 2px;
 }
 
 .tg-decision {

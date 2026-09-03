@@ -118,9 +118,39 @@
 		}
 	}
 
+	function updateHeaderScore( instance, headerScoreHtml ) {
+		var card = instance.closest( '.game-card' );
+		var meta = card ? card.querySelector( '.game-meta' ) : null;
+
+		if ( ! meta ) {
+			return;
+		}
+
+		var existing = meta.querySelector( '.tg-header-score' );
+
+		if ( ! headerScoreHtml ) {
+			if ( existing ) {
+				existing.remove();
+			}
+
+			return;
+		}
+
+		if ( existing ) {
+			existing.outerHTML = headerScoreHtml;
+		} else {
+			var timeEl = meta.querySelector( '.game-time' );
+
+			if ( timeEl ) {
+				timeEl.insertAdjacentHTML( 'afterend', headerScoreHtml );
+			}
+		}
+	}
+
 	function applyPanelUpdate( instance, data ) {
 		instance.setAttribute( 'data-phase', data.phase );
 		updateLiveIndicator( instance, data.phase );
+		updateHeaderScore( instance, data.header_score );
 
 		var panelNames = [ 'score', 'plays', 'stats', 'players' ];
 
