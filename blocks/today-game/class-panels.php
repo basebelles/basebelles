@@ -260,8 +260,8 @@ class Basebelles_Today_Game_Panels {
 	/**
 	 * Stats tab: pregame shows the probable-pitcher matchup plus each team's recent form (the team
 	 * records themselves already show in the card header, so repeating them here added nothing);
-	 * once the game is underway, the matchup's season ERA/record is stale, so show the starters'
-	 * in-game lines instead.
+	 * once the game is underway, the pregame matchup's season ERA/record is stale and the starters
+	 * may already be out of the game, so show the linescore and team-vs-team box score instead.
 	 *
 	 * @param array  $game Normalized game array.
 	 * @param string $phase Game phase.
@@ -270,7 +270,7 @@ class Basebelles_Today_Game_Panels {
 	 */
 	public static function render_stats_panel( array $game, $phase, array $live_feed ) {
 		if ( in_array( $phase, array( 'live', 'final' ), true ) ) {
-			return self::render_pitching_lines( $game, $live_feed );
+			return self::render_game_summary( $game, $live_feed );
 		}
 
 		$away_form = $game['recent_form']['away'] ?? array();
@@ -295,47 +295,105 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
-	 * Starting pitchers' in-game lines (IP, ER, K, BB, pitch count), once the game has started.
-	 *
-	 * Falls back to the pregame matchup if the live feed hasn't loaded a pitcher yet.
+	 * Live/final Stats content: linescore, HP umpire, runs-by-inning, and a team-vs-team box score
+	 * (times on base, contact, and pitch command). Falls back to the pregame matchup if the live
+	 * feed hasn't loaded yet.
 	 *
 	 * @param array $game Normalized game array.
 	 * @param array $live_feed Live feed data, or empty array.
 	 * @return string
 	 */
-	private static function render_pitching_lines( array $game, array $live_feed ) {
-		// pitchers[0] is always the starter -- see Basebelles_API::normalize_pitching_log().
-		$away = $live_feed['pitchers']['away'][0] ?? array();
-		$home = $live_feed['pitchers']['home'][0] ?? array();
+	private static function render_game_summary( array $game, array $live_feed ) {
+		$summary = $live_feed['game_summary'] ?? array();
 
-		if ( empty( $away ) && empty( $home ) ) {
+		if ( empty( $summary ) ) {
 			return self::render_pitching_matchup( $game );
 		}
 
+		$away_abbr   = $game['away_team']['abbreviation'] ?? '';
+		$home_abbr   = $game['home_team']['abbreviation'] ?? '';
+		$away_line   = $summary['line']['away'] ?? array();
+		$home_line   = $summary['line']['home'] ?? array();
+		$away_cmp    = $summary['comparison']['away'] ?? array();
+		$home_cmp    = $summary['comparison']['home'] ?? array();
+		$innings     = $summary['innings'] ?? array();
+		$num_innings = max( (int) ( $summary['scheduled_innings'] ?? 9 ), count( $innings ) );
+
 		ob_start();
 		?>
-		<div class="probable-pitchers">
-			<div class="pitcher-away">
-				<div class="pitcher-name"><?php echo esc_html( $away['name'] ?? 'TBD' ); ?></div>
-				<div class="pitcher-stats">
-					<span><?php echo esc_html( ( $away['ip'] ?? '0.0' ) . ' IP' ); ?></span>
-					&bull;
-					<span><?php echo esc_html( ( $away['er'] ?? 0 ) . ' ER' ); ?></span>
-					&bull;
-					<span><?php echo esc_html( ( $away['k'] ?? 0 ) . ' K' ); ?></span>
-				</div>
+		<div class="tg-summary-header">
+			<div class="tg-summary-team">
+				<strong><?php echo esc_html( $away_abbr ); ?></strong>
+				<span><?php echo esc_html( $away_line['runs'] ?? 0 ); ?> R &bull; <?php echo esc_html( $away_line['hits'] ?? 0 ); ?> H &bull; <?php echo esc_html( $away_line['errors'] ?? 0 ); ?> E</span>
 			</div>
-			<div class="game-meta">v.s.</div>
-			<div class="pitcher-home">
-				<div class="pitcher-name"><?php echo esc_html( $home['name'] ?? 'TBD' ); ?></div>
-				<div class="pitcher-stats">
-					<span><?php echo esc_html( ( $home['ip'] ?? '0.0' ) . ' IP' ); ?></span>
-					&bull;
-					<span><?php echo esc_html( ( $home['er'] ?? 0 ) . ' ER' ); ?></span>
-					&bull;
-					<span><?php echo esc_html( ( $home['k'] ?? 0 ) . ' K' ); ?></span>
-				</div>
+			<?php if ( ! empty( $summary['hp_umpire'] ) ) : ?>
+				<div class="tg-summary-umpire">HP <?php echo esc_html( $summary['hp_umpire'] ); ?></div>
+			<?php endif; ?>
+			<div class="tg-summary-team">
+				<strong><?php echo esc_html( $home_abbr ); ?></strong>
+				<span><?php echo esc_html( $home_line['runs'] ?? 0 ); ?> R &bull; <?php echo esc_html( $home_line['hits'] ?? 0 ); ?> H &bull; <?php echo esc_html( $home_line['errors'] ?? 0 ); ?> E</span>
 			</div>
+		</div>
+		<div class="tg-innings-wrap">
+			<table class="tg-innings">
+				<thead>
+					<tr>
+						<th scope="col"></th>
+						<?php for ( $i = 0; $i < $num_innings; $i++ ) : ?>
+							<th scope="col"><?php echo esc_html( (string) ( $i + 1 ) ); ?></th>
+						<?php endfor; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row"><?php echo esc_html( $away_abbr ); ?></th>
+						<?php for ( $i = 0; $i < $num_innings; $i++ ) : ?>
+							<td><?php echo esc_html( isset( $innings[ $i ]['away'] ) && null !== $innings[ $i ]['away'] ? (string) $innings[ $i ]['away'] : '-' ); ?></td>
+						<?php endfor; ?>
+					</tr>
+					<tr>
+						<th scope="row"><?php echo esc_html( $home_abbr ); ?></th>
+						<?php for ( $i = 0; $i < $num_innings; $i++ ) : ?>
+							<td><?php echo esc_html( isset( $innings[ $i ]['home'] ) && null !== $innings[ $i ]['home'] ? (string) $innings[ $i ]['home'] : '-' ); ?></td>
+						<?php endfor; ?>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="tg-comparison">
+			<table class="tg-comparison-group">
+				<caption>Traffic</caption>
+				<thead>
+					<tr><th scope="col"></th><th scope="col"><?php echo esc_html( $away_abbr ); ?></th><th scope="col"><?php echo esc_html( $home_abbr ); ?></th></tr>
+				</thead>
+				<tbody>
+					<tr><td>On Base</td><td><?php echo esc_html( $away_cmp['on_base'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['on_base'] ?? 0 ); ?></td></tr>
+					<tr><td>BB</td><td><?php echo esc_html( $away_cmp['bb'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['bb'] ?? 0 ); ?></td></tr>
+					<tr><td>LOB</td><td><?php echo esc_html( $away_cmp['lob'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['lob'] ?? 0 ); ?></td></tr>
+				</tbody>
+			</table>
+			<table class="tg-comparison-group">
+				<caption>Contact</caption>
+				<thead>
+					<tr><th scope="col"></th><th scope="col"><?php echo esc_html( $away_abbr ); ?></th><th scope="col"><?php echo esc_html( $home_abbr ); ?></th></tr>
+				</thead>
+				<tbody>
+					<tr><td>H</td><td><?php echo esc_html( $away_cmp['h'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['h'] ?? 0 ); ?></td></tr>
+					<tr><td>XBH</td><td><?php echo esc_html( $away_cmp['xbh'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['xbh'] ?? 0 ); ?></td></tr>
+					<tr><td>TB</td><td><?php echo esc_html( $away_cmp['tb'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['tb'] ?? 0 ); ?></td></tr>
+				</tbody>
+			</table>
+			<table class="tg-comparison-group">
+				<caption>Command</caption>
+				<thead>
+					<tr><th scope="col"></th><th scope="col"><?php echo esc_html( $away_abbr ); ?></th><th scope="col"><?php echo esc_html( $home_abbr ); ?></th></tr>
+				</thead>
+				<tbody>
+					<tr><td>Pitches</td><td><?php echo esc_html( $away_cmp['pitches'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['pitches'] ?? 0 ); ?></td></tr>
+					<tr><td>Strike%</td><td><?php echo esc_html( $away_cmp['strike_pct'] ?? '0%' ); ?></td><td><?php echo esc_html( $home_cmp['strike_pct'] ?? '0%' ); ?></td></tr>
+					<tr><td>K</td><td><?php echo esc_html( $away_cmp['k'] ?? 0 ); ?></td><td><?php echo esc_html( $home_cmp['k'] ?? 0 ); ?></td></tr>
+				</tbody>
+			</table>
 		</div>
 		<?php
 		return (string) ob_get_clean();
@@ -422,20 +480,24 @@ class Basebelles_Today_Game_Panels {
 		$away_pitching = $live_feed['pitchers']['away'] ?? array();
 		$home_pitching = $live_feed['pitchers']['home'] ?? array();
 
+		// Default to whichever team is currently batting -- 'bottom' of the inning means the home
+		// team is up. Falls back to away (e.g. pregame, no current_play yet).
+		$active_side = 'bottom' === strtolower( $live_feed['current_play']['half'] ?? '' ) ? 'home' : 'away';
+
 		ob_start();
 		?>
 		<div class="tg-subtabs">
 			<div class="tg-subtab-bar" role="tablist">
-				<button type="button" class="tg-subtab is-active" data-subtab="away" role="tab" aria-selected="true"><?php echo esc_html( $away_abbr ); ?></button>
-				<button type="button" class="tg-subtab" data-subtab="home" role="tab" aria-selected="false"><?php echo esc_html( $home_abbr ); ?></button>
+				<button type="button" class="tg-subtab<?php echo 'away' === $active_side ? ' is-active' : ''; ?>" data-subtab="away" role="tab" aria-selected="<?php echo 'away' === $active_side ? 'true' : 'false'; ?>"><?php echo esc_html( $away_abbr ); ?></button>
+				<button type="button" class="tg-subtab<?php echo 'home' === $active_side ? ' is-active' : ''; ?>" data-subtab="home" role="tab" aria-selected="<?php echo 'home' === $active_side ? 'true' : 'false'; ?>"><?php echo esc_html( $home_abbr ); ?></button>
 			</div>
-			<div class="tg-subpanel is-active" data-subpanel="away">
+			<div class="tg-subpanel<?php echo 'away' === $active_side ? ' is-active' : ''; ?>" data-subpanel="away">
 				<h4 class="tg-section-label">Batting</h4>
 				<?php self::render_lineup_table( $away_abbr, $away_lineup ); ?>
 				<h4 class="tg-section-label">Pitching</h4>
 				<?php self::render_pitching_log_table( $away_abbr, $away_pitching ); ?>
 			</div>
-			<div class="tg-subpanel" data-subpanel="home">
+			<div class="tg-subpanel<?php echo 'home' === $active_side ? ' is-active' : ''; ?>" data-subpanel="home">
 				<h4 class="tg-section-label">Batting</h4>
 				<?php self::render_lineup_table( $home_abbr, $home_lineup ); ?>
 				<h4 class="tg-section-label">Pitching</h4>

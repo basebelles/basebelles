@@ -686,6 +686,9 @@ class Basebelles_API {
 			$game_time = 'TBD (30m after G1)';
 		}
 
+		$games_in_series = (int) ( $game['gamesInSeries'] ?? 1 );
+		$opponent_team   = $is_home ? $away_team : $home_team;
+
 		return array(
 			'game_pk'        => (int) ( $game['gamePk'] ?? 0 ),
 			'game_number'    => (int) ( $game['gameNumber'] ?? 1 ),
@@ -703,11 +706,91 @@ class Basebelles_API {
 				'away' => $is_preview ? $this->get_recent_form( $away_team['id'] ) : array(),
 				'home' => $is_preview ? $this->get_recent_form( $home_team['id'] ) : array(),
 			),
+			'series'         => array(
+				'game_number'  => (int) ( $game['seriesGameNumber'] ?? $game['gameNumber'] ?? 1 ),
+				'games_total'  => $games_in_series,
+				'status_label' => ( $games_in_series > 1 && $timestamp )
+					? $this->get_series_status_label( $opponent_team['id'], $opponent_team['abbreviation'], $games_in_series, wp_date( 'Y-m-d', $timestamp, $timezone ) )
+					: '',
+			),
 			'scores'         => $has_scores ? $this->get_game_scores( $game, $game_status, $detailed_status ) : array(),
 			'broadcasts'     => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
 			'sort_time'      => $timestamp ? $timestamp : 0,
 			'show_label'     => false,
 		);
+	}
+
+	/**
+	 * Build the "Series Tied 1-1" / "CLE Leads 2-0" label for the current series against one
+	 * opponent. Empty until at least one game in the series has finished.
+	 *
+	 * @param int    $opponent_team_id MLB team ID for the opponent.
+	 * @param string $opponent_abbr Opponent's abbreviation, used in the label.
+	 * @param int    $games_in_series Total games scheduled in this series.
+	 * @param string $end_date Y-m-d local date of the current game.
+	 * @return string
+	 */
+	private function get_series_status_label( $opponent_team_id, $opponent_abbr, $games_in_series, $end_date ) {
+		// A few days of slack in case the series includes a scheduled off-day.
+		$start_date = wp_date( 'Y-m-d', strtotime( $end_date . ' -' . ( $games_in_series + 3 ) . ' days' ) );
+
+		$data = $this->request_json(
+			'schedule',
+			array(
+				'sportId'    => 1,
+				'teamId'     => self::GUARDIANS_TEAM_ID,
+				'opponentId' => $opponent_team_id,
+				'startDate'  => $start_date,
+				'endDate'    => $end_date,
+			)
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return '';
+		}
+
+		$series_games = array();
+
+		foreach ( $data['dates'] ?? array() as $date_entry ) {
+			foreach ( $date_entry['games'] ?? array() as $candidate ) {
+				if ( (int) ( $candidate['gamesInSeries'] ?? 0 ) === $games_in_series ) {
+					$series_games[] = $candidate;
+				}
+			}
+		}
+
+		// Keep just this series (the most recent block of games sharing that series length).
+		$series_games   = array_slice( $series_games, -$games_in_series );
+		$guardians_wins = 0;
+		$opponent_wins  = 0;
+
+		foreach ( $series_games as $candidate ) {
+			if ( 'Final' !== ( $candidate['status']['abstractGameState'] ?? '' ) ) {
+				continue;
+			}
+
+			$guardians_is_home = self::GUARDIANS_TEAM_ID === (int) ( $candidate['teams']['home']['team']['id'] ?? 0 );
+			$guardians_side    = $guardians_is_home ? 'home' : 'away';
+			$opponent_side     = $guardians_is_home ? 'away' : 'home';
+
+			if ( ! empty( $candidate['teams'][ $guardians_side ]['isWinner'] ) ) {
+				$guardians_wins++;
+			} elseif ( ! empty( $candidate['teams'][ $opponent_side ]['isWinner'] ) ) {
+				$opponent_wins++;
+			}
+		}
+
+		if ( 0 === $guardians_wins && 0 === $opponent_wins ) {
+			return '';
+		}
+
+		if ( $guardians_wins === $opponent_wins ) {
+			return 'Series Tied ' . $guardians_wins . '-' . $opponent_wins;
+		}
+
+		return $guardians_wins > $opponent_wins
+			? 'CLE Leads ' . $guardians_wins . '-' . $opponent_wins
+			: $opponent_abbr . ' Leads ' . $opponent_wins . '-' . $guardians_wins;
 	}
 
 	/**
@@ -1008,6 +1091,88 @@ class Basebelles_API {
 			),
 			'current_play' => $this->normalize_current_play( $live_data['plays']['currentPlay'] ?? array() ),
 			'recent_plays' => $this->normalize_recent_plays( $live_data['plays']['allPlays'] ?? array() ),
+			'game_summary' => $this->normalize_game_summary( $live_data, $away_box, $home_box ),
+		);
+	}
+
+	/**
+	 * Linescore, HP umpire, and team-vs-team aggregate stats for the live/final Stats tab.
+	 *
+	 * @param array $live_data `liveData` payload.
+	 * @param array $away_box Away team's boxscore payload.
+	 * @param array $home_box Home team's boxscore payload.
+	 * @return array
+	 */
+	private function normalize_game_summary( $live_data, $away_box, $home_box ) {
+		$linescore = $live_data['linescore'] ?? array();
+		$officials = $live_data['boxscore']['officials'] ?? array();
+		$hp_umpire = '';
+
+		foreach ( $officials as $official ) {
+			if ( 'Home Plate' === ( $official['officialType'] ?? '' ) ) {
+				$hp_umpire = $official['official']['fullName'] ?? '';
+				break;
+			}
+		}
+
+		$innings = array();
+
+		foreach ( $linescore['innings'] ?? array() as $inning ) {
+			$innings[] = array(
+				'away' => array_key_exists( 'runs', $inning['away'] ?? array() ) ? (int) $inning['away']['runs'] : null,
+				'home' => array_key_exists( 'runs', $inning['home'] ?? array() ) ? (int) $inning['home']['runs'] : null,
+			);
+		}
+
+		return array(
+			'hp_umpire'         => $hp_umpire,
+			'scheduled_innings' => (int) ( $linescore['scheduledInnings'] ?? 9 ),
+			'innings'           => $innings,
+			'line'              => array(
+				'away' => $this->extract_team_line( $linescore['teams']['away'] ?? array() ),
+				'home' => $this->extract_team_line( $linescore['teams']['home'] ?? array() ),
+			),
+			'comparison'        => array(
+				'away' => $this->extract_team_comparison( $away_box ),
+				'home' => $this->extract_team_comparison( $home_box ),
+			),
+		);
+	}
+
+	/**
+	 * Runs/hits/errors for one team, from the linescore.
+	 *
+	 * @param array $team_linescore `liveData.linescore.teams.{home,away}` payload.
+	 * @return array
+	 */
+	private function extract_team_line( $team_linescore ) {
+		return array(
+			'runs'   => (int) ( $team_linescore['runs'] ?? 0 ),
+			'hits'   => (int) ( $team_linescore['hits'] ?? 0 ),
+			'errors' => (int) ( $team_linescore['errors'] ?? 0 ),
+		);
+	}
+
+	/**
+	 * Team-level aggregate batting/pitching totals for the Traffic/Contact/Command comparison.
+	 *
+	 * @param array $team_box One team's `liveData.boxscore.teams.{home,away}` payload.
+	 * @return array
+	 */
+	private function extract_team_comparison( $team_box ) {
+		$batting  = $team_box['teamStats']['batting'] ?? array();
+		$pitching = $team_box['teamStats']['pitching'] ?? array();
+
+		return array(
+			'on_base'    => (int) ( $batting['hits'] ?? 0 ) + (int) ( $batting['baseOnBalls'] ?? 0 ) + (int) ( $batting['hitByPitch'] ?? 0 ),
+			'bb'         => (int) ( $batting['baseOnBalls'] ?? 0 ),
+			'lob'        => (int) ( $batting['leftOnBase'] ?? 0 ),
+			'h'          => (int) ( $batting['hits'] ?? 0 ),
+			'xbh'        => (int) ( $batting['doubles'] ?? 0 ) + (int) ( $batting['triples'] ?? 0 ) + (int) ( $batting['homeRuns'] ?? 0 ),
+			'tb'         => (int) ( $batting['totalBases'] ?? 0 ),
+			'pitches'    => (int) ( $pitching['numberOfPitches'] ?? 0 ),
+			'strike_pct' => round( (float) ( $pitching['strikePercentage'] ?? 0 ) * 100 ) . '%',
+			'k'          => (int) ( $pitching['strikeOuts'] ?? 0 ),
 		);
 	}
 

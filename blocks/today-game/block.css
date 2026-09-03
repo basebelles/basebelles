@@ -60,6 +60,35 @@
 	color: var(--bb-accent-slate);
 }
 
+.game-time.is-live {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	color: var(--bb-red);
+	letter-spacing: 0.03em;
+}
+
+.tg-live-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--bb-red);
+	animation: tg-live-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes tg-live-pulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+.tg-series-status {
+	margin-top: 4px;
+	font-size: 0.7rem;
+	font-weight: 400;
+	color: var(--bb-accent-slate);
+	white-space: normal;
+}
+
 .probable-pitchers,
 .game-scores {
 	border-top: 1px solid var(--bb-sandstone-cream);
@@ -238,6 +267,85 @@
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	color: var(--bb-accent-slate);
+}
+
+/* Stats tab: live/final game summary (linescore + team-vs-team box score) */
+.tg-summary-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	text-align: center;
+	margin-bottom: 15px;
+}
+
+.tg-summary-team strong { display: block; font-size: 1rem; color: var(--bb-deep-navy); }
+.tg-summary-team span { font-size: 0.75rem; color: var(--bb-accent-slate); }
+
+.tg-summary-umpire {
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bb-accent-slate);
+	white-space: nowrap;
+}
+
+.tg-innings-wrap {
+	overflow-x: auto;
+	margin-bottom: 15px;
+}
+
+.tg-innings {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.75rem;
+}
+
+.tg-innings th,
+.tg-innings td {
+	padding: 4px 6px;
+	text-align: center;
+	border-bottom: 1px solid var(--bb-sandstone-cream);
+}
+
+.tg-innings th[scope="row"] {
+	text-align: left;
+	font-weight: 700;
+	color: var(--bb-deep-navy);
+}
+
+.tg-comparison {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+}
+
+.tg-comparison-group {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.7rem;
+}
+
+.tg-comparison-group caption {
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bb-accent-slate);
+	text-align: left;
+	margin-bottom: 4px;
+}
+
+.tg-comparison-group th,
+.tg-comparison-group td {
+	padding: 2px 4px;
+	text-align: center;
+	border-bottom: 1px solid var(--bb-sandstone-cream);
+}
+
+.tg-comparison-group td:first-child,
+.tg-comparison-group th:first-child {
+	text-align: left;
 }
 
 /* Plays tab */

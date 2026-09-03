@@ -50,7 +50,11 @@
 				var subtabsEl = subtab.closest( '.tg-subtabs' );
 
 				if ( subtabsEl ) {
-					setActiveSubtab( subtabsEl, subtab.getAttribute( 'data-subtab' ) );
+					var chosen = subtab.getAttribute( 'data-subtab' );
+					setActiveSubtab( subtabsEl, chosen );
+					// Remembered so a live poll's re-render (which defaults to whichever team is
+					// batting) doesn't yank the view back once someone's picked a side themselves.
+					subtabsEl.setAttribute( 'data-manual-subtab', chosen );
 				}
 			}
 		} );
@@ -96,16 +100,51 @@
 		}, 1000 );
 	}
 
+	function updateLiveIndicator( instance, phase ) {
+		var card = instance.closest( '.game-card' );
+		var timeEl = card ? card.querySelector( '.game-time' ) : null;
+
+		if ( ! timeEl ) {
+			return;
+		}
+
+		var isLive = 'live' === phase;
+		timeEl.classList.toggle( 'is-live', isLive );
+
+		if ( isLive ) {
+			timeEl.innerHTML = '<span class="tg-live-dot" aria-hidden="true"></span>LIVE';
+		} else {
+			timeEl.textContent = timeEl.getAttribute( 'data-original-time' ) || timeEl.textContent;
+		}
+	}
+
 	function applyPanelUpdate( instance, data ) {
 		instance.setAttribute( 'data-phase', data.phase );
+		updateLiveIndicator( instance, data.phase );
 
 		var panelNames = [ 'score', 'plays', 'stats', 'players' ];
 
 		for ( var i = 0; i < panelNames.length; i++ ) {
 			var panel = instance.querySelector( '.tg-panel[data-panel="' + panelNames[ i ] + '"]' );
 
-			if ( panel && typeof data.panels[ panelNames[ i ] ] === 'string' ) {
-				panel.innerHTML = data.panels[ panelNames[ i ] ];
+			if ( ! panel || typeof data.panels[ panelNames[ i ] ] !== 'string' ) {
+				continue;
+			}
+
+			// The fresh Players HTML defaults to whichever team is batting; if someone already
+			// picked a side manually, carry that choice forward instead of overriding it.
+			var oldSubtabs   = panel.querySelector( '.tg-subtabs' );
+			var manualSubtab = oldSubtabs ? oldSubtabs.getAttribute( 'data-manual-subtab' ) : null;
+
+			panel.innerHTML = data.panels[ panelNames[ i ] ];
+
+			if ( manualSubtab ) {
+				var newSubtabs = panel.querySelector( '.tg-subtabs' );
+
+				if ( newSubtabs ) {
+					newSubtabs.setAttribute( 'data-manual-subtab', manualSubtab );
+					setActiveSubtab( newSubtabs, manualSubtab );
+				}
 			}
 		}
 	}

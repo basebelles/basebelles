@@ -65,7 +65,22 @@ if ( is_wp_error( $schedule ) ) {
 					</div>
 					<div class="game-meta">
 						<?php echo esc_html( $game['day_date'] ); ?>
-						<br /><div class="game-time"><?php echo esc_html( $game['game_time'] ); ?></div>
+						<br />
+						<div class="game-time<?php echo 'Live' === $game['game_status'] ? ' is-live' : ''; ?>" data-original-time="<?php echo esc_attr( $game['game_time'] ); ?>">
+							<?php if ( 'Live' === $game['game_status'] ) : ?>
+								<span class="tg-live-dot" aria-hidden="true"></span>LIVE
+							<?php else : ?>
+								<?php echo esc_html( $game['game_time'] ); ?>
+							<?php endif; ?>
+						</div>
+						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
+							<div class="tg-series-status">
+								Game <?php echo esc_html( $game['series']['game_number'] ); ?> of <?php echo esc_html( $game['series']['games_total'] ); ?>
+								<?php if ( ! empty( $game['series']['status_label'] ) ) : ?>
+									&middot; <?php echo esc_html( $game['series']['status_label'] ); ?>
+								<?php endif; ?>
+							</div>
+						<?php endif; ?>
 					</div>
 					<div class="home-team">
 						<div class="team-logo">
