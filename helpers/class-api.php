@@ -1228,7 +1228,14 @@ class Basebelles_API {
 	}
 
 	/**
-	 * Normalize one team's boxscore into an ordered starting-lineup list.
+	 * Normalize one team's boxscore into a batting order, keyed 1-9 by lineup slot, where each
+	 * slot holds every player who has occupied it (in appearance order) rather than just the
+	 * current one -- a pinch runner or pinch hitter would otherwise silently erase whoever they
+	 * replaced. MLB encodes this on the player itself: `battingOrder` is a 3-digit code where the
+	 * leading digit(s) are the slot and the trailing digit is how many times that slot has turned
+	 * over (0 = the original starter), so grouping by that code recovers the full substitution
+	 * chain. The team's own top-level `battingOrder` array only lists current occupants, which is
+	 * why we don't use it here.
 	 *
 	 * Empty until MLB posts the confirmed lineup, typically ~1hr before first pitch.
 	 *
@@ -1236,20 +1243,25 @@ class Basebelles_API {
 	 * @return array
 	 */
 	private function normalize_boxscore_lineup( $team_boxscore ) {
-		$order   = $team_boxscore['battingOrder'] ?? array();
 		$players = $team_boxscore['players'] ?? array();
-		$lineup  = array();
+		$slots   = array();
 
-		foreach ( $order as $player_id ) {
-			$player = $players[ 'ID' . $player_id ] ?? array();
+		foreach ( $players as $player ) {
+			$code = $player['battingOrder'] ?? null;
 
-			if ( empty( $player ) ) {
+			if ( null === $code || '' === $code ) {
 				continue;
 			}
 
-			$batting  = $player['stats']['batting'] ?? array();
-			$lineup[] = array(
-				'id'       => (int) $player_id,
+			$slot     = intdiv( (int) $code, 100 );
+			$sequence = (int) $code % 100;
+
+			if ( $slot < 1 || $slot > 9 ) {
+				continue;
+			}
+
+			$batting                     = $player['stats']['batting'] ?? array();
+			$slots[ $slot ][ $sequence ] = array(
 				'name'     => $player['person']['fullName'] ?? '',
 				'position' => $player['position']['abbreviation'] ?? '',
 				'ab'       => (int) ( $batting['atBats'] ?? 0 ),
@@ -1264,7 +1276,14 @@ class Basebelles_API {
 			);
 		}
 
-		return $lineup;
+		ksort( $slots );
+
+		foreach ( $slots as $slot => $appearances ) {
+			ksort( $appearances );
+			$slots[ $slot ] = array_values( $appearances );
+		}
+
+		return $slots;
 	}
 
 	/**
@@ -1314,6 +1333,7 @@ class Basebelles_API {
 				'description' => $play['result']['description'] ?? '',
 				'inning'      => (int) ( $about['inning'] ?? 0 ),
 				'half'        => (string) ( $about['halfInning'] ?? '' ),
+				'is_scoring'  => ! empty( $about['isScoringPlay'] ),
 			);
 		}
 

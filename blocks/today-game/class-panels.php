@@ -38,6 +38,27 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
+	 * Compact "1 - 3" score line for the header, shown under the LIVE badge (or the scheduled
+	 * time, once final). Reads the live feed's linescore rather than the schedule's, since the
+	 * live feed refreshes every 60s during the game and the schedule call doesn't.
+	 *
+	 * @param array $game Normalized game array.
+	 * @param array $live_feed Live feed data, or empty array.
+	 * @return string
+	 */
+	public static function render_header_score( array $game, array $live_feed ) {
+		$line      = $live_feed['game_summary']['line'] ?? array();
+		$away_runs = $line['away']['runs'] ?? null;
+		$home_runs = $line['home']['runs'] ?? null;
+
+		if ( null === $away_runs || null === $home_runs ) {
+			return '';
+		}
+
+		return '<div class="tg-header-score">' . esc_html( $away_runs ) . ' &ndash; ' . esc_html( $home_runs ) . '</div>';
+	}
+
+	/**
 	 * Render the tab bar and all four panels for one game.
 	 *
 	 * @param array  $game Normalized game array.
@@ -50,7 +71,7 @@ class Basebelles_Today_Game_Panels {
 		?>
 		<div class="tg-tabs" data-game-pk="<?php echo esc_attr( (string) $game['game_pk'] ); ?>" data-phase="<?php echo esc_attr( $phase ); ?>">
 			<div class="tg-tab-bar" role="tablist">
-				<button type="button" class="tg-tab is-active" data-tab="score" role="tab" aria-selected="true">Score</button>
+				<button type="button" class="tg-tab is-active" data-tab="score" role="tab" aria-selected="true">Status</button>
 				<button type="button" class="tg-tab" data-tab="plays" role="tab" aria-selected="false">Plays</button>
 				<button type="button" class="tg-tab" data-tab="stats" role="tab" aria-selected="false">Stats</button>
 				<button type="button" class="tg-tab" data-tab="players" role="tab" aria-selected="false">Players</button>
@@ -82,7 +103,7 @@ class Basebelles_Today_Game_Panels {
 		}
 
 		if ( 'live' === $phase ) {
-			return self::render_at_bat_now( $live_feed );
+			return self::render_at_bat_now( $game, $live_feed );
 		}
 
 		return self::render_final_score( $game );
@@ -152,25 +173,30 @@ class Basebelles_Today_Game_Panels {
 	/**
 	 * Live-phase Score content: a condensed "who's at bat" card.
 	 *
+	 * @param array $game Normalized game array.
 	 * @param array $live_feed Live feed data, or empty array.
 	 * @return string
 	 */
-	private static function render_at_bat_now( array $live_feed ) {
+	private static function render_at_bat_now( array $game, array $live_feed ) {
 		$current_play = $live_feed['current_play'] ?? array();
 
 		if ( empty( $current_play ) ) {
 			return '<p class="tg-empty">Live &mdash; check the Plays tab for the latest.</p>';
 		}
 
-		$bases = $current_play['bases'] ?? array();
-		$half  = 'top' === strtolower( $current_play['half'] ) ? 'Top' : 'Bottom';
+		$bases  = $current_play['bases'] ?? array();
+		$is_top = 'top' === strtolower( $current_play['half'] );
+		$half   = $is_top ? 'Top' : 'Bottom';
+		// Top of the inning: away team bats, home team pitches. Bottom: the reverse.
+		$batter_abbr  = $is_top ? ( $game['away_team']['abbreviation'] ?? '' ) : ( $game['home_team']['abbreviation'] ?? '' );
+		$pitcher_abbr = $is_top ? ( $game['home_team']['abbreviation'] ?? '' ) : ( $game['away_team']['abbreviation'] ?? '' );
 
 		ob_start();
 		?>
 		<div class="tg-at-bat">
 			<div class="tg-at-bat-inning"><?php echo esc_html( $half . ' ' . $current_play['inning'] ); ?> &middot; <?php echo esc_html( $current_play['outs'] ); ?> out</div>
 			<div class="tg-at-bat-matchup">
-				<strong><?php echo esc_html( $current_play['batter'] ); ?></strong> at bat vs <strong><?php echo esc_html( $current_play['pitcher'] ); ?></strong>
+				<strong><?php echo esc_html( $current_play['batter'] ); ?></strong> (<?php echo esc_html( $batter_abbr ); ?>) at bat vs <strong><?php echo esc_html( $current_play['pitcher'] ); ?></strong> (<?php echo esc_html( $pitcher_abbr ); ?>)
 			</div>
 			<div class="tg-at-bat-count"><?php echo esc_html( $current_play['balls'] . '-' . $current_play['strikes'] ); ?></div>
 			<div class="tg-bases" aria-hidden="true">
@@ -247,7 +273,7 @@ class Basebelles_Today_Game_Panels {
 		?>
 		<ul class="tg-plays">
 			<?php foreach ( $plays as $play ) : ?>
-				<li>
+				<li<?php echo ! empty( $play['is_scoring'] ) ? ' class="tg-play-scoring"' : ''; ?>>
 					<span class="tg-play-inning"><?php echo esc_html( ( 'top' === strtolower( $play['half'] ) ? 'Top' : 'Bot' ) . ' ' . $play['inning'] ); ?></span>
 					<span class="tg-play-desc"><?php echo esc_html( $play['description'] ); ?></span>
 				</li>
@@ -509,11 +535,14 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
-	 * Render one team's batting-order table.
+	 * Render one team's batting-order table. Each slot (1-9) may hold more than one player if a
+	 * pinch hitter/runner or defensive replacement has taken over that spot -- everyone who has
+	 * occupied it gets a row, with earlier occupants struck through and the current one noting
+	 * who they replaced, rather than the substitution silently erasing the original player.
 	 *
 	 * @param string $abbreviation Team abbreviation. The active sub-tab button already shows it
 	 *                             visually, so it's a screen-reader-only table caption here.
-	 * @param array  $lineup Ordered list of lineup entries from Basebelles_API::get_live_feed().
+	 * @param array  $lineup Slot (1-9) => ordered list of appearances, from Basebelles_API::get_live_feed().
 	 * @return void
 	 */
 	private static function render_lineup_table( $abbreviation, array $lineup ) {
@@ -537,17 +566,27 @@ class Basebelles_Today_Game_Panels {
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach ( $lineup as $index => $player ) : ?>
-					<tr>
-						<td class="tg-lineup-name"><?php echo esc_html( ( $index + 1 ) . '. ' . $player['name'] ); ?> <span class="tg-lineup-pos"><?php echo esc_html( $player['position'] ); ?></span></td>
-						<td><?php echo esc_html( $player['avg'] ?? '.---' ); ?></td>
-						<td><?php echo esc_html( $player['ab'] ); ?></td>
-						<td><?php echo esc_html( $player['r'] ); ?></td>
-						<td><?php echo esc_html( $player['h'] ); ?></td>
-						<td><?php echo esc_html( $player['rbi'] ); ?></td>
-						<td><?php echo esc_html( $player['bb'] ); ?></td>
-						<td><?php echo esc_html( $player['k'] ); ?></td>
-					</tr>
+				<?php foreach ( $lineup as $slot => $appearances ) : ?>
+					<?php $last_index = count( $appearances ) - 1; ?>
+					<?php foreach ( $appearances as $i => $player ) : ?>
+						<tr<?php echo $i < $last_index ? ' class="tg-lineup-replaced"' : ''; ?>>
+							<td class="tg-lineup-name">
+								<?php if ( 0 === $i ) : ?>
+									<?php echo esc_html( $slot . '. ' ); ?>
+								<?php else : ?>
+									<span class="tg-lineup-sub-arrow" aria-hidden="true">&#8627;</span>
+								<?php endif; ?>
+								<?php echo esc_html( $player['name'] ); ?> <span class="tg-lineup-pos"><?php echo esc_html( $player['position'] ); ?></span>
+							</td>
+							<td><?php echo esc_html( $player['avg'] ?? '.---' ); ?></td>
+							<td><?php echo esc_html( $player['ab'] ); ?></td>
+							<td><?php echo esc_html( $player['r'] ); ?></td>
+							<td><?php echo esc_html( $player['h'] ); ?></td>
+							<td><?php echo esc_html( $player['rbi'] ); ?></td>
+							<td><?php echo esc_html( $player['bb'] ); ?></td>
+							<td><?php echo esc_html( $player['k'] ); ?></td>
+						</tr>
+					<?php endforeach; ?>
 				<?php endforeach; ?>
 			</tbody>
 		</table>
