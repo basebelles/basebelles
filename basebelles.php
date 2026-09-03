@@ -68,6 +68,7 @@ class Basebelles {
 		require_once 'features/class-embeds.php';
 		require_once 'features/class-patterns.php';
 		require_once 'features/class-series-generator.php';
+		require_once 'features/class-today-game-rest.php';
 
 		// General Helpers
 		require_once 'helpers/class-api.php';
@@ -77,6 +78,7 @@ class Basebelles {
 		require_once 'helpers/class-upgrades.php';
 
 		// Blocks
+		require_once 'blocks/today-game/class-panels.php';
 		require_once 'blocks/class-blocks.php';
 	}
 

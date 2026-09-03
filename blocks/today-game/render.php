@@ -47,33 +47,6 @@ if ( is_wp_error( $schedule ) ) {
 		</div>
 	<?php else : ?>
 		<?php foreach ( $schedule['games'] as $game ) : ?>
-			<?php
-			$away_pitcher = $game['away_pitcher'];
-			$home_pitcher = $game['home_pitcher'];
-
-			// Are the Guards the home team or away team?
-			$home_or_away = ( 'CLE' === $game['home_team']['abbreviation'] ) ? 'home' : 'away';
-
-			if ( empty( $away_pitcher ) ) {
-				$away_pitcher = array(
-					'name'   => 'TBD',
-					'hand'   => '',
-					'record' => '-',
-					'era'    => '--',
-					'url'    => '',
-				);
-			}
-
-			if ( empty( $home_pitcher ) ) {
-				$home_pitcher = array(
-					'name'   => 'TBD',
-					'hand'   => '',
-					'record' => '-',
-					'era'    => '--',
-					'url'    => '',
-				);
-			}
-			?>
 			<div class="game-card">
 				<?php if ( ! empty( $game['show_label'] ) ) : ?>
 					<div class="game-label">Game <?php echo esc_html( (string) $game['game_number'] ); ?></div>
@@ -92,7 +65,22 @@ if ( is_wp_error( $schedule ) ) {
 					</div>
 					<div class="game-meta">
 						<?php echo esc_html( $game['day_date'] ); ?>
-						<br /><div class="game-time"><?php echo esc_html( $game['game_time'] ); ?></div>
+						<br />
+						<div class="game-time<?php echo 'Live' === $game['game_status'] ? ' is-live' : ''; ?>" data-original-time="<?php echo esc_attr( $game['game_time'] ); ?>">
+							<?php if ( 'Live' === $game['game_status'] ) : ?>
+								<span class="tg-live-dot" aria-hidden="true"></span>LIVE
+							<?php else : ?>
+								<?php echo esc_html( $game['game_time'] ); ?>
+							<?php endif; ?>
+						</div>
+						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
+							<div class="tg-series-status">
+								Game <?php echo esc_html( $game['series']['game_number'] ); ?> of <?php echo esc_html( $game['series']['games_total'] ); ?>
+								<?php if ( ! empty( $game['series']['status_label'] ) ) : ?>
+									&middot; <?php echo esc_html( $game['series']['status_label'] ); ?>
+								<?php endif; ?>
+							</div>
+						<?php endif; ?>
 					</div>
 					<div class="home-team">
 						<div class="team-logo">
@@ -119,106 +107,44 @@ if ( is_wp_error( $schedule ) ) {
 					<?php endif; ?>
 				</div>
 
-				<?php if ( 'Preview' === $game['game_status'] ) : ?>
-					<div class="probable-pitchers">
-						<div class="pitcher-away">
-							<div class="pitcher-name">
-								<?php if ( ! empty( $away_pitcher['url'] ) ) : ?>
-									<a href="<?php echo esc_url( $away_pitcher['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $away_pitcher['name'] ); ?></a>
-								<?php else : ?>
-									<?php echo esc_html( $away_pitcher['name'] ); ?>
-								<?php endif; ?>
-								<?php if ( ! empty( $away_pitcher['hand'] ) ) : ?>
-									<span class="pitcher-hand"><?php echo esc_html( $away_pitcher['hand'] ); ?></span>
-								<?php endif; ?>
-							</div>
-							<div class="pitcher-stats">
-								<span><?php echo esc_html( $away_pitcher['record'] ); ?></span>
-								&bull;
-								<span class="pitcher-era"><?php echo esc_html( $away_pitcher['era'] ); ?> ERA</span>
-							</div>
-						</div>
-						<div class="game-meta">
-							v.s.
-						</div>
-						<div class="pitcher-home">
-							<div class="pitcher-name">
-								<?php if ( ! empty( $home_pitcher['url'] ) ) : ?>
-									<a href="<?php echo esc_url( $home_pitcher['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $home_pitcher['name'] ); ?></a>
-								<?php else : ?>
-									<?php echo esc_html( $home_pitcher['name'] ); ?>
-								<?php endif; ?>
-								<?php if ( ! empty( $home_pitcher['hand'] ) ) : ?>
-									<span class="pitcher-hand"><?php echo esc_html( $home_pitcher['hand'] ); ?></span>
-								<?php endif; ?>
-							</div>
-							<div class="pitcher-stats">
-								<span><?php echo esc_html( $home_pitcher['record'] ); ?></span>
-								&bull;
-								<span class="pitcher-era"><?php echo esc_html( $home_pitcher['era'] ); ?> ERA</span>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>
+				<?php
+				// Always ask MLB for the live feed -- lineups and plays show up on MLB's own
+				// schedule (often 60-90+ minutes out), not tied to the Score tab's 30-minute
+				// countdown threshold below. The 60s cache in get_live_feed() bounds the real
+				// request cost regardless of how early this runs.
+				$phase       = Basebelles_Today_Game_Panels::get_phase( $game );
+				$live_feed   = array();
+				$feed_result = $api->get_live_feed( $game['game_pk'] );
 
-				<?php if ( ! empty( $game['scores'] ) ) : ?>
-					<div class="game-scores">
-						<div class="score-away">
-							<?php echo esc_html( $game['scores']['away'] ); ?>
-						</div>
-						<div class="game-meta">
-							<?php
-							$d_state = $game['detailed_state']['state'] ?? '';
-							$reason  = $game['detailed_state']['reason'] ?? '';
+				if ( ! is_wp_error( $feed_result ) ) {
+					$live_feed = $feed_result;
+				}
 
-							// 1. Check for Postponed first!
-							if ( 'Postponed' === $d_state ) {
-								?>
-								<strong class="status-ppd">
-									PPD
-									<?php if ( ! empty( $reason ) ) : ?>
-										<br /><small><?php echo esc_html( $reason ); ?></small>
-									<?php endif; ?>
-								</strong>
-								<?php
-							} elseif ( ! empty( $game['scores']['isFinal'] ) ) {
-								$winner = $home_or_away === $game['scores']['winner'] ? 'guards-win' : 'oppo-win';
-								?>
-								<strong class="<?php echo esc_attr( $winner ); ?>">
-									<?php
-									if ( 'away' === $game['scores']['winner'] ) {
-										echo esc_html( '&#9756;&nbsp;' );
-									}
-									?>
-									FINAL
-									<?php
-									if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) {
-										echo esc_html( ' / ' . $game['scores']['inning'] );
-									}
-									?>
-									<?php
-									if ( 'home' === $game['scores']['winner'] ) {
-										echo esc_html( '&#9758;&nbsp;' );
-									}
-									?>
-								</strong>
-								<?php
-							} else {
-								// 3. Fallback to Live
-								?>
-								<strong>
-									LIVE
-								</strong>
-								<?php
-							}
-							?>
-						</div>
-						<div class="score-home">
-							<?php echo esc_html( $game['scores']['home'] ); ?>
-						</div>
-					</div>
-				<?php endif; ?>
+				echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 			</div>
 		<?php endforeach; ?>
+
+		<?php
+		if ( ! wp_script_is( 'basebelles-today-game', 'enqueued' ) ) {
+			wp_enqueue_script(
+				'basebelles-today-game',
+				$plugin_url . 'blocks/today-game/today-game.js',
+				array(),
+				Basebelles::$version,
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
+			);
+			wp_localize_script(
+				'basebelles-today-game',
+				'bbTodayGame',
+				array(
+					'restUrl' => esc_url_raw( rest_url( 'basebelles/v1/today-game/' ) ),
+				)
+			);
+		}
+		?>
 	<?php endif; ?>
 </div>
