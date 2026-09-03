@@ -788,9 +788,12 @@ class Basebelles_API {
 			return 'Series Tied ' . $guardians_wins . '-' . $opponent_wins;
 		}
 
+		// Every game in the series has a result -- nothing left to change the outcome.
+		$verb = ( $guardians_wins + $opponent_wins ) === $games_in_series ? 'Wins' : 'Leads';
+
 		return $guardians_wins > $opponent_wins
-			? 'CLE Leads ' . $guardians_wins . '-' . $opponent_wins
-			: $opponent_abbr . ' Leads ' . $opponent_wins . '-' . $guardians_wins;
+			? 'CLE ' . $verb . ' ' . $guardians_wins . '-' . $opponent_wins
+			: $opponent_abbr . ' ' . $verb . ' ' . $opponent_wins . '-' . $guardians_wins;
 	}
 
 	/**

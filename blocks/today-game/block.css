@@ -121,6 +121,17 @@
 	font-variant-numeric: tabular-nums;
 }
 
+.tg-result-headline {
+	margin-top: 15px;
+	text-align: center;
+	font-size: 1.3rem;
+	font-weight: 800;
+	letter-spacing: 0.02em;
+}
+
+.tg-result-headline.is-win { color: var(--bb-green); }
+.tg-result-headline.is-loss { color: var(--bb-red); }
+
 /* Broadcasts & Multi-game Footer */
 .game-broadcasts {
 	font-size: 0.75rem;
