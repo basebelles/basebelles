@@ -1,0 +1,104 @@
+/**
+ * Belle Directory block.
+ *
+ * The avatar is a stack: a monogram sits at the bottom of the box and a Gravatar, when the
+ * person has one, is layered over it. That way there is never a blank circle.
+ */
+
+.basebelles-belles {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: 1.25rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.basebelles-belle {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.9rem;
+	margin: 0;
+	padding: 1rem;
+	border: 1px solid rgba(0, 45, 98, 0.15);
+	border-radius: 0.5rem;
+	background-color: var(--bb-sandstone-cream);
+}
+
+.basebelles-belle-avatar {
+	position: relative;
+	flex: 0 0 auto;
+	width: 4rem;
+	height: 4rem;
+	overflow: hidden;
+	border-radius: 50%;
+	background-color: var(--bb-belle-monogram-bg, var(--bb-deep-navy));
+}
+
+.basebelles-belle-monogram {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--bb-sandstone-cream);
+	font-size: 1.4rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.02em;
+}
+
+.basebelles-belle-photo {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.basebelles-belle-body {
+	min-width: 0;
+}
+
+.basebelles-belle-name {
+	margin: 0;
+	color: var(--bb-deep-navy);
+	font-size: 1.05rem;
+	line-height: 1.25;
+}
+
+.basebelles-belle-location {
+	margin: 0.15rem 0 0;
+	color: var(--bb-accent-slate);
+	font-size: 0.85rem;
+}
+
+.basebelles-belle-faves {
+	margin: 0.6rem 0 0;
+	font-size: 0.85rem;
+}
+
+.basebelles-belle-faves dt {
+	color: var(--bb-wine-red);
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.basebelles-belle-faves dd {
+	margin: 0 0 0.4rem;
+	color: var(--bb-slate-blue);
+}
+
+.basebelles-belle-faves dd:last-child {
+	margin-bottom: 0;
+}
+
+/* Editor-only placeholder: opt back out of the grid so the heading and text stack. */
+.basebelles-belles.placeholder {
+	display: block;
+	padding: 1rem;
+	border: 1px dashed var(--bb-accent-slate);
+	border-radius: 0.5rem;
+}
