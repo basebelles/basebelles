@@ -1,72 +1,136 @@
-/* Guardians Standings Block */
+/* Guardians Standings Block — ticker strip */
 .basebelles-standings {
-	padding: 10px;
-	background: #fff;
-	color: var(--bb-deep-navy);
-	border: 1px solid var(--bb-slate-blue);
-	font-family: sans-serif;
 	max-width: 100%;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .basebelles-standings.placeholder {
-	border-style: dashed;
+	padding: 10px;
+	background: #fff;
+	color: var(--bb-deep-navy);
+	border: 1px dashed var(--bb-slate-blue);
 	text-align: center;
 }
 
-.standings-table-wrap {
-	overflow-x: auto;
-	/* Adds a smoother scroll experience on iOS */
-	-webkit-overflow-scrolling: touch;
+.bb-ticker {
+	/* The design's secondary-row tint is the same base slate as --bb-slate-blue-light but at 31%
+	   rather than that token's 79%, which is far too dark to read small labels against. Scoped to
+	   the component rather than added to the shared palette until something else needs it. */
+	--bb-ticker-tint: rgba(50, 91, 118, 0.31);
+
+	background: #fff;
+	border: 3px solid var(--bb-wine-red-banner);
+	border-radius: 14px;
+	/* Keeps the secondary row's tint from squaring off the bottom corners. */
+	overflow: hidden;
 }
 
-.standings-table {
-	width: 100%;
-	/* Min-width ensures the table doesn't squish too much, triggering the scroll */
-	min-width: 600px;
-	border-collapse: separate; /* Required for sticky headers/columns */
-	border-spacing: 0;
-	font-size: 0.95em;
+.bb-ticker-row {
+	display: flex;
+	align-items: center;
+	margin: 0;
 }
 
-.standings-table th,
-.standings-table td {
-	padding: 8px 10px;
-	border-right: 1px solid var(--bb-sandstone-cream);
-	border-bottom: 1px solid var(--bb-sandstone-cream);
+.bb-ticker-row.is-primary {
+	padding: 14px 20px;
+}
+
+.bb-ticker-row.is-secondary {
+	padding: 12px 20px;
+	background: var(--bb-ticker-tint);
+	border-top: 1px solid var(--bb-sandstone-cream);
+}
+
+.bb-ticker-item {
+	flex: 1;
+	padding: 0 20px;
 	text-align: center;
+	/* min-width:auto on a flex child lets a long summary push the row wider than the card. */
+	min-width: 0;
+}
+
+/* Hairline dividers as borders on the items themselves rather than separate elements, so they
+   disappear on their own when the row wraps to a grid below. */
+.bb-ticker-row.is-primary .bb-ticker-item + .bb-ticker-item {
+	border-left: 1px solid var(--bb-sandstone-cream);
+}
+
+/* The standing summary is prose, not a stat: wider, left-aligned, and flush to the card edge. */
+.bb-ticker-item.is-standing {
+	flex: 0 1 auto;
+	padding-left: 0;
+	text-align: left;
+}
+
+.bb-ticker-label {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
 	white-space: nowrap;
 }
 
-.standings-table th {
-	background: var(--bb-sandstone-cream);
+.bb-ticker-value {
+	margin: 2px 0 0;
+	font-size: 14px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
 	color: var(--bb-deep-navy);
-	font-weight: 700;
-	position: sticky;
-	top: 0;
 }
 
-/* Sticky First Column (Team Name) */
-.standings-table td:first-child,
-.standings-table th:first-child {
-	text-align: left;
-	position: sticky;
-	left: 0;
-	background: #fff;
-	z-index: 2;
-	/* Add a small shadow or border to indicate the "split" when scrolling */
-	border-right: 2px solid var(--bb-sandstone-cream);
+.bb-ticker-item.is-standing .bb-ticker-value {
+	font-size: 16px;
 }
 
-.standings-table th:first-child {
-	background: var(--bb-sandstone-cream);
-	z-index: 3; /* Keeps corner above both row and column headers */
+/* --bb-accent-slate manages 6.4:1 on white but only 3.9:1 on the tinted row, short of the 4.5:1
+   AA needs at this size, so the secondary labels step down to the darker slate (7.4:1). The
+   size/case/tracking difference carries the label-vs-value hierarchy instead of lightness. */
+.bb-ticker-row.is-secondary .bb-ticker-label {
+	color: var(--bb-slate-blue);
 }
 
-/* Alternating row colors for better readability while scrolling */
-.standings-table tr:nth-child(even) td {
-	background: #faf9f6;
+.bb-ticker-row.is-secondary .bb-ticker-value {
+	font-size: 12px;
 }
 
-.standings-table tr:nth-child(even) td:first-child {
-	background: #faf9f6;
+/* Losing streak and negative run differential. */
+.bb-ticker-item.is-negative .bb-ticker-value {
+	color: var(--bb-red);
+}
+
+/* Both negative stats live in the tinted row, where --bb-red only reaches 3.6:1; the deeper wine
+   red gets to 6.0:1. The plain --bb-red above stands for a primary-row negative, should one ever
+   be flagged there. */
+.bb-ticker-row.is-secondary .bb-ticker-item.is-negative .bb-ticker-value {
+	color: var(--bb-wine-red);
+}
+
+/* Eight items will not sit on one line on a phone, so both rows reflow to a grid. The strip stops
+   being a strip, which is the trade for keeping every stat visible and legible. */
+@media (max-width: 640px) {
+	.bb-ticker-row {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 12px 8px;
+	}
+
+	.bb-ticker-item {
+		padding: 0;
+	}
+
+	/* The summary needs the full width; the four stats share the row beneath it. */
+	.bb-ticker-item.is-standing {
+		grid-column: 1 / -1;
+	}
+
+	.bb-ticker-row.is-primary .bb-ticker-item + .bb-ticker-item {
+		border-left: 0;
+	}
+}
+
+@media (max-width: 380px) {
+	.bb-ticker-row {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }

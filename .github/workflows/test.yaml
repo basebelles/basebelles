@@ -1,0 +1,52 @@
+name: 'Tests'
+
+on:
+  push:
+    branches: [ trunk ]
+  pull_request:
+
+jobs:
+  php:
+    name: 'PHPUnit (PHP ${{ matrix.php }})'
+    runs-on: ubuntu-latest
+    strategy:
+      # Report every version rather than stopping at the first red one — knowing a failure is
+      # 8.5-only, or on every version, is the useful part.
+      fail-fast: false
+      matrix:
+        # 8.2 is the floor the committed lockfile can install on (PHPUnit 11 requires it);
+        # 8.5 is what development actually happens on.
+        php: [ '8.2', '8.3', '8.4', '8.5' ]
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+
+      # No lockfile on the first run; --prefer-dist keeps it quick either way.
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
+
+  js:
+    name: 'Block scripts'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run tests
+        run: npm test

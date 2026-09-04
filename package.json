@@ -1,0 +1,25 @@
+{
+  "name": "basebelles",
+  "version": "1.5.0",
+  "private": true,
+  "description": "Base*Belles custom plugin.",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  },
+  "scripts": {
+    "install": "composer install",
+    "test": "npm-run-all test:*",
+    "test:node": "node --test \"tests/js/**/*.test.mjs\"",
+    "test:composer": "composer test",
+    "bump": "node tools/bump-version.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
+  },
+  "dependencies": {
+    "npm-run-all2": "^9.0.3"
+  }
+}

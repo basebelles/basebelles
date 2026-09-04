@@ -38,6 +38,13 @@ wp-config.php
 # Claude
 .claude/settings.local.json
 
+# Test tooling — installed locally and in CI, never committed or deployed.
+# Lockfiles are deliberately NOT ignored: commit them so CI resolves the same versions you ran.
+/vendor/
+/node_modules/
+/.phpunit.cache/
+.phpunit.result.cache
+
 # All plugins
 #
 # Note: If you wish to whitelist plugins,

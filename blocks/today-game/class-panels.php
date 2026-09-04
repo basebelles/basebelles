@@ -18,12 +18,35 @@ class Basebelles_Today_Game_Panels {
 	const NEAR_PHASE_WINDOW = 30 * MINUTE_IN_SECONDS;
 
 	/**
-	 * Determine which phase a game is in: far, near, live, or final.
+	 * detailedState values that mean play is stopped but the game is still expected to happen.
+	 *
+	 * Matched as prefixes, because MLB appends the cause to most of them -- "Delayed: Rain",
+	 * "Delayed Start: Rain", "Suspended: Rain" -- and the bare form shows up too when it hasn't
+	 * decided on a cause yet. Rain is the common case but nothing here is rain-specific.
+	 */
+	const DELAY_STATES = array( 'Delayed Start', 'Delayed', 'Suspended', 'Umpire Delay' );
+
+	/**
+	 * Determine which phase a game is in: far, near, live, delayed, postponed, or final.
 	 *
 	 * @param array $game Normalized game array from Basebelles_API::get_guardians_today_game().
 	 * @return string
 	 */
 	public static function get_phase( array $game ) {
+		$d_state = (string) ( $game['detailed_state']['state'] ?? '' );
+
+		if ( 'Postponed' === $d_state ) {
+			return 'postponed';
+		}
+
+		// Ahead of the Final check on purpose: a game that was delayed and then played out reports
+		// a plain "Final", so it lands in the final phase on its own once MLB drops the delay
+		// state. Checking Final first would instead swallow "Suspended", which MLB can report
+		// with an abstract state of Final while the game is still going to be resumed.
+		if ( self::is_delay_state( $d_state ) ) {
+			return 'delayed';
+		}
+
 		if ( 'Final' === ( $game['game_status'] ?? '' ) ) {
 			return 'final';
 		}
@@ -35,6 +58,103 @@ class Basebelles_Today_Game_Panels {
 		$seconds_to_first_pitch = (int) ( $game['sort_time'] ?? 0 ) - time();
 
 		return $seconds_to_first_pitch <= self::NEAR_PHASE_WINDOW ? 'near' : 'far';
+	}
+
+	/**
+	 * Whether a detailedState is one of the stopped-but-still-expected states.
+	 *
+	 * @param string $d_state MLB's detailedState.
+	 * @return bool
+	 */
+	public static function is_delay_state( $d_state ) {
+		foreach ( self::DELAY_STATES as $prefix ) {
+			if ( 0 === stripos( (string) $d_state, $prefix ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether a delayed game had already started when play stopped, which decides whether the
+	 * delay panel talks about a halted game or a pushed-back first pitch. MLB keeps a delayed
+	 * start in Preview and moves to Live at the actual first pitch, so the abstract state is the
+	 * signal -- the linescore reports zeroed innings either way.
+	 *
+	 * @param array $game Normalized game array.
+	 * @return bool
+	 */
+	public static function delay_is_in_progress( array $game ) {
+		return 'Live' === ( $game['game_status'] ?? '' );
+	}
+
+	/**
+	 * The cause of a delay, when MLB names one. It arrives either in the status reason field or
+	 * appended to detailedState after a colon; the two disagree often enough to check both.
+	 *
+	 * @param array $game Normalized game array.
+	 * @return string Reason, or an empty string.
+	 */
+	public static function get_delay_reason( array $game ) {
+		$reason = trim( (string) ( $game['detailed_state']['reason'] ?? '' ) );
+
+		if ( '' !== $reason ) {
+			return $reason;
+		}
+
+		$d_state = (string) ( $game['detailed_state']['state'] ?? '' );
+		$colon   = strpos( $d_state, ':' );
+
+		return false === $colon ? '' : trim( substr( $d_state, $colon + 1 ) );
+	}
+
+	/**
+	 * Short badge text for a delay -- "Rain delay" when the cause is known, otherwise the state
+	 * itself. Suspended and umpire delays keep their own wording rather than being folded into
+	 * "<cause> delay", which would misdescribe them.
+	 *
+	 * @param array $game Normalized game array.
+	 * @return string
+	 */
+	public static function get_delay_label( array $game ) {
+		$d_state = (string) ( $game['detailed_state']['state'] ?? '' );
+		$reason  = self::get_delay_reason( $game );
+
+		if ( 0 === stripos( $d_state, 'Umpire Delay' ) ) {
+			return 'Umpire delay';
+		}
+
+		if ( 0 === stripos( $d_state, 'Suspended' ) ) {
+			return '' === $reason ? 'Suspended' : 'Suspended · ' . $reason;
+		}
+
+		return '' === $reason ? 'Delayed' : $reason . ' delay';
+	}
+
+	/**
+	 * The .game-time element in the card header: a LIVE badge, a delay badge, or the scheduled
+	 * first-pitch time. Shared by the block and the REST endpoint so a game that goes into (or
+	 * comes out of) a delay mid-poll gets the right badge without the browser guessing at it.
+	 *
+	 * @param array  $game Normalized game array.
+	 * @param string $phase Result of self::get_phase( $game ).
+	 * @return string
+	 */
+	public static function render_time_label( array $game, $phase ) {
+		if ( 'live' === $phase ) {
+			return '<div class="game-time is-live"><span class="tg-live-dot" aria-hidden="true"></span>LIVE</div>';
+		}
+
+		if ( 'delayed' === $phase ) {
+			return '<div class="game-time is-delayed">' . esc_html( self::get_delay_label( $game ) ) . '</div>';
+		}
+
+		if ( 'postponed' === $phase ) {
+			return '<div class="game-time is-postponed">Postponed</div>';
+		}
+
+		return '<div class="game-time">' . esc_html( (string) ( $game['game_time'] ?? '' ) ) . '</div>';
 	}
 
 	/**
@@ -62,6 +182,130 @@ class Basebelles_Today_Game_Panels {
 		}
 
 		return '<div class="tg-header-score">' . esc_html( $away_runs ) . ' &ndash; ' . esc_html( $home_runs ) . '</div>';
+	}
+
+	/**
+	 * Short status suffix for a game's switcher tab -- "Final 2-6", "Live", or first-pitch time.
+	 *
+	 * Returned as HTML rather than text because the live variant carries a pulse dot. Kept
+	 * separate from the tab markup so the REST endpoint can hand the browser a fresh label when
+	 * a game changes state while the reader is looking at the other one.
+	 *
+	 * @param array  $game Normalized game array.
+	 * @param string $phase Result of self::get_phase( $game ).
+	 * @return string
+	 */
+	public static function render_switcher_label( array $game, $phase ) {
+		$number = 'Game ' . (int) ( $game['game_number'] ?? 1 );
+
+		if ( 'postponed' === $phase ) {
+			return esc_html( $number . ' · PPD' );
+		}
+
+		// Just "Delayed" here even when the cause is known -- "Game 1 · Rain delay" is wider than
+		// the pill holds on a phone, and the panel says why anyway.
+		if ( 'delayed' === $phase ) {
+			return esc_html( $number . ' · Delayed' );
+		}
+
+		if ( 'live' === $phase ) {
+			return '<span class="tg-live-dot" aria-hidden="true"></span>' . esc_html( $number ) . ' &middot; Live';
+		}
+
+		if ( 'final' === $phase ) {
+			$away = $game['scores']['away'] ?? null;
+			$home = $game['scores']['home'] ?? null;
+
+			if ( null === $away || null === $home ) {
+				return esc_html( $number . ' · Final' );
+			}
+
+			return esc_html( $number ) . ' &middot; Final ' . esc_html( $away ) . '&ndash;' . esc_html( $home );
+		}
+
+		// The scheduled time carries a timezone and, for the back half of a traditional
+		// doubleheader, the "TBD (30m after G1)" placeholder -- both too long for a pill this
+		// narrow, so the tab gets the short form and the panel keeps the full string.
+		$time = (string) ( $game['game_time'] ?? '' );
+
+		if ( '' === $time ) {
+			return esc_html( $number );
+		}
+
+		if ( 0 === strpos( $time, 'TBD' ) ) {
+			$time = 'TBD';
+		}
+
+		return esc_html( $number . ' · ' . $time );
+	}
+
+	/**
+	 * Which game the switcher should open on, in order of preference: the live one, a delayed one,
+	 * the next one still to be played, else the last one finished. Games arrive sorted by first
+	 * pitch, so "next" and "last" are just the first and last matches.
+	 *
+	 * Delayed outranks finished because the pair can genuinely occur: a suspended opener that
+	 * will resume another day, alongside a nightcap played to completion. The unfinished game is
+	 * the one still worth watching.
+	 *
+	 * @param array $games Normalized game arrays for the day.
+	 * @param array $phases Phase string per game, in the same order.
+	 * @return int Index into $games.
+	 */
+	public static function get_default_game_index( array $games, array $phases ) {
+		$delayed  = null;
+		$upcoming = null;
+
+		foreach ( $phases as $index => $phase ) {
+			if ( 'live' === $phase ) {
+				return $index;
+			}
+
+			if ( null === $delayed && 'delayed' === $phase ) {
+				$delayed = $index;
+			}
+
+			if ( null === $upcoming && in_array( $phase, array( 'far', 'near' ), true ) ) {
+				$upcoming = $index;
+			}
+		}
+
+		if ( null !== $delayed ) {
+			return $delayed;
+		}
+
+		if ( null !== $upcoming ) {
+			return $upcoming;
+		}
+
+		return max( 0, count( $games ) - 1 );
+	}
+
+	/**
+	 * The segmented Game 1 / Game 2 control shown above a doubleheader's panel.
+	 *
+	 * @param array $games Normalized game arrays for the day.
+	 * @param array $phases Phase string per game, in the same order.
+	 * @param int   $active_index Index of the game to mark active.
+	 * @return string
+	 */
+	public static function render_game_switcher( array $games, array $phases, $active_index ) {
+		ob_start();
+		?>
+		<div class="tg-game-switcher" role="tablist" aria-label="Doubleheader games">
+			<?php foreach ( $games as $index => $game ) : ?>
+				<?php $is_active = (int) $index === (int) $active_index; ?>
+				<button
+					type="button"
+					class="tg-game-tab<?php echo $is_active ? ' is-active' : ''; ?>"
+					data-game-tab="<?php echo esc_attr( (string) $game['game_pk'] ); ?>"
+					role="tab"
+					aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
+				><?php echo self::render_switcher_label( $game, $phases[ $index ] ?? 'far' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<?php endforeach; ?>
+		</div>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -100,6 +344,14 @@ class Basebelles_Today_Game_Panels {
 	 * @return string
 	 */
 	public static function render_score_panel( array $game, $phase, array $live_feed ) {
+		if ( 'postponed' === $phase ) {
+			return self::render_postponed( $game );
+		}
+
+		if ( 'delayed' === $phase ) {
+			return self::render_delayed( $game, $live_feed );
+		}
+
 		if ( 'far' === $phase ) {
 			return self::render_far_score( $game );
 		}
@@ -113,6 +365,101 @@ class Basebelles_Today_Game_Panels {
 		}
 
 		return self::render_final_score( $game );
+	}
+
+	/**
+	 * Delayed-phase Score content. Two shapes: a game stopped in progress says where it stopped
+	 * and keeps the score on screen, while a pushed-back first pitch says when the game was
+	 * meant to start. Neither promises a restart time -- MLB doesn't publish one, so inventing
+	 * "resumes shortly" would be making it up.
+	 *
+	 * @param array $game Normalized game array.
+	 * @param array $live_feed Live feed data, or empty array.
+	 * @return string
+	 */
+	private static function render_delayed( array $game, array $live_feed ) {
+		$in_progress = self::delay_is_in_progress( $game );
+		$reason      = self::get_delay_reason( $game );
+
+		ob_start();
+		?>
+		<div class="tg-delay">
+			<div class="tg-delay-badge"><?php echo esc_html( self::get_delay_label( $game ) ); ?></div>
+
+			<?php if ( $in_progress ) : ?>
+				<?php
+				$current_play = $live_feed['current_play'] ?? array();
+				$stopped_at   = '';
+
+				if ( ! empty( $current_play['inning'] ) ) {
+					$stopped_at = ( 'top' === strtolower( (string) $current_play['half'] ) ? 'Top' : 'Bottom' )
+						. ' ' . $current_play['inning'];
+				} elseif ( ! empty( $game['scores']['inning'] ) ) {
+					// Pre-formatted by the schedule as "Top of the 6th" when the live feed is thin.
+					$stopped_at = (string) $game['scores']['inning'];
+				}
+				?>
+				<div class="tg-delay-detail">
+					<?php if ( '' !== $stopped_at ) : ?>
+						Play stopped in the <?php echo esc_html( strtolower( $stopped_at ) ); ?>.
+					<?php else : ?>
+						Play is stopped.
+					<?php endif; ?>
+				</div>
+				<?php if ( isset( $game['scores']['away'], $game['scores']['home'] ) ) : ?>
+					<div class="tg-delay-score">
+						<span><?php echo esc_html( $game['away_team']['abbreviation'] ?? '' ); ?> <?php echo esc_html( $game['scores']['away'] ); ?></span>
+						<span><?php echo esc_html( $game['home_team']['abbreviation'] ?? '' ); ?> <?php echo esc_html( $game['scores']['home'] ); ?></span>
+					</div>
+				<?php endif; ?>
+			<?php else : ?>
+				<div class="tg-delay-detail">
+					<?php if ( ! empty( $game['game_time'] ) ) : ?>
+						First pitch was scheduled for <?php echo esc_html( $game['game_time'] ); ?>.
+					<?php else : ?>
+						First pitch is on hold.
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<div class="tg-delay-note">
+				<?php if ( '' !== $reason ) : ?>
+					<?php echo esc_html( $reason ); ?> &middot; no updated start time yet.
+				<?php else : ?>
+					No updated start time yet.
+				<?php endif; ?>
+			</div>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Postponed-phase Score content. Previously this lived inside render_final_score(), which
+	 * meant a postponed game was drawn as a final one with its runs blanked to "-" on either side
+	 * of a PPD badge. It isn't a result, so it no longer borrows the score layout.
+	 *
+	 * @param array $game Normalized game array.
+	 * @return string
+	 */
+	private static function render_postponed( array $game ) {
+		$reason = self::get_delay_reason( $game );
+
+		ob_start();
+		?>
+		<div class="tg-delay is-postponed">
+			<div class="tg-delay-badge">Postponed</div>
+			<div class="tg-delay-detail">
+				<?php if ( '' !== $reason ) : ?>
+					Called for <?php echo esc_html( strtolower( $reason ) ); ?>.
+				<?php else : ?>
+					This game won't be played today.
+				<?php endif; ?>
+			</div>
+			<div class="tg-delay-note">Watch for a makeup date.</div>
+		</div>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -227,22 +574,13 @@ class Basebelles_Today_Game_Panels {
 		}
 
 		$home_or_away = ( 'CLE' === ( $game['home_team']['abbreviation'] ?? '' ) ) ? 'home' : 'away';
-		$d_state      = $game['detailed_state']['state'] ?? '';
-		$reason       = $game['detailed_state']['reason'] ?? '';
 
 		ob_start();
 		?>
 		<div class="game-scores">
 			<div class="score-away"><?php echo esc_html( $game['scores']['away'] ); ?></div>
 			<div class="game-meta">
-				<?php if ( 'Postponed' === $d_state ) : ?>
-					<strong class="status-ppd">
-						PPD
-						<?php if ( ! empty( $reason ) ) : ?>
-							<br /><small><?php echo esc_html( $reason ); ?></small>
-						<?php endif; ?>
-					</strong>
-				<?php elseif ( ! empty( $game['scores']['isFinal'] ) ) : ?>
+				<?php if ( ! empty( $game['scores']['isFinal'] ) ) : ?>
 					<?php $winner = $home_or_away === $game['scores']['winner'] ? 'guards-win' : 'oppo-win'; ?>
 					<strong class="<?php echo esc_attr( $winner ); ?>">
 						FINAL
@@ -305,7 +643,10 @@ class Basebelles_Today_Game_Panels {
 	 * @return string
 	 */
 	public static function render_stats_panel( array $game, $phase, array $live_feed ) {
-		if ( in_array( $phase, array( 'live', 'final' ), true ) ) {
+		// A game stopped in progress has a real box score to show; a delayed start has nothing but
+		// the pregame matchup, so it falls through with the scheduled games.
+		if ( in_array( $phase, array( 'live', 'final' ), true )
+			|| ( 'delayed' === $phase && self::delay_is_in_progress( $game ) ) ) {
 			return self::render_game_summary( $game, $live_feed );
 		}
 

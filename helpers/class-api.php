@@ -37,6 +37,8 @@ class Basebelles_API {
 	const TRANSACTIONS_DISPLAY_MAX = 50;
 	/** Cache TTL for season archive snapshots (past years are immutable). */
 	const API_ARCHIVE_CACHE_TTL = DAY_IN_SECONDS;
+	/** Cache TTL for roster lookups (rosters move, but not by the minute). */
+	const ROSTER_CACHE_TTL = 12 * HOUR_IN_SECONDS;
 
 	/**
 	 * Singleton instance.
@@ -1643,6 +1645,79 @@ class Basebelles_API {
 		$teams = is_array( $list ) ? $list : array();
 
 		return $teams;
+	}
+
+	/**
+	 * Get the Guardians roster as a normalized list.
+	 *
+	 * Used by the Belle directory to populate the "favorite current player" choices, so the
+	 * shape here is deliberately simple: one row per player, already sorted for display.
+	 *
+	 * @param string $roster_type MLB rosterType (active, 40Man, fullSeason, etc.).
+	 * @param int    $season_year Optional season; defaults to the ACF/options season.
+	 * @return array[]|WP_Error List of arrays with id, name, jersey and position keys.
+	 */
+	public function get_guardians_roster( $roster_type = 'active', $season_year = null ) {
+		$allowed_types = array( 'active', '40Man', 'fullSeason', 'fullRoster' );
+
+		if ( ! in_array( $roster_type, $allowed_types, true ) ) {
+			$roster_type = 'active';
+		}
+
+		$settings = $this->get_season_settings();
+		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
+
+		if ( $year < 1900 ) {
+			$year = (int) gmdate( 'Y' );
+		}
+
+		$data = $this->request_json(
+			'teams/' . self::GUARDIANS_TEAM_ID . '/roster',
+			array(
+				'rosterType' => $roster_type,
+				'season'     => $year,
+			),
+			self::ROSTER_CACHE_TTL
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		if ( empty( $data['roster'] ) || ! is_array( $data['roster'] ) ) {
+			return new WP_Error( 'basebelles_api_roster_empty', 'The MLB API returned no roster entries.' );
+		}
+
+		$players = array();
+
+		foreach ( $data['roster'] as $entry ) {
+			$player_id = isset( $entry['person']['id'] ) ? (int) $entry['person']['id'] : 0;
+			$name      = isset( $entry['person']['fullName'] ) ? sanitize_text_field( (string) $entry['person']['fullName'] ) : '';
+
+			if ( ! $player_id || '' === $name ) {
+				continue;
+			}
+
+			$players[] = array(
+				'id'       => $player_id,
+				'name'     => $name,
+				'jersey'   => isset( $entry['jerseyNumber'] ) ? sanitize_text_field( (string) $entry['jerseyNumber'] ) : '',
+				'position' => isset( $entry['position']['abbreviation'] ) ? sanitize_text_field( (string) $entry['position']['abbreviation'] ) : '',
+			);
+		}
+
+		if ( empty( $players ) ) {
+			return new WP_Error( 'basebelles_api_roster_empty', 'The MLB API roster contained no usable players.' );
+		}
+
+		usort(
+			$players,
+			static function ( $left, $right ) {
+				return strcasecmp( $left['name'], $right['name'] );
+			}
+		);
+
+		return $players;
 	}
 
 	/**

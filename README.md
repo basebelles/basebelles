@@ -14,6 +14,7 @@ The plugin wires together the block editor, [Advanced Custom Fields (ACF)](https
 | **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `features/class-api.php`. |
 | **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`features/class-embeds.php`, `helpers/class-streamable-oembed.php`). |
 | **Site behavior** | Loads small feature modules under `features/` (comment moderation hooks, anti-spam, query tweaks for season archives, optional privacy-related HTTP filters, automatic updates policy, etc.). |
+| **Belle directory** | A moderated public directory of Belles. A **WPForms** submission becomes a `belle` post in `pending` status; publishing approves it, trashing marks it spam. Roster choices for the "favorite current player" field are synced from the MLB Stats API daily. See [`docs/belles-setup.md`](docs/belles-setup.md). |
 
 **ACF field definitions** (field groups, options screens, taxonomies, and other synced ACF JSON) live in **`acf-json/`** as the version-controlled source. Each file is a single JSON object named **`{key}.json`** (matching the top-level `"key"`). Saving a field group in wp-admin writes back to that folder via **`acf/settings/save_json`**. The plugin registers load/save paths in [`blocks/class-acf-json.php`](blocks/class-acf-json.php) (theme Local JSON paths remain; the plugin directory is appended for loading).
 
@@ -39,6 +40,7 @@ All blocks are registered from `blocks/class-blocks.php` and appear under the **
 
 | Block directory | Purpose (high level) |
 |-----------------|----------------------|
+| `blocks/belles/` | Belle directory card grid |
 | `blocks/results/` | Game / results presentation |
 | `blocks/season-header/` | Season header UI |
 | `blocks/season-stats-header/` | Season statistics header |
@@ -58,6 +60,7 @@ basebelles.php          # Plugin bootstrap, hooks, query var (season_year), styl
 basebelles.css          # Shared plugin styles
 features/
   class-api.php                 # MLB Stats API client, caching, Guardians-focused helpers
+  class-belles.php              # Belle post type, WPForms intake, moderation queue, roster sync
   class-comment-probation.php   # Comment moderation / anti-spam hooks
   class-embeds.php              # oEmbed providers, Streamable/MLB handlers, shortcode
   class-impostercide.php        # Blocks unauthenticated comments posted as registered users
@@ -90,7 +93,7 @@ team-info/
 2. Activate **Base\*Belles** in **Plugins** in wp-admin.
 3. Ensure **ACF PRO** is installed and active. With Local JSON wired to `acf-json/`, open **Custom Fields** in wp-admin and **Sync** any definitions that show as available so the site database matches the repo.
 
-There is no Composer/npm build step in this repository—the plugin is PHP, CSS, and block assets as committed.
+There is no build step for the plugin itself—it ships as the PHP, CSS, and block assets committed here, with nothing compiled or bundled. Composer and npm are used only to install test tooling (see [Testing](#testing)); neither is needed to run the plugin, and neither is deployed.
 
 ---
 
@@ -104,7 +107,40 @@ There is no Composer/npm build step in this repository—the plugin is PHP, CSS,
 ## Development
 
 - **Coding standards**: `phpcs.xml.dist` is provided for PHPCS runs against the PHP in this plugin.
-- **Version**: The canonical plugin version is set in the plugin header in `basebelles.php` (keep internal `$version` usage in sync when bumping releases).
+- **Version**: The version is recorded in five places — the `Version:` header in `basebelles.php`, `Basebelles::$version` (which cache-busts the enqueued CSS and JS), `package.json`, and the two copies npm keeps in `package-lock.json`. Use `npm run bump` rather than editing them by hand:
+
+  ```bash
+  npm run bump 1.5.1
+  npm run bump 1.6.0-beta.1
+  npm run bump 1.5.1 -- --dry-run    # show what would change
+  npm run bump 1.5.0 -- --force      # allow a lower version than the current one
+  ```
+
+  It edits files only — nothing is staged, committed or tagged, so review with `git diff` and commit yourself. Re-running the same version is a no-op, and it refuses to go backwards without `--force`. Note that `features/class-comment-probation.php` and `helpers/class-impostercide.php` carry their own unrelated `Version:` headers; the script deliberately never touches them.
+
+### Testing
+
+Two suites, both dev-only. `.github/workflows/test.yaml` runs them on every push to `trunk` and on every pull request. The PHP suite runs against 8.2, 8.3, 8.4 and 8.5 — 8.2 is the lowest version the committed lockfile installs on, since PHPUnit 11 requires it, and 8.5 is where development actually happens. `fail-fast` is off so a version-specific failure is visible as such.
+
+```bash
+# PHP — block templates and panel logic
+composer install
+composer test          # or: vendor/bin/phpunit
+
+# JavaScript — the today-game block script
+npm install
+npm test               # node --test, no test framework beyond jsdom
+```
+
+**What they cover.** `tests/php/PanelsTest.php` covers `Basebelles_Today_Game_Panels`: phase resolution across every `detailedState` MLB is known to send, delay labels and reasons, score/stats panel routing, doubleheader switcher labels, and which game a doubleheader opens on. `tests/php/StandingsBlockTest.php` and `tests/php/TodayGameBlockTest.php` include the block templates and assert on the markup they emit. `tests/js/` drives `today-game.js` in jsdom: game switching, state surviving a switch, and the delay badge and polling behaviour.
+
+The four `Belles*Test.php` files cover the Belle directory. `BellesIntakeTest.php` runs submissions through `wpforms_process_complete` and asserts on the meta that lands, including the loose label matching that lets the form be reworded in the WPForms builder without a code change. `BellesRosterSyncTest.php` pins the read-modify-write against the stored form — WPForms validates a submitted choice against an allowlist it reads back out of the database, so choices have to be written into the form rather than filtered in at render time — plus every failure path and the status it records. `BellesAvatarTest.php` covers initials, the palette, Gravatar URL building and the cached avatar lookup. `BellesDirectoryBlockTest.php` asserts on the card markup, including that only published Belles appear. `BellesAdminTest.php` covers the list table columns and the edit screen, including the duplicate-address warning clearing when a moderator corrects a typo.
+
+**What they are not.** These are unit tests, not WordPress integration tests. Nothing loads WordPress or touches a database — `tests/bootstrap.php` stubs the WordPress functions the code calls and replaces `Basebelles_API` with a fake whose payloads each test sets. So they prove markup and branching, not that WordPress and the MLB API hand these templates the data they expect. `tests/Fixtures.php` is where the assumed payload shapes live; if `Basebelles_API`'s normalisation changes, update it there.
+
+The Belle tests need more of WordPress than the block tests do, so the bootstrap also carries a small in-memory post store: `wp_insert_post()` puts a post in it and `get_posts()`/`get_post_meta()` read back out, which lets intake tests and directory tests talk about the same data. Options, cron, `wp_remote_head()` and a fake WPForms form handler are stubbed the same way — recorded rather than performed. The sharp edge is that these stubs are only as faithful as they look: `sanitize_text_field()` and `is_email()` approximate WordPress rather than matching it, and WPForms' real `update()` does more to a form than the fake does. Anything that turns on those details still needs checking on a real install.
+
+**Adding a test.** Drop a `*Test.php` in `tests/php/` (any class extending `PHPUnit\Framework\TestCase`), or a `*.test.mjs` in `tests/js/`. Both are picked up automatically. If you add a dev dependency, add it to the `EXCLUDE` list in `.github/workflows/deploy.yaml` too — that rsync runs `--delete` over the whole repo, so anything not excluded ends up in the live plugin directory.
 
 ---
 

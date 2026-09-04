@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Do a git checkout including submodules
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           submodules: true
 
@@ -24,13 +24,13 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.BELLES_SSH_KEY }}
-          # Standard rsync flags: archive, compress, verbose, delete extraneous
           ARGS: "-azv --delete"
           REMOTE_HOST: ${{ secrets.BELLES_HOST }}
           REMOTE_USER: ${{ secrets.BELLES_USER }}
-          # Pathing for DreamHost standalone
           TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_FOLDER }}/wp-content/plugins/basebelles/"
-          EXCLUDE: "/.git/, /.github/, /node_modules/, .DS_Store"
+          # Dev-only files must be listed here: the rsync above runs with --delete over the whole
+          # repo, so anything not excluded lands in the live plugin directory.
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /vendor/, /tests/, /tools/, /.phpunit.cache/, .DS_Store, composer.json, composer.lock, package.json, package-lock.json, phpunit.xml.dist, phpcs.xml.dist"
 
       - name: Sync ACF JSON on Server
         uses: appleboy/ssh-action@v1.2.5

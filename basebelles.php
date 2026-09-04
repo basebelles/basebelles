@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the amazing features.
- * Version: 1.3.0
+ * Version: 1.5.0
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -22,7 +22,7 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.3.0';
+		self::$version = '1.5.0';
 
 		// ACF
 		require_once 'blocks/class-acf-json.php';
@@ -64,6 +64,7 @@ class Basebelles {
 	 */
 	public function init() {
 		// Belle Features
+		require_once 'features/class-belles.php';
 		require_once 'features/class-comment-probation.php';
 		require_once 'features/class-embeds.php';
 		require_once 'features/class-patterns.php';

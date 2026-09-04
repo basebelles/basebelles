@@ -38,6 +38,7 @@ class Basebelles_Blocks {
 	 * @return void
 	 */
 	public static function register_blocks() {
+		register_block_type( __DIR__ . '/belles' );
 		register_block_type( __DIR__ . '/results' );
 		register_block_type( __DIR__ . '/season-header' );
 		register_block_type( __DIR__ . '/series' );
@@ -55,6 +56,7 @@ class Basebelles_Blocks {
 	 */
 	public function register_styles() {
 		$deps = array( 'basebelles-style' );
+		wp_register_style( 'basebelles-belles-style', plugin_dir_url( __FILE__ ) . 'belles/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-results-style', plugin_dir_url( __FILE__ ) . 'results/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-series-style', plugin_dir_url( __FILE__ ) . 'series/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-season-header-style', plugin_dir_url( __FILE__ ) . 'season-header/block.css', $deps, self::$version );
@@ -94,6 +96,7 @@ class Basebelles_Blocks {
 	 */
 	public function enqueue_styles() {
 		$deps = array( 'basebelles-style' );
+		wp_enqueue_style( 'basebelles-belles-style', plugin_dir_url( __FILE__ ) . 'belles/block.css', $deps, self::$version );
 		wp_enqueue_style( 'basebelles-results-style', plugin_dir_url( __FILE__ ) . 'results/block.css', $deps, self::$version );
 		wp_enqueue_style( 'basebelles-series-style', plugin_dir_url( __FILE__ ) . 'series/block.css', $deps, self::$version );
 		wp_enqueue_style( 'basebelles-season-header-style', plugin_dir_url( __FILE__ ) . 'season-header/block.css', $deps, self::$version );

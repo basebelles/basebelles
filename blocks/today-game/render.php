@@ -38,34 +38,63 @@ if ( is_wp_error( $schedule ) ) {
 	return;
 }
 
+$games = $schedule['games'] ?? array();
+
+// A doubleheader gets a segmented switcher and renders one game at a time, so the day's phases
+// have to be known before the first card is drawn -- the switcher sits above them and its labels
+// and default selection depend on every game's state.
+//
+// Always ask MLB for the live feed -- lineups and plays show up on MLB's own schedule (often
+// 60-90+ minutes out), not tied to the Score tab's 30-minute countdown threshold. The 60s cache
+// in get_live_feed() bounds the real request cost regardless of how early this runs.
+$phases     = array();
+$live_feeds = array();
+
+foreach ( $games as $index => $game ) {
+	$feed_result          = $api->get_live_feed( $game['game_pk'] );
+	$phases[ $index ]     = Basebelles_Today_Game_Panels::get_phase( $game );
+	$live_feeds[ $index ] = is_wp_error( $feed_result ) ? array() : $feed_result;
+}
+
+$is_doubleheader = count( $games ) > 1;
+$active_index    = $is_doubleheader
+	? Basebelles_Today_Game_Panels::get_default_game_index( $games, $phases )
+	: 0;
+
+$dh_heading = '';
+
+if ( $is_doubleheader ) {
+	$first      = $games[0];
+	$dh_heading = trim(
+		( $schedule['day_date'] ?? '' ) . ' · '
+		. ( $first['away_team']['short_name'] ?? '' ) . ' @ ' . ( $first['home_team']['short_name'] ?? '' )
+	);
+}
+
 ?>
 
-<div class="basebelles-today-game">
+<div class="basebelles-today-game<?php echo $is_doubleheader ? ' has-doubleheader' : ''; ?>">
 	<?php if ( ! empty( $schedule['off_day'] ) ) : ?>
 		<div class="off-day-box">
 			<img class="off-day-image" width="500px" src="<?php echo esc_url( $off_day_image ); ?>" alt="Off day" />
 		</div>
 	<?php else : ?>
-		<?php foreach ( $schedule['games'] as $game ) : ?>
-			<div class="game-card">
-				<?php if ( ! empty( $game['show_label'] ) ) : ?>
+		<?php if ( $is_doubleheader ) : ?>
+			<div class="tg-doubleheader" data-active-game="<?php echo esc_attr( (string) $games[ $active_index ]['game_pk'] ); ?>">
+				<div class="tg-dh-heading"><?php echo esc_html( $dh_heading ); ?></div>
+				<?php echo Basebelles_Today_Game_Panels::render_game_switcher( $games, $phases, $active_index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<div class="tg-dh-panel">
+		<?php endif; ?>
+
+		<?php foreach ( $games as $index => $game ) : ?>
+			<?php
+			$phase     = $phases[ $index ];
+			$live_feed = $live_feeds[ $index ];
+			?>
+			<div class="game-card"<?php echo $is_doubleheader ? ' data-game-card="' . esc_attr( (string) $game['game_pk'] ) . '"' : ''; ?><?php echo $is_doubleheader && $index !== $active_index ? ' hidden' : ''; ?>>
+				<?php if ( ! empty( $game['show_label'] ) && ! $is_doubleheader ) : ?>
 					<div class="game-label">Game <?php echo esc_html( (string) $game['game_number'] ); ?></div>
 				<?php endif; ?>
-
-				<?php
-				// Always ask MLB for the live feed -- lineups and plays show up on MLB's own
-				// schedule (often 60-90+ minutes out), not tied to the Score tab's 30-minute
-				// countdown threshold below. The 60s cache in get_live_feed() bounds the real
-				// request cost regardless of how early this runs. Fetched here (rather than
-				// after the header) because the header's score line needs it too.
-				$phase       = Basebelles_Today_Game_Panels::get_phase( $game );
-				$live_feed   = array();
-				$feed_result = $api->get_live_feed( $game['game_pk'] );
-
-				if ( ! is_wp_error( $feed_result ) ) {
-					$live_feed = $feed_result;
-				}
-				?>
 
 				<div class="today-game-header">
 					<div class="away-team">
@@ -81,13 +110,7 @@ if ( is_wp_error( $schedule ) ) {
 					<div class="game-meta">
 						<?php echo esc_html( $game['day_date'] ); ?>
 						<br />
-						<div class="game-time<?php echo 'Live' === $game['game_status'] ? ' is-live' : ''; ?>" data-original-time="<?php echo esc_attr( $game['game_time'] ); ?>">
-							<?php if ( 'Live' === $game['game_status'] ) : ?>
-								<span class="tg-live-dot" aria-hidden="true"></span>LIVE
-							<?php else : ?>
-								<?php echo esc_html( $game['game_time'] ); ?>
-							<?php endif; ?>
-						</div>
+						<?php echo Basebelles_Today_Game_Panels::render_time_label( $game, $phase ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
 							<div class="tg-series-status">
@@ -126,6 +149,11 @@ if ( is_wp_error( $schedule ) ) {
 				<?php echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 		<?php endforeach; ?>
+
+		<?php if ( $is_doubleheader ) : ?>
+				</div>
+			</div>
+		<?php endif; ?>
 
 		<?php
 		if ( ! wp_script_is( 'basebelles-today-game', 'enqueued' ) ) {
