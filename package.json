@@ -13,7 +13,8 @@
     "install": "composer install",
     "test": "npm-run-all test:*",
     "test:node": "node --test \"tests/js/**/*.test.mjs\"",
-    "test:composer": "composer test"
+    "test:composer": "composer test",
+    "bump": "node tools/bump-version.mjs"
   },
   "devDependencies": {
     "jsdom": "^25.0.1"

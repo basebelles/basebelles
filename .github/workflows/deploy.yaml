@@ -30,7 +30,7 @@ jobs:
           TARGET: "/home/${{ secrets.BELLES_USER }}/${{ secrets.BELLES_FOLDER }}/wp-content/plugins/basebelles/"
           # Dev-only files must be listed here: the rsync above runs with --delete over the whole
           # repo, so anything not excluded lands in the live plugin directory.
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /vendor/, /tests/, /.phpunit.cache/, .DS_Store, composer.json, composer.lock, package.json, package-lock.json, phpunit.xml.dist, phpcs.xml.dist"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /vendor/, /tests/, /tools/, /.phpunit.cache/, .DS_Store, composer.json, composer.lock, package.json, package-lock.json, phpunit.xml.dist, phpcs.xml.dist"
 
       - name: Sync ACF JSON on Server
         uses: appleboy/ssh-action@v1.2.5

@@ -107,7 +107,16 @@ There is no build step for the plugin itself—it ships as the PHP, CSS, and blo
 ## Development
 
 - **Coding standards**: `phpcs.xml.dist` is provided for PHPCS runs against the PHP in this plugin.
-- **Version**: The canonical plugin version is set in the plugin header in `basebelles.php` (keep internal `$version` usage in sync when bumping releases).
+- **Version**: The version is recorded in five places — the `Version:` header in `basebelles.php`, `Basebelles::$version` (which cache-busts the enqueued CSS and JS), `package.json`, and the two copies npm keeps in `package-lock.json`. Use `npm run bump` rather than editing them by hand:
+
+  ```bash
+  npm run bump 1.5.1
+  npm run bump 1.6.0-beta.1
+  npm run bump 1.5.1 -- --dry-run    # show what would change
+  npm run bump 1.5.0 -- --force      # allow a lower version than the current one
+  ```
+
+  It edits files only — nothing is staged, committed or tagged, so review with `git diff` and commit yourself. Re-running the same version is a no-op, and it refuses to go backwards without `--force`. Note that `features/class-comment-probation.php` and `helpers/class-impostercide.php` carry their own unrelated `Version:` headers; the script deliberately never touches them.
 
 ### Testing
 
