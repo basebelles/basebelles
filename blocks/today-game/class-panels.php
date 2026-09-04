@@ -47,6 +47,12 @@ class Basebelles_Today_Game_Panels {
 	 * @return string
 	 */
 	public static function render_header_score( array $game, array $live_feed ) {
+		// MLB's linescore already reports zeroed (not absent) runs before first pitch, so gate
+		// on game status directly rather than on whether the runs value is present.
+		if ( 'Preview' === ( $game['game_status'] ?? '' ) ) {
+			return '';
+		}
+
 		$line      = $live_feed['game_summary']['line'] ?? array();
 		$away_runs = $line['away']['runs'] ?? null;
 		$home_runs = $line['home']['runs'] ?? null;
@@ -239,12 +245,10 @@ class Basebelles_Today_Game_Panels {
 				<?php elseif ( ! empty( $game['scores']['isFinal'] ) ) : ?>
 					<?php $winner = $home_or_away === $game['scores']['winner'] ? 'guards-win' : 'oppo-win'; ?>
 					<strong class="<?php echo esc_attr( $winner ); ?>">
-						<?php if ( 'away' === $game['scores']['winner'] ) : ?><?php echo esc_html( '➜ ' ); ?><?php endif; ?>
 						FINAL
 						<?php if ( ! empty( $game['scores']['inning'] ) && $game['scores']['inning'] > 9 ) : ?>
 							<?php echo esc_html( ' / ' . $game['scores']['inning'] ); ?>
 						<?php endif; ?>
-						<?php if ( 'home' === $game['scores']['winner'] ) : ?><?php echo esc_html( ' ➜' ); ?><?php endif; ?>
 					</strong>
 				<?php else : ?>
 					<strong>LIVE</strong>
@@ -255,7 +259,7 @@ class Basebelles_Today_Game_Panels {
 		<?php if ( ! empty( $game['scores']['isFinal'] ) && ! empty( $game['scores']['winner'] ) ) : ?>
 			<?php $guardians_win = $home_or_away === $game['scores']['winner']; ?>
 			<div class="tg-result-headline <?php echo $guardians_win ? 'is-win' : 'is-loss'; ?>">
-				The Guardians <?php echo $guardians_win ? 'WIN' : 'LOSE'; ?>
+				The Guardians <?php echo $guardians_win ? 'win' : 'lose'; ?>
 			</div>
 		<?php endif; ?>
 		<?php

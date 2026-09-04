@@ -24,6 +24,10 @@ class Basebelles_API {
 	const LIVE_FEED_CACHE_TTL = 60;
 	const API_CACHE_TTL     = 900;
 	const API_TIMEOUT       = 10;
+	// Game times/dates are always shown in the Guardians' own time zone, regardless of the
+	// WordPress site's configured timezone (a visitor or admin setting elsewhere shouldn't change
+	// what time first pitch reads as).
+	const GAME_TIMEZONE     = 'America/New_York';
 	const AL_LEAGUE_ID      = 103; // American League
 	const CL_LEAGUE_ID      = 114; // Cactus League (spring training)
 	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
@@ -616,7 +620,7 @@ class Basebelles_API {
 			return $data;
 		}
 
-		$timezone      = wp_timezone();
+		$timezone      = new DateTimeZone( self::GAME_TIMEZONE );
 		$day_timestamp = strtotime( $date . ' 12:00:00' );
 		$games         = $data['dates'][0]['games'] ?? array();
 
@@ -676,7 +680,7 @@ class Basebelles_API {
 		);
 		$is_preview        = 'Preview' === $game_status;
 		$has_scores        = in_array( $game_status, array( 'Live', 'Final' ), true );
-		$timezone          = wp_timezone();
+		$timezone          = new DateTimeZone( self::GAME_TIMEZONE );
 		$timestamp         = $game_date ? strtotime( $game_date ) : false;
 		$is_traditional_dh = ( 'Y' === ( $game['doubleHeader'] ?? 'N' ) );
 		$is_game_two       = ( 2 === (int) ( $game['gameNumber'] ?? 1 ) );

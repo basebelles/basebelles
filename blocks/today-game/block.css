@@ -127,6 +127,7 @@
 	font-size: 1.3rem;
 	font-weight: 800;
 	letter-spacing: 0.02em;
+	text-transform: uppercase;
 }
 
 .tg-result-headline.is-win { color: var(--bb-green); }
