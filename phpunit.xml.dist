@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+	bootstrap="tests/bootstrap.php"
+	colors="true"
+	beStrictAboutOutputDuringTests="false"
+	failOnWarning="true"
+	failOnNotice="true"
+	cacheDirectory=".phpunit.cache"
+>
+	<!-- beStrictAboutOutputDuringTests is off deliberately: the block templates under test
+	     produce their markup by echoing, and the tests capture it with output buffering. -->
+	<testsuites>
+		<testsuite name="Base*Belles">
+			<directory suffix="Test.php">tests/php</directory>
+		</testsuite>
+	</testsuites>
+
+	<source>
+		<include>
+			<directory suffix=".php">blocks</directory>
+			<directory suffix=".php">features</directory>
+			<directory suffix=".php">helpers</directory>
+		</include>
+	</source>
+</phpunit>

@@ -1,0 +1,19 @@
+{
+    "name": "basebelles/basebelles",
+    "description": "Base*Belles WordPress plugin — custom blocks, data integrations and site-specific behaviours for Basebelles.com.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "phpcs"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

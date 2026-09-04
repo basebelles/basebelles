@@ -93,7 +93,7 @@ team-info/
 2. Activate **Base\*Belles** in **Plugins** in wp-admin.
 3. Ensure **ACF PRO** is installed and active. With Local JSON wired to `acf-json/`, open **Custom Fields** in wp-admin and **Sync** any definitions that show as available so the site database matches the repo.
 
-There is no Composer/npm build step in this repository—the plugin is PHP, CSS, and block assets as committed.
+There is no build step for the plugin itself—it ships as the PHP, CSS, and block assets committed here, with nothing compiled or bundled. Composer and npm are used only to install test tooling (see [Testing](#testing)); neither is needed to run the plugin, and neither is deployed.
 
 ---
 
@@ -108,6 +108,26 @@ There is no Composer/npm build step in this repository—the plugin is PHP, CSS,
 
 - **Coding standards**: `phpcs.xml.dist` is provided for PHPCS runs against the PHP in this plugin.
 - **Version**: The canonical plugin version is set in the plugin header in `basebelles.php` (keep internal `$version` usage in sync when bumping releases).
+
+### Testing
+
+Two suites, both dev-only. `.github/workflows/test.yaml` runs them on every push to `trunk` and on every pull request.
+
+```bash
+# PHP — block templates and panel logic
+composer install
+composer test          # or: vendor/bin/phpunit
+
+# JavaScript — the today-game block script
+npm install
+npm test               # node --test, no test framework beyond jsdom
+```
+
+**What they cover.** `tests/php/PanelsTest.php` covers `Basebelles_Today_Game_Panels`: phase resolution across every `detailedState` MLB is known to send, delay labels and reasons, score/stats panel routing, doubleheader switcher labels, and which game a doubleheader opens on. `tests/php/StandingsBlockTest.php` and `tests/php/TodayGameBlockTest.php` include the block templates and assert on the markup they emit. `tests/js/` drives `today-game.js` in jsdom: game switching, state surviving a switch, and the delay badge and polling behaviour.
+
+**What they are not.** These are unit tests, not WordPress integration tests. Nothing loads WordPress or touches a database — `tests/bootstrap.php` stubs the handful of WordPress functions the code calls and replaces `Basebelles_API` with a fake whose payloads each test sets. So they prove markup and branching, not that WordPress and the MLB API hand these templates the data they expect. `tests/Fixtures.php` is where the assumed payload shapes live; if `Basebelles_API`'s normalisation changes, update it there.
+
+**Adding a test.** Drop a `*Test.php` in `tests/php/` (any class extending `PHPUnit\Framework\TestCase`), or a `*.test.mjs` in `tests/js/`. Both are picked up automatically. If you add a dev dependency, add it to the `EXCLUDE` list in `.github/workflows/deploy.yaml` too — that rsync runs `--delete` over the whole repo, so anything not excluded ends up in the live plugin directory.
 
 ---
 
