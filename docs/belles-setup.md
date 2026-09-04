@@ -13,33 +13,32 @@ On [/be-a-belle/](https://basebelles.com/be-a-belle/), with these field types:
 | Name | Name | `name` |
 | Email | Email | `email` |
 | Location | Single Line Text | `location`, `city`, `hometown`, or `where from` |
-| Favorite current players | **Checkboxes** | `current` |
+| Favorite current player | **Dropdown** | `current` |
 | Favorite historical player | Single Line Text | `historical`, `all-time`, or `retired` |
+| Consent | GDPR Checkbox (required) | `gdpr`, `consent`, `agree`, or `permission` |
 
 Fields are matched on their labels, so you can reword them in the builder without touching code —
 just keep the keyword above somewhere in the label. Casing, spaces and punctuation are ignored.
 To pin exact field IDs instead, return a `key => field_id` map from the
 `basebelles_belles_field_map` filter.
 
-The current-player field has to be **Checkboxes**, not a multi-select Dropdown. WPForms only
-enforces its "Choice Limit" setting on Checkboxes, so a dropdown could not actually hold anyone to
-three players.
+A single-select **Dropdown** is the right field for the current player — it stays compact with a
+26-man roster in it. Checkboxes or Multiple Choice work too; intake takes the first selection if a
+field somehow returns more than one.
 
-Worth adding while you are in there: WPForms' anti-spam token, Akismet if you have it, and a
-consent checkbox saying the email is stored and used to look up a Gravatar. You are collecting
-email addresses from the public, so say so.
+Worth adding while you are in there: WPForms' anti-spam token, and Akismet if you have it.
 
 ## 2. Connect it
 
 **Belles → Form Settings**
 
 1. Pick the sign-up form, **Save Settings**.
-2. Reload the screen, then pick the current-player Checkboxes field (the picker reads fields from
-   the saved form, which is why it takes two passes).
+2. Reload the screen, then pick the current-player field (the picker reads fields from the saved
+   form, which is why it takes two passes).
 3. **Save and Sync Roster Now.**
 
-That writes the active Guardians roster into the field's choices and sets Choice Limit to 3. A
-daily cron job repeats it. If a sync fails, the error shows on this screen and on the Belles list.
+That writes the active Guardians roster into the field's choices. A daily cron job repeats it. If a
+sync fails, the error shows on this screen and on the Belles list.
 
 The sync rewrites the *whole* form — that is how WPForms' API works — so don't leave the form open
 in the builder while a sync lands, or the builder's next save will clobber the fresh roster.
@@ -77,6 +76,26 @@ commenter avatars.
 
 `_bb_belle_user_id` is stored as `0` on every Belle. It is the hook for linking a Belle to a real
 WP user later, if gated content ever happens.
+
+### Consent
+
+The WPForms entry is the primary evidence that consent was given, and `_bb_belle_entry_id` points
+at it. Each Belle also carries its own copy — `_bb_belle_consent` (1 or 0) and
+`_bb_belle_consented_at` (a GMT timestamp) — so the record survives entries being pruned or entry
+storage being switched off later.
+
+The edit screen shows this as text, not a field. A consent record you can edit is not a record; if
+one is wrong, the WPForms entry is the thing to go back to.
+
+Three states, deliberately distinct:
+
+- **Given** — box ticked, with the timestamp
+- **Withheld** — the form asked and the box was not ticked (only reachable if the field is ever
+  made optional)
+- **Not recorded** — the form had no consent field at the time, which is not the same as a refusal
+
+Belles approved before the consent field existed will read "Not recorded". Their consent is in
+their WPForms entry if the form asked at the time; otherwise it was never collected.
 
 ## Filters
 

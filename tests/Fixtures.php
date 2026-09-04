@@ -283,6 +283,126 @@ class Fixtures {
 		);
 	}
 
+	/*
+	 * -----------------------------------------------------------------------
+	 * Belle directory
+	 * -----------------------------------------------------------------------
+	 */
+
+	/**
+	 * A Guardians roster, as Basebelles_API::get_guardians_roster() returns it: already sorted
+	 * by name, because the real method sorts before handing it back.
+	 *
+	 * @return array[]
+	 */
+	public static function roster(): array {
+		return array(
+			array(
+				'id'       => 680757,
+				'name'     => 'Bo Naylor',
+				'jersey'   => '23',
+				'position' => 'C',
+			),
+			array(
+				'id'       => 608070,
+				'name'     => 'José Ramírez',
+				'jersey'   => '11',
+				'position' => '3B',
+			),
+			array(
+				'id'       => 663581,
+				'name'     => 'Steven Kwan',
+				'jersey'   => '38',
+				'position' => 'LF',
+			),
+		);
+	}
+
+	/**
+	 * One completed WPForms submission, in the shape wpforms_process_complete receives.
+	 *
+	 * Keys are field IDs; each entry carries the label in 'name', which is what the intake
+	 * matches on. Pass label => value overrides to change or add a field, or a value of null
+	 * to drop that field from the submission entirely.
+	 *
+	 * @param array $overrides Field label => value (or null to remove).
+	 * @return array
+	 */
+	public static function entry( array $overrides = array() ): array {
+		$defaults = array(
+			'Your Name'                  => array( 'Mika Epstein', 'name' ),
+			'Email Address'              => array( 'Mika@Example.COM', 'email' ),
+			'Location'                   => array( 'Cleveland, OH, USA', 'text' ),
+			'Favorite Current Player'    => array( 'José Ramírez', 'select' ),
+			'Favorite Historical Player' => array( 'Kenny Lofton', 'text' ),
+			// A GDPR checkbox submits its own label text when ticked, nothing when not.
+			'GDPR Agreement'             => array(
+				'I consent to having this website store my submitted information so they can list me as a Belle.',
+				'gdpr-checkbox',
+			),
+		);
+
+		foreach ( $overrides as $label => $value ) {
+			$type = $defaults[ $label ][1] ?? 'text';
+
+			if ( null === $value ) {
+				unset( $defaults[ $label ] );
+				continue;
+			}
+
+			$defaults[ $label ] = array( $value, $type );
+		}
+
+		$fields = array();
+		$id     = 1;
+
+		foreach ( $defaults as $label => $field ) {
+			$fields[ $id ] = array(
+				'name'  => $label,
+				'value' => $field[0],
+				'id'    => $id,
+				'type'  => $field[1],
+			);
+
+			++$id;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * A stored WPForms form with one choice field, as the roster sync expects to find it.
+	 *
+	 * @param string $field_id ID of the choice field.
+	 * @return array
+	 */
+	public static function wpforms_form( string $field_id = '4' ): array {
+		return array(
+			'id'       => 42,
+			'settings' => array(
+				'form_title' => 'Be a Belle',
+			),
+			'fields'   => array(
+				'2'       => array(
+					'id'    => '2',
+					'type'  => 'email',
+					'label' => 'Email Address',
+				),
+				$field_id => array(
+					'id'      => $field_id,
+					'type'    => 'select',
+					'label'   => 'Favorite Current Player',
+					'choices' => array(
+						1 => array(
+							'label' => 'Somebody Stale',
+							'value' => '',
+						),
+					),
+				),
+			),
+		);
+	}
+
 	/**
 	 * Standings, as Basebelles_API::fetch_standings() returns them. Defaults to a .500 team on a
 	 * losing streak with a negative run differential, so both negative flags are exercised.

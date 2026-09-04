@@ -13,7 +13,7 @@
  * when it renders commenter avatars, not as a privacy guarantee.
  *
  * @package Base*Belles
- * @since   1.4.0
+ * @since   1.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,12 +29,21 @@ class Basebelles_Belles {
 	const META_EMAIL      = '_bb_belle_email';
 	const META_EMAIL_HASH = '_bb_belle_email_hash';
 	const META_LOCATION   = '_bb_belle_location';
-	const META_CURRENT    = '_bb_belle_current_players';
+	const META_CURRENT    = '_bb_belle_current_player';
 	const META_HISTORICAL = '_bb_belle_historical_player';
 	const META_GRAVATAR   = '_bb_belle_has_gravatar';
 	const META_USER_ID    = '_bb_belle_user_id';
 	const META_ENTRY_ID   = '_bb_belle_entry_id';
 	const META_DUPLICATE  = '_bb_belle_duplicate';
+
+	/**
+	 * Consent record. The WPForms entry is the primary evidence and META_ENTRY_ID points at it;
+	 * these exist so a Belle still carries its own proof if entries are ever pruned or entry
+	 * storage gets switched off. Never editable from the admin — a consent record you can edit
+	 * is not a record.
+	 */
+	const META_CONSENT      = '_bb_belle_consent';
+	const META_CONSENTED_AT = '_bb_belle_consented_at';
 
 	/** Options set on the Belles → Form Settings screen. */
 	const OPTION_FORM_ID      = 'bb_belles_form_id';
@@ -47,9 +56,6 @@ class Basebelles_Belles {
 
 	/** Deferred, single-event Gravatar lookup so publishing never waits on gravatar.com. */
 	const CRON_GRAVATAR = 'bb_belles_check_gravatar';
-
-	/** How many current players a Belle may pick. Mirrored into the form's choice_limit. */
-	const CURRENT_PLAYER_LIMIT = 3;
 
 	/**
 	 * Singleton instance.
@@ -175,9 +181,11 @@ class Basebelles_Belles {
 			return;
 		}
 
-		$email = sanitize_email( $values['email'] );
+		// Stored lowercased so the address and its hash are always the same shape, whatever
+		// casing the person typed.
+		$email = strtolower( sanitize_email( $values['email'] ) );
 		$name  = '' !== $values['name'] ? $values['name'] : ucfirst( strstr( $email, '@', true ) );
-		$hash  = hash( 'sha256', strtolower( trim( $email ) ) );
+		$hash  = hash( 'sha256', $email );
 
 		$post_id = wp_insert_post(
 			array(
@@ -196,10 +204,20 @@ class Basebelles_Belles {
 		update_post_meta( $post_id, self::META_EMAIL, $email );
 		update_post_meta( $post_id, self::META_EMAIL_HASH, $hash );
 		update_post_meta( $post_id, self::META_LOCATION, $values['location'] );
-		update_post_meta( $post_id, self::META_CURRENT, $this->resolve_player_ids( $values['current_players'] ) );
+		update_post_meta( $post_id, self::META_CURRENT, $this->resolve_player( $values['current_player'] ) );
 		update_post_meta( $post_id, self::META_HISTORICAL, $values['historical_player'] );
 		update_post_meta( $post_id, self::META_ENTRY_ID, (int) $entry_id );
 		update_post_meta( $post_id, self::META_USER_ID, 0 );
+
+		// Recorded only when the form actually asked. GMT so the record does not shift with the
+		// site's timezone setting.
+		if ( null !== $values['consent'] ) {
+			update_post_meta( $post_id, self::META_CONSENT, $values['consent'] ? 1 : 0 );
+
+			if ( $values['consent'] ) {
+				update_post_meta( $post_id, self::META_CONSENTED_AT, gmdate( 'Y-m-d H:i:s' ) );
+			}
+		}
 
 		// Flagged rather than dropped: a repeat submission is usually someone correcting a typo,
 		// and that is a judgement call for the moderation queue, not for this function.
@@ -231,8 +249,11 @@ class Basebelles_Belles {
 			'name'              => '',
 			'email'             => '',
 			'location'          => '',
-			'current_players'   => array(),
+			'current_player'    => '',
 			'historical_player' => '',
+			// Null means the form carried no consent field at all, which is a different thing
+			// from consent being withheld — only one of those is worth recording as a refusal.
+			'consent'           => null,
 		);
 
 		/**
@@ -246,7 +267,8 @@ class Basebelles_Belles {
 		foreach ( $fields as $field_id => $field ) {
 			$key = $this->match_field_key( $field_id, $field, $map );
 
-			if ( ! $key || ! isset( $values[ $key ] ) ) {
+			// array_key_exists rather than isset: a null default is a meaningful state here.
+			if ( ! $key || ! array_key_exists( $key, $values ) ) {
 				continue;
 			}
 
@@ -255,10 +277,17 @@ class Basebelles_Belles {
 			$value = isset( $field['value'] ) ? $field['value'] : '';
 			$raw   = is_array( $value ) ? implode( "\n", array_filter( $value, 'is_scalar' ) ) : (string) $value;
 
-			if ( 'current_players' === $key ) {
-				// Checkbox and multi-select values arrive newline-joined.
+			if ( 'consent' === $key ) {
+				// A GDPR checkbox submits its own label text when ticked and nothing when not.
+				$values[ $key ] = '' !== trim( $raw );
+				continue;
+			}
+
+			if ( 'current_player' === $key ) {
+				// A single-select dropdown sends one plain string, but take the first line
+				// regardless so a checkbox field (newline-joined) cannot store two names.
 				$choices        = array_filter( array_map( 'trim', explode( "\n", $raw ) ) );
-				$values[ $key ] = array_slice( array_values( $choices ), 0, self::CURRENT_PLAYER_LIMIT );
+				$values[ $key ] = sanitize_text_field( (string) reset( $choices ) );
 				continue;
 			}
 
@@ -297,6 +326,16 @@ class Basebelles_Belles {
 			return 'email';
 		}
 
+		// Tested after email so an opt-in worded "consent to email updates" is still read as the
+		// email field, which is the one the directory cannot function without.
+		$consent_words = array( 'gdpr', 'consent', 'agree', 'permission' );
+
+		foreach ( $consent_words as $word ) {
+			if ( false !== strpos( $label, $word ) ) {
+				return 'consent';
+			}
+		}
+
 		$location_words = array( 'location', 'whereareyou', 'city', 'hometown', 'wherefrom' );
 
 		foreach ( $location_words as $word ) {
@@ -306,7 +345,7 @@ class Basebelles_Belles {
 		}
 
 		if ( false !== strpos( $label, 'current' ) ) {
-			return 'current_players';
+			return 'current_player';
 		}
 
 		if ( false !== strpos( $label, 'historical' ) || false !== strpos( $label, 'alltime' ) || false !== strpos( $label, 'retired' ) ) {
@@ -321,30 +360,31 @@ class Basebelles_Belles {
 	}
 
 	/**
-	 * Attach MLB player IDs to submitted player names using the cached roster map.
+	 * Attach the MLB player ID to a submitted player name using the cached roster map.
 	 *
-	 * @param string[] $names Submitted player names.
-	 * @return array[] List of arrays with name and id keys.
+	 * The ID is a convenience for later grouping ("how many Belles picked this player"), so a
+	 * name the roster does not know still stores fine, just with an ID of 0.
+	 *
+	 * @param string $name Submitted player name.
+	 * @return array Array with name and id keys; both empty when nothing was submitted.
 	 */
-	private function resolve_player_ids( $names ) {
-		$roster_map = (array) get_option( self::OPTION_ROSTER_MAP, array() );
-		$players    = array();
+	private function resolve_player( $name ) {
+		$name = sanitize_text_field( $name );
 
-		foreach ( $names as $name ) {
-			$name = sanitize_text_field( $name );
-
-			if ( '' === $name ) {
-				continue;
-			}
-
-			$lookup    = strtolower( $name );
-			$players[] = array(
-				'name' => $name,
-				'id'   => isset( $roster_map[ $lookup ] ) ? (int) $roster_map[ $lookup ] : 0,
+		if ( '' === $name ) {
+			return array(
+				'name' => '',
+				'id'   => 0,
 			);
 		}
 
-		return $players;
+		$roster_map = (array) get_option( self::OPTION_ROSTER_MAP, array() );
+		$lookup     = strtolower( $name );
+
+		return array(
+			'name' => $name,
+			'id'   => isset( $roster_map[ $lookup ] ) ? (int) $roster_map[ $lookup ] : 0,
+		);
 	}
 
 	/**
@@ -550,7 +590,7 @@ class Basebelles_Belles {
 				'id'         => $post->ID,
 				'name'       => $post->post_title,
 				'location'   => (string) get_post_meta( $post->ID, self::META_LOCATION, true ),
-				'current'    => is_array( $current ) ? $current : array(),
+				'current'    => is_array( $current ) && ! empty( $current['name'] ) ? (string) $current['name'] : '',
 				'historical' => (string) get_post_meta( $post->ID, self::META_HISTORICAL, true ),
 				'gravatar'   => get_post_meta( $post->ID, self::META_GRAVATAR, true ) ? self::gravatar_url( $hash, 160, 'blank' ) : '',
 			);
@@ -604,7 +644,7 @@ class Basebelles_Belles {
 	}
 
 	/**
-	 * Write the current Guardians roster into the form's checkbox choices.
+	 * Write the current Guardians roster into the form field's choices.
 	 *
 	 * Choices have to live in the saved form, not be filtered in at render time: WPForms
 	 * validates submitted choices against an allowlist read straight from the stored form, so
@@ -659,10 +699,6 @@ class Basebelles_Belles {
 		}
 
 		$form_data['fields'][ $field_id ]['choices'] = $choices;
-
-		if ( empty( $form_data['fields'][ $field_id ]['choice_limit'] ) ) {
-			$form_data['fields'][ $field_id ]['choice_limit'] = self::CURRENT_PLAYER_LIMIT;
-		}
 
 		// update() replaces the whole form, which is why the array above is a full read-modify-write.
 		$updated = $handler->update( $form_id, $form_data, array( 'cap' => false ) );
@@ -973,8 +1009,7 @@ class Basebelles_Belles {
 		$location   = (string) get_post_meta( $post->ID, self::META_LOCATION, true );
 		$historical = (string) get_post_meta( $post->ID, self::META_HISTORICAL, true );
 		$current    = get_post_meta( $post->ID, self::META_CURRENT, true );
-		$current    = is_array( $current ) ? $current : array();
-		$names      = wp_list_pluck( $current, 'name' );
+		$current    = is_array( $current ) && isset( $current['name'] ) ? (string) $current['name'] : '';
 
 		if ( get_post_meta( $post->ID, self::META_DUPLICATE, true ) ) {
 			echo '<div class="notice notice-warning inline"><p><strong>Possible duplicate:</strong> another Belle already uses this email address.</p></div>';
@@ -991,19 +1026,50 @@ class Basebelles_Belles {
 		printf( '<input type="text" class="regular-text" id="bb_belle_location" name="bb_belle_location" value="%s" />', esc_attr( $location ) );
 		echo '</td></tr>';
 
-		echo '<tr><th scope="row"><label for="bb_belle_current">Favorite current players</label></th><td>';
-		printf(
-			'<input type="text" class="large-text" id="bb_belle_current" name="bb_belle_current" value="%s" />',
-			esc_attr( implode( ', ', array_filter( (array) $names ) ) )
-		);
-		echo '<p class="description">Comma separated. Editing here clears the stored MLB player IDs for any name that is not on the current roster.</p>';
+		echo '<tr><th scope="row"><label for="bb_belle_current">Favorite current player</label></th><td>';
+		printf( '<input type="text" class="regular-text" id="bb_belle_current" name="bb_belle_current" value="%s" />', esc_attr( $current ) );
+		echo '<p class="description">A name that is not on the current roster still saves, just without an MLB player ID attached.</p>';
 		echo '</td></tr>';
 
 		echo '<tr><th scope="row"><label for="bb_belle_historical">Favorite historical player</label></th><td>';
 		printf( '<input type="text" class="regular-text" id="bb_belle_historical" name="bb_belle_historical" value="%s" />', esc_attr( $historical ) );
 		echo '</td></tr>';
 
+		// Deliberately text, not a field: this is evidence, and evidence you can edit is not
+		// evidence. Correcting it means going back to the WPForms entry.
+		echo '<tr><th scope="row">Consent</th><td>';
+		echo wp_kses_post( $this->get_consent_summary( $post->ID ) );
+		echo '</td></tr>';
+
 		echo '</tbody></table>';
+	}
+
+	/**
+	 * Describe the stored consent record for the edit screen.
+	 *
+	 * @param int $post_id Belle post ID.
+	 * @return string
+	 */
+	private function get_consent_summary( $post_id ) {
+		$recorded = get_post_meta( $post_id, self::META_CONSENT, true );
+		$entry_id = (int) get_post_meta( $post_id, self::META_ENTRY_ID, true );
+		$entry    = $entry_id ? sprintf( ' WPForms entry #%d.', $entry_id ) : '';
+
+		if ( '' === $recorded ) {
+			return '<em>Not recorded.</em> This Belle predates the consent record, or the form had no consent field when it was submitted.' . esc_html( $entry );
+		}
+
+		if ( ! $recorded ) {
+			return '<strong>Withheld.</strong> The consent box was not ticked.' . esc_html( $entry );
+		}
+
+		$when = (string) get_post_meta( $post_id, self::META_CONSENTED_AT, true );
+
+		return sprintf(
+			'<strong>Given</strong>%s.%s',
+			'' === $when ? '' : ' ' . esc_html( $when ) . ' UTC',
+			esc_html( $entry )
+		);
 	}
 
 	/**
@@ -1035,7 +1101,8 @@ class Basebelles_Belles {
 		$old   = (string) get_post_meta( $post_id, self::META_EMAIL, true );
 
 		if ( '' !== $email && is_email( $email ) ) {
-			$hash = hash( 'sha256', strtolower( trim( $email ) ) );
+			$email = strtolower( $email );
+			$hash  = hash( 'sha256', $email );
 
 			update_post_meta( $post_id, self::META_EMAIL, $email );
 			update_post_meta( $post_id, self::META_EMAIL_HASH, $hash );
@@ -1062,8 +1129,8 @@ class Basebelles_Belles {
 		}
 
 		if ( isset( $_POST['bb_belle_current'] ) ) {
-			$names = array_filter( array_map( 'trim', explode( ',', sanitize_text_field( wp_unslash( $_POST['bb_belle_current'] ) ) ) ) );
-			update_post_meta( $post_id, self::META_CURRENT, $this->resolve_player_ids( array_slice( array_values( $names ), 0, self::CURRENT_PLAYER_LIMIT ) ) );
+			$current = sanitize_text_field( wp_unslash( $_POST['bb_belle_current'] ) );
+			update_post_meta( $post_id, self::META_CURRENT, $this->resolve_player( $current ) );
 		}
 	}
 
@@ -1127,16 +1194,16 @@ class Basebelles_Belles {
 
 			case 'bb_faves':
 				$current    = get_post_meta( $post_id, self::META_CURRENT, true );
-				$current    = is_array( $current ) ? array_filter( (array) wp_list_pluck( $current, 'name' ) ) : array();
+				$current    = is_array( $current ) && isset( $current['name'] ) ? (string) $current['name'] : '';
 				$historical = (string) get_post_meta( $post_id, self::META_HISTORICAL, true );
 
-				if ( empty( $current ) && '' === $historical ) {
+				if ( '' === $current && '' === $historical ) {
 					echo '—';
 					break;
 				}
 
-				if ( ! empty( $current ) ) {
-					echo esc_html( implode( ', ', $current ) );
+				if ( '' !== $current ) {
+					echo esc_html( $current );
 				}
 
 				if ( '' !== $historical ) {

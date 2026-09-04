@@ -120,7 +120,7 @@ There is no build step for the plugin itself—it ships as the PHP, CSS, and blo
 
 ### Testing
 
-Two suites, both dev-only. `.github/workflows/test.yaml` runs them on every push to `trunk` and on every pull request.
+Two suites, both dev-only. `.github/workflows/test.yaml` runs them on every push to `trunk` and on every pull request. The PHP suite runs against 8.2, 8.3, 8.4 and 8.5 — 8.2 is the lowest version the committed lockfile installs on, since PHPUnit 11 requires it, and 8.5 is where development actually happens. `fail-fast` is off so a version-specific failure is visible as such.
 
 ```bash
 # PHP — block templates and panel logic
@@ -134,7 +134,11 @@ npm test               # node --test, no test framework beyond jsdom
 
 **What they cover.** `tests/php/PanelsTest.php` covers `Basebelles_Today_Game_Panels`: phase resolution across every `detailedState` MLB is known to send, delay labels and reasons, score/stats panel routing, doubleheader switcher labels, and which game a doubleheader opens on. `tests/php/StandingsBlockTest.php` and `tests/php/TodayGameBlockTest.php` include the block templates and assert on the markup they emit. `tests/js/` drives `today-game.js` in jsdom: game switching, state surviving a switch, and the delay badge and polling behaviour.
 
-**What they are not.** These are unit tests, not WordPress integration tests. Nothing loads WordPress or touches a database — `tests/bootstrap.php` stubs the handful of WordPress functions the code calls and replaces `Basebelles_API` with a fake whose payloads each test sets. So they prove markup and branching, not that WordPress and the MLB API hand these templates the data they expect. `tests/Fixtures.php` is where the assumed payload shapes live; if `Basebelles_API`'s normalisation changes, update it there.
+The four `Belles*Test.php` files cover the Belle directory. `BellesIntakeTest.php` runs submissions through `wpforms_process_complete` and asserts on the meta that lands, including the loose label matching that lets the form be reworded in the WPForms builder without a code change. `BellesRosterSyncTest.php` pins the read-modify-write against the stored form — WPForms validates a submitted choice against an allowlist it reads back out of the database, so choices have to be written into the form rather than filtered in at render time — plus every failure path and the status it records. `BellesAvatarTest.php` covers initials, the palette, Gravatar URL building and the cached avatar lookup. `BellesDirectoryBlockTest.php` asserts on the card markup, including that only published Belles appear. `BellesAdminTest.php` covers the list table columns and the edit screen, including the duplicate-address warning clearing when a moderator corrects a typo.
+
+**What they are not.** These are unit tests, not WordPress integration tests. Nothing loads WordPress or touches a database — `tests/bootstrap.php` stubs the WordPress functions the code calls and replaces `Basebelles_API` with a fake whose payloads each test sets. So they prove markup and branching, not that WordPress and the MLB API hand these templates the data they expect. `tests/Fixtures.php` is where the assumed payload shapes live; if `Basebelles_API`'s normalisation changes, update it there.
+
+The Belle tests need more of WordPress than the block tests do, so the bootstrap also carries a small in-memory post store: `wp_insert_post()` puts a post in it and `get_posts()`/`get_post_meta()` read back out, which lets intake tests and directory tests talk about the same data. Options, cron, `wp_remote_head()` and a fake WPForms form handler are stubbed the same way — recorded rather than performed. The sharp edge is that these stubs are only as faithful as they look: `sanitize_text_field()` and `is_email()` approximate WordPress rather than matching it, and WPForms' real `update()` does more to a form than the fake does. Anything that turns on those details still needs checking on a real install.
 
 **Adding a test.** Drop a `*Test.php` in `tests/php/` (any class extending `PHPUnit\Framework\TestCase`), or a `*.test.mjs` in `tests/js/`. Both are picked up automatically. If you add a dev dependency, add it to the `EXCLUDE` list in `.github/workflows/deploy.yaml` too — that rsync runs `--delete` over the whole repo, so anything not excluded ends up in the live plugin directory.
 

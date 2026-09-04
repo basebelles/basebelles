@@ -56,7 +56,7 @@ if ( '' !== $anchor ) {
 foreach ( $belles as $belle ) {
 	$initials = Basebelles_Belles::get_initials( $belle['name'] );
 	$color    = Basebelles_Belles::get_monogram_color( $belle['name'] );
-	$current  = array_filter( (array) wp_list_pluck( $belle['current'], 'name' ) );
+	$current  = (string) $belle['current'];
 
 	echo '<li class="basebelles-belle">';
 
@@ -88,12 +88,12 @@ foreach ( $belles as $belle ) {
 		printf( '<p class="basebelles-belle-location">%s</p>', esc_html( $belle['location'] ) );
 	}
 
-	if ( ! empty( $current ) || '' !== $belle['historical'] ) {
+	if ( '' !== $current || '' !== $belle['historical'] ) {
 		echo '<dl class="basebelles-belle-faves">';
 
-		if ( ! empty( $current ) ) {
-			echo '<dt>Current favorite' . ( count( $current ) > 1 ? 's' : '' ) . '</dt>';
-			printf( '<dd>%s</dd>', esc_html( implode( ', ', $current ) ) );
+		if ( '' !== $current ) {
+			echo '<dt>Current favorite</dt>';
+			printf( '<dd>%s</dd>', esc_html( $current ) );
 		}
 
 		if ( '' !== $belle['historical'] ) {
