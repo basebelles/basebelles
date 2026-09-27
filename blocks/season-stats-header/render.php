@@ -86,7 +86,15 @@ $slug_to_type = array(
 	'regular-season'  => 'regularSeason',
 	'post-season'     => 'postseason',
 );
-$season_type  = $season_settings['current_type'] ?? 'regularSeason';
+// Map the Season Settings "Current Type" choice onto an API season type. The Wild Card round
+// is part of the postseason, and the off season shows the regular season.
+$settings_type_map = array(
+	'springTraining' => 'springTraining',
+	'regularSeason'  => 'regularSeason',
+	'wildCard'       => 'postseason',
+	'postseason'     => 'postseason',
+);
+$season_type       = $settings_type_map[ $season_settings['season_type'] ?? '' ] ?? 'regularSeason';
 
 // Read the season_year query var for both archive types.
 $season_year_qv = (int) get_query_var( 'season_year' );
@@ -120,6 +128,14 @@ if ( is_tax( 'team' ) ) {
 // Call the API
 $api     = Basebelles_API::get_instance();
 $stats   = $api->get_season_archive_stats( $season_year, $season_type, $team_id );
+
+// On a team page during the postseason, a team with no postseason games yet (or that didn't
+// make it) falls back to its regular season record rather than "Coming soon".
+if ( is_tax( 'team' ) && 'postseason' === $season_type && is_wp_error( $stats ) && 'basebelles_api_postseason_empty' === $stats->get_error_code() ) {
+	$season_type = 'regularSeason';
+	$stats       = $api->get_season_archive_stats( $season_year, $season_type, $team_id );
+}
+
 $is_past = $season_year < (int) wp_date( 'Y' );
 
 if ( is_wp_error( $stats ) ) {
@@ -160,7 +176,7 @@ if ( 'springTraining' === $season_type ) {
 	$class_season_type = 'basebelles-season-stats-header-postseason';
 }
 
-$class_current_season = ( gmdate( 'Y' ) === $current_season ) ? 'is-current' : '';
+$class_current_season = ( (int) gmdate( 'Y' ) === $current_season ) ? 'is-current' : '';
 
 $classes = array(
 	'basebelles-season-stats-header',
