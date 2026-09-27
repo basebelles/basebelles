@@ -17,10 +17,20 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 	return;
 }
 
-// Get the season type and year from ACF Options or query variables. Default to regular season and current year.
-$season_type = (string) ( get_field( 'season_type', 'option' ) ?? 'regularSeason' );
-$season_year = (int) ( get_query_var( 'season_year' ) ?? get_field( 'season_year', 'option' ) ?? (int) gmdate( 'Y' ) );
-if ( ! is_numeric( $season_year ) ) {
+// Get the season type and year from ACF Options (Season Settings group) or query variables.
+// Default to regular season and current year.
+$season_settings = get_field( 'season_settings', 'option' );
+$season_settings = is_array( $season_settings ) ? $season_settings : array();
+
+// MLB has no postseason standings table, so outside Spring Training the ticker shows the
+// regular season standings (the final ones once the regular season is over).
+$season_type = ( 'springTraining' === ( $season_settings['season_type'] ?? '' ) ) ? 'springTraining' : 'regularSeason';
+
+$season_year = (int) get_query_var( 'season_year' );
+if ( $season_year < 1900 ) {
+	$season_year = (int) ( $season_settings['current_season'] ?? 0 );
+}
+if ( $season_year < 1900 ) {
 	$season_year = (int) gmdate( 'Y' );
 }
 
