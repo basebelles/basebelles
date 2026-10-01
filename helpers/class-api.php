@@ -394,10 +394,10 @@ class Basebelles_API {
 					continue;
 				}
 
-				$is_home   = self::GUARDIANS_TEAM_ID === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
+				$is_home   = (int) $team_id === (int) ( $game['teams']['home']['team']['id'] ?? 0 );
 				$team_side = $is_home ? 'home' : 'away';
 				$opp_side  = $is_home ? 'away' : 'home';
-				$team_r    = (int) ( $game['teams'][ $team_side ]['score'] ?? 0 );
+				$team_r   = (int) ( $game['teams'][ $team_side ]['score'] ?? 0 );
 				$opp_r     = (int) ( $game['teams'][ $opp_side ]['score'] ?? 0 );
 				$is_winner = ! empty( $game['teams'][ $team_side ]['isWinner'] );
 
