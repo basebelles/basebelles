@@ -17,6 +17,9 @@ class Basebelles_Today_Game_Panels {
 	/** How close to first pitch the Score tab switches from the far-out matchup view to the countdown view. */
 	const NEAR_PHASE_WINDOW = 30 * MINUTE_IN_SECONDS;
 
+	/** Past this, a "First pitch in 43:12:05" countdown is noise -- the date and time say enough. */
+	const COUNTDOWN_WINDOW = DAY_IN_SECONDS;
+
 	/**
 	 * detailedState values that mean play is stopped but the game is still expected to happen.
 	 *
@@ -465,18 +468,23 @@ class Basebelles_Today_Game_Panels {
 	/**
 	 * Far-phase Score content: the pitching matchup, with a countdown to first pitch in place of
 	 * the Stats tab's season-form line (there's nothing to count down to once the game is close).
+	 * The countdown is left off entirely while first pitch is more than COUNTDOWN_WINDOW away.
 	 *
 	 * @param array $game Normalized game array.
 	 * @return string
 	 */
 	private static function render_far_score( array $game ) {
+		$seconds_to_first_pitch = (int) ( $game['sort_time'] ?? 0 ) - time();
+
 		ob_start();
 		echo self::render_pitching_matchup( $game ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		?>
-		<div class="tg-far-countdown">
-			<?php echo self::render_countdown_timer( $game ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
-		<?php
+		if ( $seconds_to_first_pitch <= self::COUNTDOWN_WINDOW ) :
+			?>
+			<div class="tg-far-countdown">
+				<?php echo self::render_countdown_timer( $game ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+			<?php
+		endif;
 		return (string) ob_get_clean();
 	}
 

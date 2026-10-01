@@ -22,7 +22,10 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 }
 
 $plugin_url    = plugin_dir_url( dirname( __DIR__, 2 ) . '/basebelles.php' );
-$off_day_image = $plugin_url . 'blocks/today-game/off-day.jpg';
+$game_settings = call_user_func( 'get_field', 'game_settings', 'option' );
+$off_day_image = ! empty( $game_settings['off_day_image'] )
+	? (string) $game_settings['off_day_image']
+	: $plugin_url . 'blocks/today-game/off-day.jpg';
 $game_date     = (string) ( call_user_func( 'get_field', 'game_date' ) ?? '' );
 $api           = Basebelles_API::get_instance();
 $schedule      = $api->get_guardians_today_game( $game_date );
@@ -79,6 +82,10 @@ if ( $is_doubleheader ) {
 			<img class="off-day-image" width="500px" src="<?php echo esc_url( $off_day_image ); ?>" alt="Off day" />
 		</div>
 	<?php else : ?>
+		<?php if ( ! empty( $schedule['next_game'] ) ) : ?>
+			<div class="tg-next-game-label">Next Game</div>
+		<?php endif; ?>
+
 		<?php if ( $is_doubleheader ) : ?>
 			<div class="tg-doubleheader" data-active-game="<?php echo esc_attr( (string) $games[ $active_index ]['game_pk'] ); ?>">
 				<div class="tg-dh-heading"><?php echo esc_html( $dh_heading ); ?></div>
