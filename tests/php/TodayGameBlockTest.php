@@ -95,6 +95,45 @@ class TodayGameBlockTest extends TestCase {
 
 		$this->assertStringContainsString( 'off-day-box', $html );
 		$this->assertStringNotContainsString( 'game-card', $html );
+		$this->assertStringContainsString( 'blocks/today-game/off-day.jpg', $html );
+	}
+
+	public function test_an_off_day_uses_the_custom_image_when_one_is_set(): void {
+		Basebelles_Test_State::$fields['game_settings'] = array(
+			'show_off_days' => true,
+			'off_day_image' => 'https://example.test/uploads/rest-day.png',
+		);
+		Basebelles_Test_State::$schedule = array(
+			'day_date' => 'Mon 9/7',
+			'off_day'  => true,
+			'games'    => array(),
+		);
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/today-game/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'https://example.test/uploads/rest-day.png', $html );
+		$this->assertStringNotContainsString( 'off-day.jpg', $html );
+	}
+
+	public function test_a_next_game_stand_in_is_labelled(): void {
+		Basebelles_Test_State::$schedule              = Fixtures::schedule( array( Fixtures::game() ) );
+		Basebelles_Test_State::$schedule['next_game'] = true;
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/today-game/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'tg-next-game-label', $html );
+		$this->assertStringContainsString( 'game-card', $html );
+		$this->assertStringNotContainsString( 'off-day-box', $html );
+	}
+
+	public function test_todays_game_is_not_labelled_as_next(): void {
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringNotContainsString( 'tg-next-game-label', $html );
 	}
 
 	/*

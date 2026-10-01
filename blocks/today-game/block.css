@@ -13,7 +13,8 @@
 	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.game-label {
+.game-label,
+.tg-next-game-label {
 	margin-bottom: 15px;
 	font-size: 0.85rem;
 	font-weight: 700;

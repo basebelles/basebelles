@@ -33,6 +33,11 @@ class Basebelles_API {
 	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
 	/** Calendar days included in Guardians transactions API query (inclusive). */
 	const TRANSACTIONS_LOOKBACK_DAYS = 30;
+	/**
+	 * How far ahead to look for the next game when off days are hidden. Covers the All-Star
+	 * break with room to spare; past this (the off-season) the off day image is shown anyway.
+	 */
+	const NEXT_GAME_LOOKAHEAD_DAYS = 14;
 	/** Upper bound for how many transactions the block may list. */
 	const TRANSACTIONS_DISPLAY_MAX = 50;
 	/** Cache TTL for season archive snapshots (past years are immutable). */
@@ -622,18 +627,101 @@ class Basebelles_API {
 			return $data;
 		}
 
-		$timezone      = new DateTimeZone( self::GAME_TIMEZONE );
-		$day_timestamp = strtotime( $date . ' 12:00:00' );
-		$games         = $data['dates'][0]['games'] ?? array();
+		$games = $data['dates'][0]['games'] ?? array();
 
-		if ( empty( $games ) || ! is_array( $games ) ) {
-			return array(
-				'day_date' => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, $timezone ) : '',
-				'off_day'  => true,
-				'games'    => array(),
-			);
+		if ( ! empty( $games ) && is_array( $games ) ) {
+			return $this->build_day_schedule( $date, $games, false );
 		}
 
+		// "Show Off Days" unchecked: show the next scheduled game instead of the off day image.
+		// This has to happen here rather than in the block template, because the today-game REST
+		// endpoint calls this same method and must agree on which game_pk is "today's".
+		if ( ! $this->show_off_days() ) {
+			$next = $this->get_guardians_next_game_day( $date );
+
+			if ( null !== $next ) {
+				return $this->build_day_schedule( $next['date'], $next['games'], true );
+			}
+		}
+
+		$day_timestamp = strtotime( $date . ' 12:00:00' );
+
+		return array(
+			'day_date'  => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, new DateTimeZone( self::GAME_TIMEZONE ) ) : '',
+			'off_day'   => true,
+			'next_game' => false,
+			'games'     => array(),
+		);
+	}
+
+	/**
+	 * Whether the "Show Off Days" option is on. Defaults to on when the settings page has never
+	 * been saved, matching the field's default_value.
+	 *
+	 * @return bool
+	 */
+	public function show_off_days() {
+		return (bool) $this->get_option_value( 'game_settings_show_off_days', 1 );
+	}
+
+	/**
+	 * Find the first day after $date (within NEXT_GAME_LOOKAHEAD_DAYS) that has a playable game.
+	 *
+	 * @param string $date Y-m-d date with no games.
+	 * @return array{date: string, games: array}|null Null when nothing is scheduled in the window.
+	 */
+	private function get_guardians_next_game_day( $date ) {
+		$data = $this->request_json(
+			'schedule',
+			array(
+				'sportId'   => 1,
+				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'startDate' => wp_date( 'Y-m-d', strtotime( $date . ' +1 day' ) ),
+				'endDate'   => wp_date( 'Y-m-d', strtotime( $date . ' +' . self::NEXT_GAME_LOOKAHEAD_DAYS . ' days' ) ),
+				'hydrate'   => 'team,linescore,probablePitcher,broadcasts',
+			)
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return null;
+		}
+
+		// A postponed game is still listed on its original date; skip past it to the day the
+		// Guardians actually play.
+		$skip_states = array( 'Postponed', 'Cancelled' );
+
+		foreach ( $data['dates'] ?? array() as $day ) {
+			$games = array_values(
+				array_filter(
+					$day['games'] ?? array(),
+					function ( $game ) use ( $skip_states ) {
+						return is_array( $game ) && ! in_array( $game['status']['detailedState'] ?? '', $skip_states, true );
+					}
+				)
+			);
+
+			if ( ! empty( $games ) && ! empty( $day['date'] ) ) {
+				return array(
+					'date'  => $day['date'],
+					'games' => $games,
+				);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Normalize one day's raw MLB games into the shape the today-game block renders.
+	 *
+	 * @param string $date      Y-m-d date the games are on.
+	 * @param array  $games     Raw game payloads from the schedule endpoint.
+	 * @param bool   $next_game True when these are a future day's games standing in for an off day.
+	 * @return array
+	 */
+	private function build_day_schedule( $date, $games, $next_game ) {
+		$timezone         = new DateTimeZone( self::GAME_TIMEZONE );
+		$day_timestamp    = strtotime( $date . ' 12:00:00' );
 		$settings         = $this->get_season_settings();
 		$normalized_games = array();
 
@@ -657,9 +745,10 @@ class Basebelles_API {
 		}
 
 		return array(
-			'day_date' => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, $timezone ) : '',
-			'off_day'  => false,
-			'games'    => $normalized_games,
+			'day_date'  => $day_timestamp ? wp_date( 'D n/j', $day_timestamp, $timezone ) : '',
+			'off_day'   => false,
+			'next_game' => (bool) $next_game,
+			'games'     => $normalized_games,
 		);
 	}
 
