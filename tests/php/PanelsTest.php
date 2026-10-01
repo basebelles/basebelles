@@ -70,6 +70,23 @@ class PanelsTest extends TestCase {
 		$this->assertSame( 'near', Basebelles_Today_Game_Panels::get_phase( $near ) );
 	}
 
+	public function test_far_score_shows_a_countdown_within_a_day_of_first_pitch(): void {
+		$game = Fixtures::game( array( 'sort_time' => time() + 23 * HOUR_IN_SECONDS ) );
+		$html = Basebelles_Today_Game_Panels::render_score_panel( $game, 'far', array() );
+
+		$this->assertStringContainsString( 'tg-countdown', $html );
+	}
+
+	public function test_far_score_drops_the_countdown_more_than_a_day_out(): void {
+		$game = Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) );
+		$html = Basebelles_Today_Game_Panels::render_score_panel( $game, 'far', array() );
+
+		$this->assertStringNotContainsString( 'tg-countdown', $html );
+		$this->assertStringNotContainsString( 'tg-far-countdown', $html );
+		// The pitching matchup still renders; only the timer goes.
+		$this->assertNotSame( '', trim( $html ) );
+	}
+
 	public function test_delay_clears_once_mlb_drops_the_delay_state(): void {
 		// A stale reason string must not keep the game stuck in the delayed phase.
 		$game = Fixtures::live_game(
