@@ -95,12 +95,61 @@ function wp_localize_script( ...$args ) {
 /**
  * ACF's get_field(). Returns whatever the test put in Basebelles_Test_State::$fields.
  *
+ * Values for a specific object (e.g. 'category_5') go in $object_fields and win when that
+ * object is asked for; everything else ignores $post_id, as before.
+ *
  * @param string $selector Field name.
- * @param mixed  $post_id Post ID or 'option'.
+ * @param mixed  $post_id Post ID, 'option', or '{taxonomy}_{term_id}'.
  * @return mixed
  */
 function get_field( $selector, $post_id = false ) {
+	if ( is_string( $post_id ) && isset( Basebelles_Test_State::$object_fields[ $post_id ] ) ) {
+		return Basebelles_Test_State::$object_fields[ $post_id ][ $selector ] ?? null;
+	}
+
 	return Basebelles_Test_State::$fields[ $selector ] ?? null;
+}
+
+/**
+ * get_the_category(), from Basebelles_Test_State::$categories (post ID => term objects).
+ *
+ * @param int $post_id Post ID.
+ * @return object[]
+ */
+function get_the_category( $post_id = false ) {
+	return Basebelles_Test_State::$categories[ (int) $post_id ] ?? array();
+}
+
+/**
+ * get_the_terms(), from Basebelles_Test_State::$post_terms (post ID => taxonomy => terms).
+ * Returns false when there are none, like WordPress.
+ *
+ * @param int    $post_id  Post ID.
+ * @param string $taxonomy Taxonomy name.
+ * @return object[]|false
+ */
+function get_the_terms( $post_id, $taxonomy ) {
+	$terms = Basebelles_Test_State::$post_terms[ (int) $post_id ][ $taxonomy ] ?? array();
+
+	return empty( $terms ) ? false : $terms;
+}
+
+/**
+ * get_terms(), returning every term in Basebelles_Test_State::$terms for the taxonomy.
+ *
+ * @param array $args Query arguments; only 'taxonomy' is honoured.
+ * @return object[]
+ */
+function get_terms( $args = array() ) {
+	return Basebelles_Test_State::$terms[ $args['taxonomy'] ?? '' ] ?? array();
+}
+
+function sanitize_hex_color( $color ) {
+	if ( '' === $color ) {
+		return '';
+	}
+
+	return preg_match( '|^#([A-Fa-f0-9]{3}){1,2}$|', (string) $color ) ? $color : null;
 }
 
 function is_wp_error( $thing ) {
@@ -528,6 +577,21 @@ class Basebelles_Test_State {
 	/** @var array Field name => value, for get_field(). */
 	public static $fields = array();
 
+	/** @var array<string, array> Object ID (e.g. 'category_5') => field name => value, for get_field(). */
+	public static $object_fields = array();
+
+	/** @var array<int, object[]> Post ID => category terms, for get_the_category(). */
+	public static $categories = array();
+
+	/** @var array<string, object[]> Taxonomy => terms, for get_terms(). */
+	public static $terms = array();
+
+	/** @var array<int, array<string, object[]>> Post ID => taxonomy => terms, for get_the_terms(). */
+	public static $post_terms = array();
+
+	/** @var array<string, array> team-info list.json entries, keyed by team key, for the fake API. */
+	public static $team_info = array();
+
 	/** @var array|WP_Error Payload for Basebelles_API::get_guardians_today_game(). */
 	public static $schedule = array();
 
@@ -630,6 +694,11 @@ class Basebelles_Test_State {
 
 	public static function reset(): void {
 		self::$fields            = array();
+		self::$object_fields     = array();
+		self::$categories        = array();
+		self::$terms             = array();
+		self::$post_terms        = array();
+		self::$team_info         = array();
 		self::$schedule          = array();
 		self::$standings         = array();
 		self::$live_feeds        = array();
@@ -770,6 +839,18 @@ class Basebelles_API {
 	public function get_guardians_roster( $roster_type = 'active', $season_year = null ) {
 		return Basebelles_Test_State::$roster;
 	}
+
+	/** Same lookup as the real one, against Basebelles_Test_State::$team_info. */
+	public function get_team_by_taxonomy_slug( $taxonomy_slug ) {
+		foreach ( Basebelles_Test_State::$team_info as $key => $team ) {
+			if ( ( $team['taxonomy_term'] ?? '' ) === $taxonomy_slug ) {
+				$team['slug'] = $key;
+				return $team;
+			}
+		}
+
+		return array();
+	}
 }
 
 /** The today-game template reads Basebelles::$version when enqueueing its script. */
@@ -783,5 +864,7 @@ require_once BASEBELLES_PLUGIN_DIR . '/blocks/today-game/class-panels.php';
 // Requiring this constructs the singleton, which registers hooks and the post type against the
 // stubs above. is_admin() is false at bootstrap, so nothing gets scheduled.
 require_once BASEBELLES_PLUGIN_DIR . '/features/class-belles.php';
+
+require_once BASEBELLES_PLUGIN_DIR . '/features/class-category-style.php';
 
 require_once BASEBELLES_TESTS_DIR . '/Fixtures.php';

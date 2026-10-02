@@ -77,9 +77,17 @@ class Basebelles_Patterns {
 				'keywords'    => array( 'basebelles', 'game', 'series', 'end' ),
 				'file'        => 'patterns/game-series-end.php',
 			),
+			'home-posts'           => array(
+				'title'       => __( 'Home Posts', 'basebelles' ),
+				'slug'        => 'basebelles/home-posts',
+				'description' => __( 'Latest posts list for the homepage, styled by category.', 'basebelles' ),
+				'keywords'    => array( 'basebelles', 'home', 'posts', 'latest', 'query' ),
+				'blockTypes'  => array( 'core/query' ),
+				'file'        => 'patterns/home-posts.php',
+			),
 		);
 
-		foreach ( $patterns as $slug => $data ) {
+		foreach ( $patterns as $data ) {
 			$filepath = plugin_dir_path( __DIR__ ) . $data['file'];
 
 			if ( file_exists( $filepath ) ) {
@@ -87,13 +95,17 @@ class Basebelles_Patterns {
 				include $filepath;
 
 				$data['content'] = trim( ob_get_clean() );
-				unset( $data['file'] );
+
+				// Register under the namespaced slug (e.g. 'basebelles/header'), not the
+				// array key, so names can't collide with theme or core patterns.
+				$name = $data['slug'];
+				unset( $data['file'], $data['slug'] );
 
 				// For simplicity, all patterns are registered to post editor and categorized
 				// under 'featured', 'text', and 'basebelles'.
 				$data['categories'] = array( 'featured', 'text', 'basebelles' );
 
-				register_block_pattern( $slug, $data );
+				register_block_pattern( $name, $data );
 			}
 		}
 	}

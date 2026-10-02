@@ -1,0 +1,71 @@
+{
+    "key": "group_bb_category_style",
+    "title": "Category Style",
+    "fields": [
+        {
+            "key": "field_bb_category_color",
+            "label": "Category Color",
+            "name": "bb_category_color",
+            "aria-label": "",
+            "type": "color_picker",
+            "instructions": "Used for the image ring, label, and post title on the homepage. Pick a dark color. Label text is cream.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "enable_opacity": 0,
+            "return_format": "string",
+            "allow_in_bindings": 0,
+            "custom_palette_source": "",
+            "palette_colors": "",
+            "show_color_wheel": true
+        },
+        {
+            "key": "field_bb_category_tint",
+            "label": "Tint Photo",
+            "name": "bb_category_tint",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "Show the featured image as a color-washed photo (used for Off Day).",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui": 1,
+            "ui_on_text": "",
+            "ui_off_text": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "taxonomy",
+                "operator": "==",
+                "value": "category"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Per-category color and tint for the homepage posts list.",
+    "show_in_rest": 1,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1790893351
+}

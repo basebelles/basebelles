@@ -65,6 +65,7 @@ class Basebelles {
 	public function init() {
 		// Belle Features
 		require_once 'features/class-belles.php';
+		require_once 'features/class-category-style.php';
 		require_once 'features/class-comment-probation.php';
 		require_once 'features/class-embeds.php';
 		require_once 'features/class-patterns.php';
