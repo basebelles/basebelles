@@ -112,6 +112,96 @@ a.wp-block-latest-posts__post-title {
 	font-size: 1.15em;
 }
 
+/*
+ * Homepage posts: category-colored images (patterns/home-posts.php).
+ * --bb-cat-color is set per category on the post's <li> by a <style> block that
+ * features/class-category-style.php prints in wp_head. Uncolored categories
+ * fall back to wine red.
+ */
+.bb-home-posts .wp-block-post-featured-image {
+	position: relative;
+	aspect-ratio: 1;
+	border-radius: 14px;
+}
+
+.bb-home-posts .wp-block-post-featured-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.bb-home-posts .wp-block-post-featured-image:hover img,
+	.bb-home-posts .wp-block-post-featured-image a:focus-visible img {
+		transform: scale(1.07);
+	}
+}
+
+/*
+ * Labels straddle the diamond's points: category on the top point, team (game
+ * posts only) on the bottom point. Half on the image, half off, so the figure
+ * must not clip (no overflow: hidden on it).
+ */
+.bb-home-posts .bb-cat-pill {
+	position: absolute;
+	left: 50%;
+	z-index: 1;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background: var(--bb-cat-color, var(--bb-wine-red));
+	color: var(--bb-sandstone-cream);
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	line-height: 1.2;
+	padding: 4px 9px;
+	border-radius: 26px;
+	pointer-events: none;
+	--shape: initial;
+}
+
+.bb-home-posts .bb-cat-pill--category {
+	top: 0;
+	transform: translate(-50%, -50%);
+}
+
+.bb-home-posts .bb-cat-pill--team {
+	bottom: 0;
+	transform: translate(-50%, 50%);
+}
+
+.bb-home-posts .wp-block-post-title a {
+	color: var(--bb-cat-color, var(--bb-wine-red));
+}
+
+/*
+ * Tint Photo. The background fills the whole square figure on purpose, so tinted
+ * posts read as a rounded colored square around the diamond (not just a diamond).
+ */
+.bb-home-posts .bb-cat-tint .wp-block-post-featured-image {
+	background: var(--bb-cat-color, var(--bb-wine-red));
+}
+
+.bb-home-posts .bb-cat-tint .wp-block-post-featured-image img {
+	filter: grayscale(1) contrast(1.1);
+	mix-blend-mode: luminosity;
+	opacity: 0.85;
+}
+
+.bb-home-posts .bb-cat-tint .wp-block-post-featured-image:hover img {
+	opacity: 1;
+}
+
+.bb-home-posts .bb-cat-tint .bb-cat-pill {
+	background: var(--bb-sandstone-cream);
+	color: var(--bb-cat-color, var(--bb-wine-red));
+}
+
 /* Homepage Pullquote */
 .home .wp-block-pullquote cite {
 	font-size: .5em!important;
