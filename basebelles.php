@@ -22,7 +22,8 @@ class Basebelles {
 	 * @return void
 	 */
 	public function __construct() {
-		self::$version = '1.6.0';
+		// The plugin header is the only place the version is set. It cache-busts the enqueued CSS and JS.
+		self::$version = get_file_data( __FILE__, array( 'Version' => 'Version' ) )['Version'];
 
 		// ACF
 		require_once 'blocks/class-acf-json.php';
