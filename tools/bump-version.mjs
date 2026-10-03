@@ -8,9 +8,9 @@
  * Edits files only — no staging, no commit, no tag. Re-running with the same version is a no-op,
  * so it is safe to run twice.
  *
- * The version lives in five places and they have to agree: the plugin header WordPress reads,
- * Basebelles::$version (which cache-busts the enqueued CSS and JS), package.json, and the two
- * copies npm keeps in package-lock.json. The npm pair is delegated to `npm version` rather than
+ * The version lives in four places and they have to agree: the plugin header WordPress reads
+ * (Basebelles::$version is read from it at runtime to cache-bust the enqueued CSS and JS),
+ * package.json, and the two copies npm keeps in package-lock.json. The npm pair is delegated to `npm version` rather than
  * hand-edited, because the lockfile is npm's to format.
  *
  * Deliberately narrow: only basebelles.php is touched for PHP. features/class-comment-probation.php
@@ -31,9 +31,6 @@ const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 
 /** The plugin header line WordPress parses. */
 const HEADER_RE = /^(\s*\*\s*Version:\s*)(\S+)(\s*)$/m;
-
-/** The assignment in Basebelles::__construct(). */
-const ASSIGNMENT_RE = /(self::\$version\s*=\s*')([^']+)(';)/;
 
 function die( message ) {
 	console.error( `\n  ✗ ${ message }\n` );
@@ -77,33 +74,20 @@ if ( ! VERSION_PATTERN.test( target ) ) {
 
 const pluginSource = fs.readFileSync( PLUGIN_FILE, 'utf8' );
 const headerMatch = pluginSource.match( HEADER_RE );
-const assignmentMatch = pluginSource.match( ASSIGNMENT_RE );
 
 if ( ! headerMatch ) {
 	die( 'Could not find the "Version:" header in basebelles.php. Has the plugin header changed?' );
 }
 
-if ( ! assignmentMatch ) {
-	die( 'Could not find the self::$version assignment in basebelles.php. Has the constructor changed?' );
-}
-
 const current = headerMatch[ 2 ];
 
-if ( current !== assignmentMatch[ 2 ] ) {
-	console.warn(
-		`  ! basebelles.php disagrees with itself: header says ${ current }, self::$version says ${ assignmentMatch[ 2 ] }.\n    Both will be set to ${ target }.`
-	);
-}
-
-const phpNeedsWork = current !== target || assignmentMatch[ 2 ] !== target;
+const phpNeedsWork = current !== target;
 
 if ( phpNeedsWork && compare( target, current ) < 0 && ! force ) {
 	die( `${ target } is lower than the current ${ current }. Pass --force if that is deliberate.` );
 }
 
-const updatedSource = pluginSource
-	.replace( HEADER_RE, `$1${ target }$3` )
-	.replace( ASSIGNMENT_RE, `$1${ target }$3` );
+const updatedSource = pluginSource.replace( HEADER_RE, `$1${ target }$3` );
 
 const packageJson = JSON.parse( fs.readFileSync( PACKAGE_FILE, 'utf8' ) );
 const packageCurrent = packageJson.version;
@@ -119,7 +103,6 @@ if ( dryRun ) {
   Dry run — nothing written.
 
     basebelles.php   Version:          ${ headerMatch[ 2 ] }  ->  ${ target }
-    basebelles.php   self::$version    ${ assignmentMatch[ 2 ] }  ->  ${ target }
     package.json     version           ${ packageCurrent }  ->  ${ target }
     package-lock.json                  ${ packageCurrent }  ->  ${ target }   (via npm version)
 ` );
@@ -148,7 +131,7 @@ if ( packageCurrent !== target ) {
 console.log( `
   ✓ Bumped ${ current } -> ${ target }
 
-    basebelles.php     Version: header and self::$version
+    basebelles.php     Version: header
     package.json       version
     package-lock.json  version (both copies)
 
