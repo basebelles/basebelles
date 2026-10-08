@@ -106,6 +106,79 @@
 	color: var(--bb-wine-red);
 }
 
+/* -----------------------------------------------------------------------------------------------
+   Postseason
+   ----------------------------------------------------------------------------------------------- */
+
+.basebelles-standings.is-postseason .bb-ticker {
+	/* --bb-green only manages ~3:1 on the tinted row; this deeper green clears 4.5:1 there and on
+	   white. Scoped like the tint until something else wants it. */
+	--bb-ticker-win: #05601c;
+}
+
+/* Wins and a series lead. The W/L prefix and "leads"/"Won" carry the meaning; colour backs it up. */
+.bb-ticker-item.is-positive .bb-ticker-value {
+	color: var(--bb-ticker-win, var(--bb-green));
+}
+
+.bb-ticker-item.is-matchup .bb-ticker-value {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+}
+
+/* Short scorelines and series states read wrong broken mid-way ("2-" / "1"). */
+.is-postseason .bb-ticker-value {
+	white-space: nowrap;
+}
+
+.bb-team {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+}
+
+.bb-team-logo {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+}
+
+.bb-team-seed,
+.bb-matchup-vs {
+	font-weight: 400;
+	color: var(--bb-accent-slate);
+}
+
+.bb-team.is-tbd {
+	color: var(--bb-accent-slate);
+}
+
+/* Series games: the next (or in-progress) game gets the navy chip so it's findable at a glance. */
+.bb-ticker-row.is-games .bb-ticker-item {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.bb-ticker-row.is-games .bb-ticker-item.is-next {
+	background: var(--bb-deep-navy);
+	border-radius: 8px;
+}
+
+.bb-ticker-row.is-games .bb-ticker-item.is-next .bb-ticker-label,
+.bb-ticker-row.is-games .bb-ticker-item.is-next .bb-ticker-value {
+	color: #fff;
+}
+
+/* A game that will never be played. Still the darker slate, so it stays legible. */
+.bb-ticker-row.is-games .bb-ticker-item.is-dim .bb-ticker-value {
+	font-weight: 400;
+	font-style: italic;
+}
+
 /* Eight items will not sit on one line on a phone, so both rows reflow to a grid. The strip stops
    being a strip, which is the trade for keeping every stat visible and legible. */
 @media (max-width: 640px) {
@@ -120,8 +193,29 @@
 	}
 
 	/* The summary needs the full width; the four stats share the row beneath it. */
-	.bb-ticker-item.is-standing {
+	.bb-ticker-item.is-standing,
+	.bb-ticker-item.is-matchup {
 		grid-column: 1 / -1;
+	}
+
+	/* Postseason: the matchup leads on its own line, and the (at most three) facts share the row
+	   beneath it. */
+	.is-postseason .bb-ticker-row.is-primary {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.bb-ticker-item.is-matchup {
+		order: -1;
+	}
+
+	/* Three across rather than four, so "Sat 10/10 · if nec." fits; a Best of 7 lands 3-3-1. */
+	.bb-ticker-row.is-games {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	/* The next-game chip needs its own breathing room once the item padding is gone. */
+	.bb-ticker-row.is-games .bb-ticker-item {
+		padding: 4px 2px;
 	}
 
 	.bb-ticker-row.is-primary .bb-ticker-item + .bb-ticker-item {
@@ -130,7 +224,8 @@
 }
 
 @media (max-width: 380px) {
-	.bb-ticker-row {
+	.bb-ticker-row,
+	.is-postseason .bb-ticker-row.is-primary {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }

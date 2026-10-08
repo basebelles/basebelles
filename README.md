@@ -39,7 +39,7 @@ Optional but expected in production: object/transient caching as provided by Wor
 All blocks are registered from `blocks/class-blocks.php` and appear under the **Base\*Belles** category in the inserter:
 
 | Block directory | Purpose (high level) |
-|-----------------|----------------------|
+| ----------------- | ---------------------- |
 | `blocks/belles/` | Belle directory card grid |
 | `blocks/results/` | Game / results presentation |
 | `blocks/season-header/` | Season header UI |

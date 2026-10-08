@@ -272,6 +272,115 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringNotContainsString( '<script>alert(1)</script>', $html );
 	}
 
+	/*
+	 * -----------------------------------------------------------------------
+	 * Postseason
+	 * -----------------------------------------------------------------------
+	 */
+
+	/**
+	 * Render with Season Type set and a postseason status built by the real state machine.
+	 *
+	 * @param string     $season_type ACF season_type value.
+	 * @param array|null $games Raw postseason games; null leaves the fake API's default.
+	 * @param string     $today Y-m-d.
+	 * @return string
+	 */
+	private function render_postseason( string $season_type, ?array $games, string $today = '2026-10-08' ): string {
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => $season_type );
+
+		if ( null !== $games ) {
+			Basebelles_Test_State::$postseason = Basebelles_Postseason::build_status(
+				Fixtures::ps_dates( $games ),
+				Basebelles_Postseason::compute_seeds( Fixtures::al_standings_2026() ),
+				$today,
+				114
+			);
+		}
+
+		return $this->render();
+	}
+
+	public function test_postseason_mid_series_ticker(): void {
+		$html = $this->render_postseason( 'postseason', Fixtures::alds_2026_before_game_four() );
+
+		$this->assertStringContainsString( 'is-postseason is-in-series', $html );
+
+		$primary = $this->pairs( $html, 'is-primary' );
+		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5', 'Wild Card' ), array_keys( $primary ) );
+		$this->assertSame( 'AL Division Series', $primary['Round'] );
+		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
+		$this->assertSame( 'Bye', $primary['Wild Card'] );
+
+		// Seeds sit next to each abbreviation.
+		$this->assertMatchesRegularExpression( '#CLE</span> <span class="bb-team-seed">\(2\)</span>#', $primary['Matchup'] );
+		$this->assertMatchesRegularExpression( '#CWS</span> <span class="bb-team-seed">\(6\)</span>#', $primary['Matchup'] );
+
+		$games = $this->pairs( $html, 'is-secondary is-games' );
+		$this->assertSame( array( 'G1 · vs CWS', 'G2 · vs CWS', 'G3 · @CWS', 'G4 · @CWS', 'G5 · vs CWS' ), array_keys( $games ) );
+		$this->assertSame( 'W 9-3', $games['G3 · @CWS'] );
+		$this->assertSame( array( 'Series · Best of 5', 'G1 · vs CWS', 'G2 · vs CWS' ), $this->negatives( $html ) );
+		$this->assertMatchesRegularExpression( '#bb-ticker-item is-next">\s*<dt class="bb-ticker-label">G4 · @CWS#', $html );
+	}
+
+	public function test_wild_card_season_type_also_switches_to_the_postseason_ticker(): void {
+		$html = $this->render_postseason( 'wildCard', Fixtures::alds_2026_before_game_four() );
+
+		$this->assertStringContainsString( 'is-postseason', $html );
+	}
+
+	public function test_eliminated_ticker(): void {
+		$games    = Fixtures::alds_2026_before_game_four();
+		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-08' ) );
+
+		$html    = $this->render_postseason( 'postseason', $games, '2026-10-09' );
+		$primary = $this->pairs( $html, 'is-primary' );
+
+		$this->assertSame( 'Eliminated', $primary['Season'] );
+		$this->assertSame( 'Lost 1-3', $primary['ALDS'] );
+		$this->assertSame( '1-3', $primary['Postseason'] );
+		$this->assertArrayNotHasKey( 'Wild Card', $primary );
+		$this->assertSame( 'Not needed', $this->pairs( $html, 'is-secondary is-games' )['G5 · vs CWS'] );
+	}
+
+	public function test_between_rounds_ticker_has_no_games_row(): void {
+		$games    = Fixtures::alds_2026_before_game_four();
+		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 5, 2, array( 'officialDate' => '2026-10-08' ) );
+		$games[4] = Fixtures::ps_game( 'D', 5, 5, 145, true, 'Final', 4, 3, array( 'officialDate' => '2026-10-10' ) );
+
+		$html    = $this->render_postseason( 'postseason', $games, '2026-10-11' );
+		$primary = $this->pairs( $html, 'is-primary' );
+
+		$this->assertSame( 'ALCS', $primary['Round'] );
+		$this->assertStringContainsString( 'bb-team is-tbd">TBD', $primary['Matchup'] );
+		$this->assertSame( 'Won 3-2 vs CWS', $primary['ALDS'] );
+		$this->assertSame( 'Bye', $primary['Wild Card'] );
+		$this->assertStringNotContainsString( 'is-games', $html );
+	}
+
+	public function test_not_qualified_falls_back_to_the_regular_season_standings(): void {
+		// The fake API defaults to not_qualified.
+		$html = $this->render_postseason( 'postseason', null );
+
+		$this->assertStringNotContainsString( 'is-postseason', $html );
+		$this->assertSame( '2nd in the AL Central', $this->pairs( $html, 'is-primary' )['Standing'] );
+	}
+
+	public function test_a_postseason_api_error_falls_back_to_the_regular_season_standings(): void {
+		Basebelles_Test_State::$postseason = new WP_Error( 'http_error', 'boom' );
+
+		$html = $this->render_postseason( 'postseason', null );
+
+		$this->assertStringNotContainsString( 'is-postseason', $html );
+		$this->assertStringContainsString( 'bb-ticker-row is-secondary', $html );
+	}
+
+	public function test_regular_season_type_ignores_the_postseason(): void {
+		$html = $this->render_postseason( 'regularSeason', Fixtures::alds_2026_before_game_four() );
+
+		$this->assertStringNotContainsString( 'is-postseason', $html );
+	}
+
 	public function test_an_api_error_renders_nothing_on_the_front_end(): void {
 		Basebelles_Test_State::$standings = new WP_Error( 'http_error', 'boom' );
 

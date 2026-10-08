@@ -13,8 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Basebelles_API {
 
-	const API_BASE_URL      = 'https://statsapi.mlb.com/api/v1/';
+	/**
+	 * API Feed URLs
+	 */
+	const API_BASE_URL       = 'https://statsapi.mlb.com/api/v1/';
 	const LIVE_FEED_BASE_URL = 'https://statsapi.mlb.com/api/v1.1/';
+
 	/**
 	 * How long (seconds) a live-game feed response stays cached before the next poll re-fetches it
 	 * from MLB. Shared across every visitor (WordPress transients, not per-session), so this is the
@@ -22,15 +26,20 @@ class Basebelles_API {
 	 * watching. Tune here if that cadence ever needs to change.
 	 */
 	const LIVE_FEED_CACHE_TTL = 60;
-	const API_CACHE_TTL     = 900;
-	const API_TIMEOUT       = 10;
-	// Game times/dates are always shown in the Guardians' own time zone, regardless of the
-	// WordPress site's configured timezone (a visitor or admin setting elsewhere shouldn't change
-	// what time first pitch reads as).
-	const GAME_TIMEZONE     = 'America/New_York';
-	const AL_LEAGUE_ID      = 103; // American League
-	const CL_LEAGUE_ID      = 114; // Cactus League (spring training)
-	const GUARDIANS_TEAM_ID = 114; // Cleveland Guardians
+	const API_CACHE_TTL       = 900;
+	const API_TIMEOUT         = 10;
+	const GAME_TIMEZONE       = 'America/New_York';
+	const AL_LEAGUE_ID        = 103; // American League
+	const NL_LEAGUE_ID        = 104; // National League
+
+	/**
+	 * Cache TTL for the postseason schedule behind the standings ticker. Short, because the
+	 * ticker shows a live score during a game; still shared across every visitor.
+	 */
+	const POSTSEASON_CACHE_TTL = 120;
+	const CL_LEAGUE_ID         = 114; // Cactus League (spring training)
+	const GUARDIANS_TEAM_ID    = 114; // Cleveland Guardians
+
 	/** Calendar days included in Guardians transactions API query (inclusive). */
 	const TRANSACTIONS_LOOKBACK_DAYS = 30;
 	/**
@@ -111,6 +120,128 @@ class Basebelles_API {
 		}
 
 		return $this->fetch_standings_normalized( $year, $settings['season_type'], $team_id, null, self::API_CACHE_TTL );
+	}
+
+	/**
+	 * Guardians postseason status for the standings ticker: round, seeds, series score, each
+	 * game's result, and whether they had a Wild Card bye. See Basebelles_Postseason for states.
+	 *
+	 * @param int|null $season_year Optional season year; defaults to ACF/options season.
+	 * @return array|WP_Error
+	 */
+	public function get_postseason_status( $season_year = null ) {
+		$settings = $this->get_season_settings();
+		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
+
+		if ( $year < 1900 ) {
+			$year = (int) gmdate( 'Y' );
+		}
+
+		// Plain schedule rather than schedule/postseason/series: that endpoint ignores teamId and
+		// returns every series in both leagues.
+		$schedule = $this->request_json(
+			'schedule',
+			array(
+				'sportId'  => 1,
+				'teamId'   => self::GUARDIANS_TEAM_ID,
+				'season'   => $year,
+				'gameType' => 'F,D,L,W',
+				'hydrate'  => 'team,linescore',
+			),
+			self::POSTSEASON_CACHE_TTL
+		);
+
+		if ( is_wp_error( $schedule ) ) {
+			return $schedule;
+		}
+
+		$dates = is_array( $schedule['dates'] ?? null ) ? $schedule['dates'] : array();
+
+		// Seeds come from the final regular-season standings. The NL is only needed for a World
+		// Series opponent's seed, so it's only fetched once there's a World Series game to show.
+		$seeds = $this->get_postseason_seeds( self::AL_LEAGUE_ID, $year );
+
+		if ( $this->schedule_has_game_type( $dates, 'W' ) ) {
+			$seeds += $this->get_postseason_seeds( self::NL_LEAGUE_ID, $year );
+		}
+
+		$today  = ( new DateTime( 'now', new DateTimeZone( self::GAME_TIMEZONE ) ) )->format( 'Y-m-d' );
+		$status = Basebelles_Postseason::build_status( $dates, $seeds, $today, self::GUARDIANS_TEAM_ID, self::GAME_TIMEZONE );
+
+		if ( ! empty( $status['seed_mismatch'] ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( sprintf( 'Base*Belles: Guardians seed (%s) disagrees with the Wild Card schedule for %d; showing what the schedule says.', (string) $status['seed'], $year ) );
+		}
+
+		// Local logos, the same ones the today-game block uses.
+		foreach ( $status['series'] as $type => $series ) {
+			$status['series'][ $type ]['guardians']['logo_url'] = $this->get_logo_url_by_abbreviation( $series['guardians']['abbreviation'] );
+			$status['series'][ $type ]['opponent']['logo_url']  = $this->get_logo_url_by_abbreviation( $series['opponent']['abbreviation'] );
+		}
+
+		if ( is_array( $status['current'] ) ) {
+			$status['current'] = $status['series'][ $status['current']['game_type'] ];
+		}
+
+		$status['guardians_logo_url'] = $this->get_logo_url_by_abbreviation( 'CLE' );
+
+		return $status;
+	}
+
+	/**
+	 * Seeds for one league from its regular-season standings.
+	 *
+	 * @param int $league_id MLB league ID.
+	 * @param int $year      Season year.
+	 * @return array<int, int> Team ID => seed; empty if the standings are unavailable.
+	 */
+	private function get_postseason_seeds( $league_id, $year ) {
+		$data = $this->request_json(
+			'standings',
+			array(
+				'leagueId'       => (int) $league_id,
+				'season'         => (int) $year,
+				'standingsTypes' => 'regularSeason',
+			),
+			self::API_CACHE_TTL
+		);
+
+		if ( is_wp_error( $data ) || empty( $data['records'] ) || ! is_array( $data['records'] ) ) {
+			return array();
+		}
+
+		return Basebelles_Postseason::compute_seeds( $data['records'] );
+	}
+
+	/**
+	 * Whether a schedule `dates` payload contains a game of the given type.
+	 *
+	 * @param array  $dates     Schedule `dates` array.
+	 * @param string $game_type Game type code.
+	 * @return bool
+	 */
+	private function schedule_has_game_type( $dates, $game_type ) {
+		foreach ( $dates as $day ) {
+			foreach ( $day['games'] ?? array() as $game ) {
+				if ( ( $game['gameType'] ?? '' ) === $game_type ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Local logo URL for a team abbreviation, or empty when there isn't one.
+	 *
+	 * @param string $abbreviation Team abbreviation.
+	 * @return string
+	 */
+	private function get_logo_url_by_abbreviation( $abbreviation ) {
+		$team_info = $this->get_team_info_by_abbreviation( $abbreviation );
+
+		return $this->get_team_logo_url( $team_info['slug'] ?? '' );
 	}
 
 	/**
