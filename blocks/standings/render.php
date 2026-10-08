@@ -21,10 +21,7 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 // Default to regular season and current year.
 $season_settings = get_field( 'season_settings', 'option' );
 $season_settings = is_array( $season_settings ) ? $season_settings : array();
-
-// MLB has no postseason standings table, so outside Spring Training the ticker shows the
-// regular season standings (the final ones once the regular season is over).
-$season_type = ( 'springTraining' === ( $season_settings['season_type'] ?? '' ) ) ? 'springTraining' : 'regularSeason';
+$current_type    = (string) ( $season_settings['season_type'] ?? '' );
 
 $season_year = (int) get_query_var( 'season_year' );
 if ( $season_year < 1900 ) {
@@ -34,8 +31,57 @@ if ( $season_year < 1900 ) {
 	$season_year = (int) gmdate( 'Y' );
 }
 
+$api = Basebelles_API::get_instance();
+
+/**
+ * Render one row of the ticker.
+ *
+ * A definition list rather than the div soup the prototype uses: each item is a label describing
+ * a value, which is what dt/dd mean, so the pairing survives for anyone on a screen reader. The
+ * div wrapper around each dt/dd pair is valid HTML5 inside a dl and is what the flex layout
+ * hangs off.
+ *
+ * An item may carry 'html' instead of 'value' when the value is markup (the postseason matchup
+ * with its logos). That markup is built from escaped parts by the caller.
+ *
+ * @param array  $items Item arrays with label, value (or html) and optional class.
+ * @param string $row_class Row modifier class.
+ * @return void
+ */
+$basebelles_render_ticker_row = static function ( array $items, $row_class ) {
+	?>
+	<dl class="bb-ticker-row <?php echo esc_attr( $row_class ); ?>">
+		<?php foreach ( $items as $item ) : ?>
+			<div class="bb-ticker-item <?php echo esc_attr( $item['class'] ?? '' ); ?>">
+				<dt class="bb-ticker-label"><?php echo esc_html( $item['label'] ); ?></dt>
+				<?php if ( isset( $item['html'] ) ) : ?>
+					<dd class="bb-ticker-value"><?php echo wp_kses_post( $item['html'] ); ?></dd>
+				<?php else : ?>
+					<dd class="bb-ticker-value"><?php echo esc_html( $item['value'] ); ?></dd>
+				<?php endif; ?>
+			</div>
+		<?php endforeach; ?>
+	</dl>
+	<?php
+};
+
+// Postseason: once Season Type is Wild Card or Post Season, a Guardians team that made it gets
+// the series ticker instead. One that didn't qualify (or an API failure) falls through to the
+// final regular-season standings below.
+if ( in_array( $current_type, array( 'wildCard', 'postseason' ), true ) && method_exists( $api, 'get_postseason_status' ) ) {
+	$postseason = $api->get_postseason_status( (int) $season_year );
+
+	if ( ! is_wp_error( $postseason ) && is_array( $postseason ) && 'not_qualified' !== ( $postseason['state'] ?? 'not_qualified' ) ) {
+		require __DIR__ . '/postseason.php';
+		return;
+	}
+}
+
+// MLB has no postseason standings table, so outside Spring Training the ticker shows the
+// regular season standings (the final ones once the regular season is over).
+$season_type = ( 'springTraining' === $current_type ) ? 'springTraining' : 'regularSeason';
+
 // Get the standings from the API.
-$api       = Basebelles_API::get_instance();
 $standings = $api->fetch_standings( (string) $season_type, (int) $season_year );
 
 if ( is_wp_error( $standings ) ) {
@@ -120,31 +166,6 @@ $secondary = array(
 		'value' => (string) ( $standings['over_500'] ?? '-' ),
 	),
 );
-
-/**
- * Render one row of the ticker.
- *
- * A definition list rather than the div soup the prototype uses: each item is a label describing
- * a value, which is what dt/dd mean, so the pairing survives for anyone on a screen reader. The
- * div wrapper around each dt/dd pair is valid HTML5 inside a dl and is what the flex layout
- * hangs off.
- *
- * @param array  $items Item arrays with label, value and optional class.
- * @param string $row_class Row modifier class.
- * @return void
- */
-$basebelles_render_ticker_row = static function ( array $items, $row_class ) {
-	?>
-	<dl class="bb-ticker-row <?php echo esc_attr( $row_class ); ?>">
-		<?php foreach ( $items as $item ) : ?>
-			<div class="bb-ticker-item <?php echo esc_attr( $item['class'] ?? '' ); ?>">
-				<dt class="bb-ticker-label"><?php echo esc_html( $item['label'] ); ?></dt>
-				<dd class="bb-ticker-value"><?php echo esc_html( $item['value'] ); ?></dd>
-			</div>
-		<?php endforeach; ?>
-	</dl>
-	<?php
-};
 ?>
 
 <div class="basebelles-standings">

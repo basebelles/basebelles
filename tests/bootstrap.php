@@ -598,6 +598,9 @@ class Basebelles_Test_State {
 	/** @var array|WP_Error Payload for Basebelles_API::fetch_standings(). */
 	public static $standings = array();
 
+	/** @var array|WP_Error Payload for Basebelles_API::get_postseason_status(). */
+	public static $postseason = array( 'state' => 'not_qualified' );
+
 	/** @var array game_pk => payload, for Basebelles_API::get_live_feed(). */
 	public static $live_feeds = array();
 
@@ -701,6 +704,7 @@ class Basebelles_Test_State {
 		self::$team_info         = array();
 		self::$schedule          = array();
 		self::$standings         = array();
+		self::$postseason        = array( 'state' => 'not_qualified' );
 		self::$live_feeds        = array();
 		self::$live_feed_default = array();
 		self::$enqueued_scripts  = array();
@@ -840,6 +844,10 @@ class Basebelles_API {
 		return Basebelles_Test_State::$roster;
 	}
 
+	public function get_postseason_status( $season_year = null ) {
+		return Basebelles_Test_State::$postseason;
+	}
+
 	/** Same lookup as the real one, against Basebelles_Test_State::$team_info. */
 	public function get_team_by_taxonomy_slug( $taxonomy_slug ) {
 		foreach ( Basebelles_Test_State::$team_info as $key => $team ) {
@@ -860,6 +868,9 @@ class Basebelles {
 }
 
 require_once BASEBELLES_PLUGIN_DIR . '/blocks/today-game/class-panels.php';
+
+// Pure logic, no HTTP: tested directly, while the fake API above stands in for the fetching.
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-postseason.php';
 
 // Requiring this constructs the singleton, which registers hooks and the post type against the
 // stubs above. is_admin() is false at bootstrap, so nothing gets scheduled.
