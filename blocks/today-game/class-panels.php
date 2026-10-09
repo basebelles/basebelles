@@ -317,9 +317,17 @@ class Basebelles_Today_Game_Panels {
 	 * @param array  $game Normalized game array.
 	 * @param string $phase Result of self::get_phase( $game ).
 	 * @param array  $live_feed Result of Basebelles_API::get_live_feed(), or empty array.
+	 * @param bool   $not_today True when the game isn't today's (an off day showing the next game).
+	 *                          The tabs have nothing to show yet, so an info box replaces them. No
+	 *                          .tg-tabs element means the front-end script wires no tabs, countdown,
+	 *                          or polling for it.
 	 * @return string
 	 */
-	public static function render( array $game, $phase, array $live_feed ) {
+	public static function render( array $game, $phase, array $live_feed, $not_today = false ) {
+		if ( $not_today && 'far' === $phase ) {
+			return '<div class="tg-info-box" role="note">Game details will be available closer to game time.</div>';
+		}
+
 		ob_start();
 		?>
 		<div class="tg-tabs" data-game-pk="<?php echo esc_attr( (string) $game['game_pk'] ); ?>" data-phase="<?php echo esc_attr( $phase ); ?>">

@@ -153,7 +153,7 @@ if ( $is_doubleheader ) {
 					<?php endif; ?>
 				</div>
 
-				<?php echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed, ! empty( $schedule['next_game'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 		<?php endforeach; ?>
 
