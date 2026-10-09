@@ -130,6 +130,27 @@ class TodayGameBlockTest extends TestCase {
 		$this->assertStringNotContainsString( 'off-day-box', $html );
 	}
 
+	public function test_a_next_game_stand_in_swaps_the_tabs_for_an_info_box(): void {
+		Basebelles_Test_State::$schedule              = Fixtures::schedule( array( Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) ) ) );
+		Basebelles_Test_State::$schedule['next_game'] = true;
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/today-game/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'Game details will be available closer to game time.', $html );
+		$this->assertStringNotContainsString( 'tg-tabs', $html );
+		$this->assertStringNotContainsString( 'tg-tab-bar', $html );
+		$this->assertStringContainsString( 'game-broadcasts', $html );
+	}
+
+	public function test_todays_game_keeps_its_tabs_and_has_no_info_box(): void {
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringContainsString( 'tg-tabs', $html );
+		$this->assertStringNotContainsString( 'tg-info-box', $html );
+	}
+
 	public function test_todays_game_is_not_labelled_as_next(): void {
 		$html = $this->render( array( Fixtures::game() ) );
 

@@ -213,6 +213,16 @@
 .tg-panel { display: none; }
 .tg-panel.is-active { display: block; }
 
+.tg-info-box {
+	text-align: center;
+	color: var(--bb-accent-slate);
+	font-size: 0.9rem;
+	padding: 12px 16px;
+	border: 1px solid var(--bb-sandstone-cream);
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--bb-light-blue) 12%, #fff);
+}
+
 .tg-empty {
 	text-align: center;
 	color: var(--bb-accent-slate);
