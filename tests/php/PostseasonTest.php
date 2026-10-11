@@ -94,15 +94,15 @@ class PostseasonTest extends TestCase {
 
 		$this->assertSame(
 			array(
-				array( 'G1 · vs CWS', 'L 0-3', 'loss', false ),
-				array( 'G2 · vs CWS', 'L 3-4', 'loss', false ),
-				array( 'G3 · @CWS', 'W 9-3', 'win', false ),
-				array( 'G4 · @CWS', 'Today 8:00 PM', 'scheduled', true ),
-				array( 'G5 · vs CWS', 'Sat 10/10 · if nec.', 'scheduled', false ),
+				array( 'G1 · vs CWS', 'L 0-3', 'loss', false, false ),
+				array( 'G2 · vs CWS', 'L 3-4', 'loss', false, false ),
+				array( 'G3 · @CWS', 'W 9-3', 'win', false, false ),
+				array( 'G4 · @CWS', 'Today 8:00 PM', 'scheduled', true, false ),
+				array( 'G5 · vs CWS', 'Sat 10/10', 'scheduled', false, true ),
 			),
 			array_map(
 				static function ( $cell ) {
-					return array( $cell['label'], $cell['value'], $cell['state'], $cell['next'] );
+					return array( $cell['label'], $cell['value'], $cell['state'], $cell['next'], $cell['if_necessary'] ?? false );
 				},
 				$cells
 			)

@@ -185,7 +185,8 @@ $bb_ps_state_class = array(
 	'scheduled'  => '',
 );
 
-$secondary = array();
+$secondary       = array();
+$bb_ps_footnote = false;
 
 foreach ( $games as $bb_ps_game ) {
 	$bb_ps_classes = array_filter(
@@ -195,11 +196,23 @@ foreach ( $games as $bb_ps_game ) {
 		)
 	);
 
-	$secondary[] = array(
+	$bb_ps_item = array(
 		'label' => $bb_ps_game['label'],
 		'value' => $bb_ps_game['value'],
 		'class' => implode( ' ', $bb_ps_classes ),
 	);
+
+	// "if necessary" spelled out in every cell crowded a Best of 7 off the line, so the cell
+	// carries an asterisk and the note sits under the card. Screen readers get the words inline
+	// instead, since they'd otherwise hear "star" with the note far away.
+	if ( ! empty( $bb_ps_game['if_necessary'] ) ) {
+		$bb_ps_item['html'] = esc_html( $bb_ps_game['value'] )
+			. '<span class="bb-footnote-mark" aria-hidden="true">*</span>'
+			. '<span class="screen-reader-text"> (if necessary)</span>';
+		$bb_ps_footnote     = true;
+	}
+
+	$secondary[] = $bb_ps_item;
 }
 ?>
 
@@ -210,4 +223,7 @@ foreach ( $games as $bb_ps_game ) {
 			<?php $basebelles_render_ticker_row( $secondary, 'is-secondary is-games' ); ?>
 		<?php endif; ?>
 	</div>
+	<?php if ( $bb_ps_footnote ) : ?>
+		<p class="bb-ticker-note" aria-hidden="true">* If necessary</p>
+	<?php endif; ?>
 </div>

@@ -390,11 +390,12 @@ class Basebelles_Postseason {
 		for ( $number = 1; $number <= $total; $number++ ) {
 			$game = $games[ $number ] ?? null;
 			$cell = array(
-				'number' => $number,
-				'label'  => 'G' . $number,
-				'value'  => $complete ? 'Not needed' : 'TBD',
-				'state'  => $complete ? 'not_needed' : 'scheduled',
-				'next'   => false,
+				'number'       => $number,
+				'label'        => 'G' . $number,
+				'value'        => $complete ? 'Not needed' : 'TBD',
+				'state'        => $complete ? 'not_needed' : 'scheduled',
+				'next'         => false,
+				'if_necessary' => false,
 			);
 
 			if ( null !== $game ) {
@@ -422,7 +423,7 @@ class Basebelles_Postseason {
 	 * @param bool   $complete Whether the series is decided.
 	 * @param string $today    Y-m-d.
 	 * @param string $timezone Display time zone.
-	 * @return array{value: string, state: string}
+	 * @return array{value: string, state: string, if_necessary?: bool}
 	 */
 	private static function game_result( array $game, array $sides, bool $complete, string $today, string $timezone ): array {
 		$abstract = (string) ( $game['status']['abstractGameState'] ?? '' );
@@ -465,15 +466,10 @@ class Basebelles_Postseason {
 			);
 		}
 
-		$value = self::when( $game, $today, $timezone );
-
-		if ( 'Y' === ( $game['ifNecessary'] ?? 'N' ) ) {
-			$value .= ' · if nec.';
-		}
-
 		return array(
-			'value' => $value,
-			'state' => 'scheduled',
+			'value'        => self::when( $game, $today, $timezone ),
+			'state'        => 'scheduled',
+			'if_necessary' => 'Y' === ( $game['ifNecessary'] ?? 'N' ),
 		);
 	}
 

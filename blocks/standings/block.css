@@ -179,6 +179,47 @@
 	font-style: italic;
 }
 
+/* Games that only happen if the series is still going. The note lives under the card, not in it. */
+.bb-footnote-mark {
+	margin-left: 1px;
+}
+
+.bb-ticker-note {
+	margin: 6px 0 0;
+	padding: 0 4px;
+	font-size: 11px;
+	color: var(--bb-slate-blue);
+	text-align: right;
+}
+
+/* The inline "(if necessary)" is for screen readers only. Scoped here so the block doesn't depend
+   on the theme shipping the class. */
+.basebelles-standings .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* A Best of 7 needs ~130px a game to sit on one line. Below that it wraps 4 + 3 rather than
+   squeezing the cells into each other; a Best of 3 or 5 still fits. */
+@media (max-width: 960px) {
+	.bb-ticker-row.is-games:has(> :nth-child(7)) {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 8px;
+	}
+
+	.bb-ticker-row.is-games:has(> :nth-child(7)) .bb-ticker-item {
+		padding: 4px 8px;
+	}
+}
+
 /* Eight items will not sit on one line on a phone, so both rows reflow to a grid. The strip stops
    being a strip, which is the trade for keeping every stat visible and legible. */
 @media (max-width: 640px) {
@@ -208,8 +249,9 @@
 		order: -1;
 	}
 
-	/* Three across rather than four, so "Sat 10/10 · if nec." fits; a Best of 7 lands 3-3-1. */
-	.bb-ticker-row.is-games {
+	/* Three across rather than four, so the labels ("G5 · vs CWS") fit; a Best of 7 lands 3-3-1. */
+	.bb-ticker-row.is-games,
+	.bb-ticker-row.is-games:has(> :nth-child(7)) {
 		grid-template-columns: repeat(3, 1fr);
 	}
 
