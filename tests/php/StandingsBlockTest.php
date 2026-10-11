@@ -308,7 +308,7 @@ class StandingsBlockTest extends TestCase {
 
 		$primary = $this->pairs( $html, 'is-primary' );
 		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5', 'Wild Card' ), array_keys( $primary ) );
-		$this->assertSame( 'AL Division Series', $primary['Round'] );
+		$this->assertSame( '<span class="bb-round-full">AL Division Series</span><span class="bb-round-short">ALDS</span>', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
 		$this->assertSame( 'Bye', $primary['Wild Card'] );
 
@@ -331,6 +331,8 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringStartsWith( 'Sat 10/10<span class="bb-footnote-mark" aria-hidden="true">*</span>', $games['G5 · vs CWS'] );
 		$this->assertStringContainsString( '<span class="screen-reader-text"> (if necessary)</span>', $games['G5 · vs CWS'] );
 		$this->assertStringNotContainsString( 'if nec.', $html );
+		$this->assertMatchesRegularExpression( '#bb-ticker-item is-maybe">\s*<dt class="bb-ticker-label">G5 · vs CWS#', $html );
+		$this->assertStringNotContainsString( 'is-next is-maybe', $html );
 
 		// The note sits after the card, not inside it.
 		$this->assertMatchesRegularExpression( '#</div>\s*<p class="bb-ticker-note" aria-hidden="true">\* If necessary</p>\s*</div>\s*$#', $html );

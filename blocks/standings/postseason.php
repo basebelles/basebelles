@@ -68,6 +68,22 @@ $bb_ps_matchup = static function ( $us, $them ) use ( $bb_ps_team ) {
 	return $bb_ps_team( $us ) . ' <span class="bb-matchup-vs">vs</span> ' . $bb_ps_team( $them );
 };
 
+/**
+ * Round name, with the short form ("ALCS") swapped in on phones where the full one won't fit.
+ * Only one is ever displayed, so a screen reader hears just that one.
+ *
+ * @param string $full  "AL Championship Series".
+ * @param string $short "ALCS".
+ * @return string Escaped markup.
+ */
+$bb_ps_round = static function ( $full, $short ) {
+	if ( '' === (string) $short || $short === $full ) {
+		return esc_html( $full );
+	}
+
+	return '<span class="bb-round-full">' . esc_html( $full ) . '</span><span class="bb-round-short">' . esc_html( $short ) . '</span>';
+};
+
 $bb_ps_wild_card = array();
 $bb_ps_wc_label  = (string) ( $postseason['wild_card_label'] ?? '' );
 
@@ -90,7 +106,7 @@ switch ( $bb_ps_state ) {
 		$primary    = array(
 			array(
 				'label' => 'Round',
-				'value' => $bb_ps_current['round'],
+				'html'  => $bb_ps_round( $bb_ps_current['round'], $bb_ps_current['round_short'] ),
 				'class' => 'is-round',
 			),
 			array(
@@ -193,6 +209,7 @@ foreach ( $games as $bb_ps_game ) {
 		array(
 			$bb_ps_state_class[ $bb_ps_game['state'] ] ?? '',
 			! empty( $bb_ps_game['next'] ) ? 'is-next' : '',
+			! empty( $bb_ps_game['if_necessary'] ) ? 'is-maybe' : '',
 		)
 	);
 

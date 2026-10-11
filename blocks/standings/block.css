@@ -192,6 +192,22 @@
 	text-align: right;
 }
 
+/* Games that may not happen read lighter: normal weight, and the lightest slate that still clears
+   4.5:1 on the tinted row (4.8:1; --bb-accent-slate only manages 3.9:1). The next-game chip keeps
+   its white. */
+.bb-ticker-row.is-games .bb-ticker-item.is-maybe:not(.is-next) .bb-ticker-label,
+.bb-ticker-row.is-games .bb-ticker-item.is-maybe:not(.is-next) .bb-ticker-value {
+	color: #3d5466;
+}
+
+.bb-ticker-row.is-games .bb-ticker-item.is-maybe .bb-ticker-value {
+	font-weight: 400;
+}
+
+.bb-round-short {
+	display: none;
+}
+
 /* The inline "(if necessary)" is for screen readers only. Scoped here so the block doesn't depend
    on the theme shipping the class. */
 .basebelles-standings .screen-reader-text {
@@ -247,6 +263,15 @@
 
 	.bb-ticker-item.is-matchup {
 		order: -1;
+	}
+
+	/* "AL Championship Series" gets a third of a phone and runs into its neighbour. */
+	.bb-round-full {
+		display: none;
+	}
+
+	.bb-round-short {
+		display: inline;
 	}
 
 	/* Three across rather than four, so the labels ("G5 · vs CWS") fit; a Best of 7 lands 3-3-1. */
