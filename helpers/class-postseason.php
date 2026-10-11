@@ -152,11 +152,11 @@ class Basebelles_Postseason {
 			'seed'              => $seed,
 			'had_bye'           => $had_bye,
 			'seed_mismatch'     => $seed_mismatch,
-			'wild_card_label'   => self::wild_card_label( $had_bye, $series['F'] ?? null ),
 			'current'           => null,
 			'next_round'        => '',
 			'postseason_record' => self::postseason_record( $series ),
 			'series'            => $series,
+			'road'              => self::road( $series, $had_bye, '' ),
 		);
 
 		if ( empty( $series ) ) {
@@ -172,6 +172,7 @@ class Basebelles_Postseason {
 
 		$current           = end( $series );
 		$status['current'] = $current;
+		$status['road']    = self::road( $series, $had_bye, $current['game_type'] );
 
 		if ( ! $current['complete'] ) {
 			$status['state'] = 'in_series';
@@ -506,22 +507,36 @@ class Basebelles_Postseason {
 	}
 
 	/**
-	 * Wild Card column: "Bye", or how the Wild Card Series went once it's over.
+	 * The rounds already behind us, oldest first, for the "Road here" line under the card. The
+	 * current round is left out: the card itself covers it.
 	 *
-	 * @param bool       $had_bye   Whether we skipped the round.
-	 * @param array|null $wild_card The Wild Card series, if we played one.
-	 * @return string Empty while the Wild Card Series is the one being played.
+	 * @param array  $series   Game type => series.
+	 * @param bool   $had_bye  Whether we skipped the Wild Card Series.
+	 * @param string $current  Game type of the current round, or '' before the first one.
+	 * @return array<int, array{round: string, result: string}>
 	 */
-	private static function wild_card_label( bool $had_bye, $wild_card ): string {
-		if ( $had_bye ) {
-			return 'Bye';
+	private static function road( array $series, bool $had_bye, string $current ): array {
+		$road = array();
+
+		foreach ( self::ROUND_ORDER as $game_type ) {
+			if ( $game_type === $current ) {
+				break;
+			}
+
+			if ( 'F' === $game_type && $had_bye ) {
+				$road[] = array(
+					'round'  => self::ROUND_SHORT['F'],
+					'result' => 'Bye',
+				);
+			} elseif ( isset( $series[ $game_type ] ) && $series[ $game_type ]['complete'] ) {
+				$road[] = array(
+					'round'  => self::ROUND_SHORT[ $game_type ],
+					'result' => $series[ $game_type ]['result_label'],
+				);
+			}
 		}
 
-		if ( is_array( $wild_card ) && $wild_card['complete'] ) {
-			return $wild_card['result_label'];
-		}
-
-		return '';
+		return $road;
 	}
 
 	/**

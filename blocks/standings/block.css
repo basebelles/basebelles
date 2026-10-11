@@ -116,6 +116,17 @@
 	--bb-ticker-win: #05601c;
 }
 
+/* A rule to break from what's above, then the round's full name centred over the card. The
+   theme's hr and h3 styles carry the rest. */
+.bb-ticker-rule {
+	margin: 0 0 12px;
+}
+
+.bb-ticker-heading {
+	margin: 0 0 8px;
+	text-align: center;
+}
+
 /* Wins and a series lead. The W/L prefix and "leads"/"Won" carry the meaning; colour backs it up. */
 .bb-ticker-item.is-positive .bb-ticker-value {
 	color: var(--bb-ticker-win, var(--bb-green));
@@ -189,12 +200,39 @@
 	margin-left: 1px;
 }
 
-.bb-ticker-note {
-	margin: 6px 0 0;
+/* Under the card: the road here on the left, the if-necessary note on the right. Either can be
+   alone; the note stays right-aligned when it is. */
+.bb-ticker-foot {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 4px 16px;
+	margin-top: 6px;
 	padding: 0 4px;
 	font-size: 11px;
 	color: var(--bb-slate-blue);
-	text-align: right;
+}
+
+.bb-ticker-road,
+.bb-ticker-note {
+	margin: 0;
+}
+
+.bb-ticker-note {
+	margin-left: auto;
+}
+
+/* A long road wraps between rounds, never inside one ("vs" / "CWS"). */
+.bb-ticker-road-leg {
+	white-space: nowrap;
+}
+
+.bb-ticker-road-label {
+	margin-right: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 /* Games that may not happen read lighter: normal weight, and the lightest slate that still clears
