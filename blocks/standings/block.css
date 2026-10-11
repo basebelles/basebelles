@@ -116,9 +116,15 @@
 	--bb-ticker-win: #05601c;
 }
 
-/* The round's full name sits above the card; the theme's h3 styles carry the rest. */
+/* A rule to break from what's above, then the round's full name centred over the card. The
+   theme's hr and h3 styles carry the rest. */
+.bb-ticker-rule {
+	margin: 0 0 12px;
+}
+
 .bb-ticker-heading {
 	margin: 0 0 8px;
+	text-align: center;
 }
 
 /* Wins and a series lead. The W/L prefix and "leads"/"Won" carry the meaning; colour backs it up. */

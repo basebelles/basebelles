@@ -310,7 +310,7 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5' ), array_keys( $primary ) );
 		$this->assertSame( 'ALDS', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
-		$this->assertMatchesRegularExpression( '#is-in-series">\s*<h3 class="bb-ticker-heading">AL Division Series</h3>\s*<div class="bb-ticker">#', $html );
+		$this->assertMatchesRegularExpression( '#is-in-series">\s*<hr class="bb-ticker-rule" />\s*<h3 class="bb-ticker-heading">AL Division Series</h3>\s*<div class="bb-ticker">#', $html );
 
 		// Seeds sit next to each abbreviation.
 		$this->assertMatchesRegularExpression( '#CLE</span> <span class="bb-team-seed">\(2\)</span>#', $primary['Matchup'] );
