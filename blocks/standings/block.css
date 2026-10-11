@@ -173,7 +173,12 @@
 	color: #fff;
 }
 
-/* A game that will never be played. Still the darker slate, so it stays legible. */
+/* A game that will never be played: the game itself is crossed out, and "Not needed" says why in
+   words (strikethrough isn't announced). Still the darker slate, so it stays legible. */
+.bb-ticker-row.is-games .bb-ticker-item.is-dim .bb-ticker-label {
+	text-decoration: line-through;
+}
+
 .bb-ticker-row.is-games .bb-ticker-item.is-dim .bb-ticker-value {
 	font-weight: 400;
 	font-style: italic;
