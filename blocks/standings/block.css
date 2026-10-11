@@ -116,6 +116,11 @@
 	--bb-ticker-win: #05601c;
 }
 
+/* The round's full name sits above the card; the theme's h3 styles carry the rest. */
+.bb-ticker-heading {
+	margin: 0 0 8px;
+}
+
 /* Wins and a series lead. The W/L prefix and "leads"/"Won" carry the meaning; colour backs it up. */
 .bb-ticker-item.is-positive .bb-ticker-value {
 	color: var(--bb-ticker-win, var(--bb-green));

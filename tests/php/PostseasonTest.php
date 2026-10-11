@@ -77,7 +77,6 @@ class PostseasonTest extends TestCase {
 		$this->assertSame( 2, $status['seed'] );
 		$this->assertTrue( $status['had_bye'] );
 		$this->assertFalse( $status['seed_mismatch'] );
-		$this->assertSame( 'Bye', $status['wild_card_label'] );
 
 		$current = $status['current'];
 		$this->assertSame( 'AL Division Series', $current['round'] );
@@ -195,7 +194,6 @@ class PostseasonTest extends TestCase {
 		$this->assertSame( 'awaiting', $status['state'] );
 		$this->assertSame( 'D', $status['next_round'] );
 		$this->assertTrue( $status['had_bye'] );
-		$this->assertSame( 'Bye', $status['wild_card_label'] );
 	}
 
 	public function test_no_seed_and_no_games_means_not_qualified(): void {
@@ -204,7 +202,7 @@ class PostseasonTest extends TestCase {
 		$this->assertSame( 'not_qualified', $status['state'] );
 	}
 
-	public function test_a_wild_card_team_shows_its_wild_card_result_in_later_rounds(): void {
+	public function test_a_wild_card_team_moves_on_to_the_division_series(): void {
 		$seeds   = array( 114 => 4, 117 => 5 );
 		$games   = array(
 			Fixtures::ps_game( 'F', 1, 3, 117, true, 'Final', 4, 2, array( 'officialDate' => '2026-09-29' ) ),
@@ -216,7 +214,6 @@ class PostseasonTest extends TestCase {
 
 		$this->assertFalse( $status['had_bye'] );
 		$this->assertFalse( $status['seed_mismatch'] );
-		$this->assertSame( 'Won 2-0 vs HOU', $status['wild_card_label'] );
 		$this->assertSame( 'D', $status['current']['game_type'] );
 		// Game 3 of the Wild Card was never needed, and the schedule had no entry for it.
 		$this->assertSame( 'Not needed', $status['series']['F']['games'][2]['value'] );

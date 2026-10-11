@@ -307,10 +307,10 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringContainsString( 'is-postseason is-in-series', $html );
 
 		$primary = $this->pairs( $html, 'is-primary' );
-		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5', 'Wild Card' ), array_keys( $primary ) );
+		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5' ), array_keys( $primary ) );
 		$this->assertSame( 'ALDS', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
-		$this->assertSame( 'Bye', $primary['Wild Card'] );
+		$this->assertMatchesRegularExpression( '#is-in-series">\s*<h3 class="bb-ticker-heading">AL Division Series</h3>\s*<div class="bb-ticker">#', $html );
 
 		// Seeds sit next to each abbreviation.
 		$this->assertMatchesRegularExpression( '#CLE</span> <span class="bb-team-seed">\(2\)</span>#', $primary['Matchup'] );
@@ -378,7 +378,8 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( 'ALCS', $primary['Round'] );
 		$this->assertStringContainsString( 'bb-team is-tbd">TBD', $primary['Matchup'] );
 		$this->assertSame( 'Won 3-2 vs CWS', $primary['ALDS'] );
-		$this->assertSame( 'Bye', $primary['Wild Card'] );
+		$this->assertArrayNotHasKey( 'Wild Card', $primary );
+		$this->assertStringContainsString( '<h3 class="bb-ticker-heading">AL Championship Series</h3>', $html );
 		$this->assertStringNotContainsString( 'is-games', $html );
 	}
 

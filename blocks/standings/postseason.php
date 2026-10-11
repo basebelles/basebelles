@@ -62,21 +62,13 @@ $bb_ps_matchup = static function ( $us, $them ) use ( $bb_ps_team ) {
 	return $bb_ps_team( $us ) . ' <span class="bb-matchup-vs">vs</span> ' . $bb_ps_team( $them );
 };
 
-$bb_ps_wild_card = array();
-$bb_ps_wc_label  = (string) ( $postseason['wild_card_label'] ?? '' );
-
-// The Wild Card column is context for later rounds; while the Wild Card Series is the one being
-// played, the round column already says so.
-if ( '' !== $bb_ps_wc_label && ( ! $bb_ps_current || 'F' !== $bb_ps_current['game_type'] ) ) {
-	$bb_ps_wild_card = array(
-		'label' => 'Wild Card',
-		'value' => $bb_ps_wc_label,
-		'class' => 0 === strpos( $bb_ps_wc_label, 'Lost' ) ? 'is-negative' : '',
-	);
-}
-
 $primary = array();
 $games   = array();
+
+// The round's full name heads the card; the Round column inside keeps the short one.
+$bb_ps_heading = in_array( $bb_ps_state, array( 'awaiting', 'between_rounds' ), true )
+	? ( Basebelles_Postseason::ROUND_FULL[ (string) ( $postseason['next_round'] ?? 'D' ) ] ?? '' )
+	: (string) ( $bb_ps_current['round'] ?? '' );
 
 switch ( $bb_ps_state ) {
 	case 'in_series':
@@ -163,12 +155,7 @@ switch ( $bb_ps_state ) {
 			),
 		);
 		$games     = $bb_ps_current['games'];
-		$bb_ps_wild_card = array();
 		break;
-}
-
-if ( ! empty( $bb_ps_wild_card ) ) {
-	$primary[] = $bb_ps_wild_card;
 }
 
 $bb_ps_state_class = array(
@@ -212,6 +199,9 @@ foreach ( $games as $bb_ps_game ) {
 ?>
 
 <div class="basebelles-standings is-postseason is-<?php echo esc_attr( str_replace( '_', '-', $bb_ps_state ) ); ?>">
+	<?php if ( '' !== $bb_ps_heading ) : ?>
+		<h3 class="bb-ticker-heading"><?php echo esc_html( $bb_ps_heading ); ?></h3>
+	<?php endif; ?>
 	<div class="bb-ticker">
 		<?php $basebelles_render_ticker_row( $primary, 'is-primary' ); ?>
 		<?php if ( ! empty( $secondary ) ) : ?>

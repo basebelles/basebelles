@@ -152,7 +152,6 @@ class Basebelles_Postseason {
 			'seed'              => $seed,
 			'had_bye'           => $had_bye,
 			'seed_mismatch'     => $seed_mismatch,
-			'wild_card_label'   => self::wild_card_label( $had_bye, $series['F'] ?? null ),
 			'current'           => null,
 			'next_round'        => '',
 			'postseason_record' => self::postseason_record( $series ),
@@ -503,25 +502,6 @@ class Basebelles_Postseason {
 		}
 
 		return $day->format( 'D n/j' );
-	}
-
-	/**
-	 * Wild Card column: "Bye", or how the Wild Card Series went once it's over.
-	 *
-	 * @param bool       $had_bye   Whether we skipped the round.
-	 * @param array|null $wild_card The Wild Card series, if we played one.
-	 * @return string Empty while the Wild Card Series is the one being played.
-	 */
-	private static function wild_card_label( bool $had_bye, $wild_card ): string {
-		if ( $had_bye ) {
-			return 'Bye';
-		}
-
-		if ( is_array( $wild_card ) && $wild_card['complete'] ) {
-			return $wild_card['result_label'];
-		}
-
-		return '';
 	}
 
 	/**
