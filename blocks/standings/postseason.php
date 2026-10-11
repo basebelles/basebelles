@@ -166,6 +166,13 @@ $bb_ps_state_class = array(
 	'scheduled'  => '',
 );
 
+// Earlier rounds, oldest first: "Wild Card — Bye · ALDS — Won 3-2 vs CWS".
+$bb_ps_road = array();
+
+foreach ( (array) ( $postseason['road'] ?? array() ) as $bb_ps_leg ) {
+	$bb_ps_road[] = '<span class="bb-ticker-road-leg">' . esc_html( $bb_ps_leg['round'] . ' — ' . $bb_ps_leg['result'] ) . '</span>';
+}
+
 $secondary       = array();
 $bb_ps_footnote = false;
 
@@ -208,7 +215,17 @@ foreach ( $games as $bb_ps_game ) {
 			<?php $basebelles_render_ticker_row( $secondary, 'is-secondary is-games' ); ?>
 		<?php endif; ?>
 	</div>
-	<?php if ( $bb_ps_footnote ) : ?>
-		<p class="bb-ticker-note" aria-hidden="true">* If necessary</p>
+	<?php if ( ! empty( $bb_ps_road ) || $bb_ps_footnote ) : ?>
+		<div class="bb-ticker-foot">
+			<?php if ( ! empty( $bb_ps_road ) ) : ?>
+				<p class="bb-ticker-road">
+					<span class="bb-ticker-road-label">Road here</span>
+					<?php echo wp_kses_post( implode( ' · ', $bb_ps_road ) ); ?>
+				</p>
+			<?php endif; ?>
+			<?php if ( $bb_ps_footnote ) : ?>
+				<p class="bb-ticker-note" aria-hidden="true">* If necessary</p>
+			<?php endif; ?>
+		</div>
 	<?php endif; ?>
 </div>

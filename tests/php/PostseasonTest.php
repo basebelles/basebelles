@@ -219,6 +219,46 @@ class PostseasonTest extends TestCase {
 		$this->assertSame( 'Not needed', $status['series']['F']['games'][2]['value'] );
 	}
 
+	public function test_the_road_lists_finished_rounds_oldest_first_and_skips_the_current_one(): void {
+		$seeds = array( 114 => 4, 117 => 5 );
+		$games = array(
+			Fixtures::ps_game( 'F', 1, 3, 117, true, 'Final', 4, 2, array( 'officialDate' => '2026-09-29' ) ),
+			Fixtures::ps_game( 'F', 2, 3, 117, true, 'Final', 6, 1, array( 'officialDate' => '2026-09-30' ) ),
+			Fixtures::ps_game( 'D', 1, 5, 145, false, 'Final', 3, 1, array( 'officialDate' => '2026-10-03' ) ),
+			Fixtures::ps_game( 'D', 2, 5, 145, false, 'Final', 2, 0, array( 'officialDate' => '2026-10-04' ) ),
+			Fixtures::ps_game( 'D', 3, 5, 145, true, 'Final', 5, 4, array( 'officialDate' => '2026-10-06' ) ),
+			Fixtures::ps_game( 'L', 1, 7, 139, false, 'Preview', null, null, array( 'officialDate' => '2026-10-12' ) ),
+		);
+
+		$status = $this->build( $games, '2026-10-11', $seeds );
+
+		$this->assertSame( 'L', $status['current']['game_type'] );
+		$this->assertSame(
+			array(
+				array(
+					'round'  => 'Wild Card',
+					'result' => 'Won 2-0 vs HOU',
+				),
+				array(
+					'round'  => 'ALDS',
+					'result' => 'Won 3-0 vs CWS',
+				),
+			),
+			$status['road']
+		);
+	}
+
+	public function test_the_road_is_empty_before_a_wild_card_teams_first_series(): void {
+		$this->assertSame( array(), $this->build( array(), '2026-09-28', array( 114 => 4 ) )['road'] );
+	}
+
+	public function test_a_bye_team_awaiting_the_alds_shows_the_bye_on_the_road(): void {
+		$status = $this->build( array(), '2026-09-28', array( 114 => 2 ) );
+
+		$this->assertSame( 'awaiting', $status['state'] );
+		$this->assertSame( array( array( 'round' => 'Wild Card', 'result' => 'Bye' ) ), $status['road'] );
+	}
+
 	public function test_wild_card_games_override_a_bye_seed_and_flag_the_mismatch(): void {
 		$games = array( Fixtures::ps_game( 'F', 1, 3, 117, true, 'Preview', null, null, array( 'officialDate' => '2026-09-29' ) ) );
 

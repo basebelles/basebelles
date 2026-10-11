@@ -334,8 +334,14 @@ class StandingsBlockTest extends TestCase {
 		$this->assertMatchesRegularExpression( '#bb-ticker-item is-maybe">\s*<dt class="bb-ticker-label">G5 · vs CWS#', $html );
 		$this->assertStringNotContainsString( 'is-next is-maybe', $html );
 
-		// The note sits after the card, not inside it.
-		$this->assertMatchesRegularExpression( '#</div>\s*<p class="bb-ticker-note" aria-hidden="true">\* If necessary</p>\s*</div>\s*$#', $html );
+		// The note sits under the card, not inside it.
+		$this->assertMatchesRegularExpression( '#<div class="bb-ticker-foot">.*<p class="bb-ticker-note" aria-hidden="true">\* If necessary</p>\s*</div>\s*</div>\s*$#s', $html );
+	}
+
+	public function test_the_road_here_lists_earlier_rounds_under_the_card(): void {
+		$html = $this->render_postseason( 'postseason', Fixtures::alds_2026_before_game_four() );
+
+		$this->assertMatchesRegularExpression( '#<p class="bb-ticker-road">\s*<span class="bb-ticker-road-label">Road here</span>\s*<span class="bb-ticker-road-leg">Wild Card — Bye</span>\s*</p>#', $html );
 	}
 
 	public function test_no_note_once_no_game_is_if_necessary(): void {
@@ -380,6 +386,8 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( 'Won 3-2 vs CWS', $primary['ALDS'] );
 		$this->assertArrayNotHasKey( 'Wild Card', $primary );
 		$this->assertStringContainsString( '<h3 class="bb-ticker-heading">AL Championship Series</h3>', $html );
+		// The ALDS is already in the card; the road only adds what came before it.
+		$this->assertMatchesRegularExpression( '#Road here</span>\s*<span class="bb-ticker-road-leg">Wild Card — Bye</span>\s*</p>#', $html );
 		$this->assertStringNotContainsString( 'is-games', $html );
 	}
 

@@ -156,6 +156,7 @@ class Basebelles_Postseason {
 			'next_round'        => '',
 			'postseason_record' => self::postseason_record( $series ),
 			'series'            => $series,
+			'road'              => self::road( $series, $had_bye, '' ),
 		);
 
 		if ( empty( $series ) ) {
@@ -171,6 +172,7 @@ class Basebelles_Postseason {
 
 		$current           = end( $series );
 		$status['current'] = $current;
+		$status['road']    = self::road( $series, $had_bye, $current['game_type'] );
 
 		if ( ! $current['complete'] ) {
 			$status['state'] = 'in_series';
@@ -502,6 +504,39 @@ class Basebelles_Postseason {
 		}
 
 		return $day->format( 'D n/j' );
+	}
+
+	/**
+	 * The rounds already behind us, oldest first, for the "Road here" line under the card. The
+	 * current round is left out: the card itself covers it.
+	 *
+	 * @param array  $series   Game type => series.
+	 * @param bool   $had_bye  Whether we skipped the Wild Card Series.
+	 * @param string $current  Game type of the current round, or '' before the first one.
+	 * @return array<int, array{round: string, result: string}>
+	 */
+	private static function road( array $series, bool $had_bye, string $current ): array {
+		$road = array();
+
+		foreach ( self::ROUND_ORDER as $game_type ) {
+			if ( $game_type === $current ) {
+				break;
+			}
+
+			if ( 'F' === $game_type && $had_bye ) {
+				$road[] = array(
+					'round'  => self::ROUND_SHORT['F'],
+					'result' => 'Bye',
+				);
+			} elseif ( isset( $series[ $game_type ] ) && $series[ $game_type ]['complete'] ) {
+				$road[] = array(
+					'round'  => self::ROUND_SHORT[ $game_type ],
+					'result' => $series[ $game_type ]['result_label'],
+				);
+			}
+		}
+
+		return $road;
 	}
 
 	/**
