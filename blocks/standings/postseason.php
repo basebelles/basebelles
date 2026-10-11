@@ -23,12 +23,6 @@ $bb_ps_short = array(
 	'L' => 'ALCS',
 	'W' => 'World Series',
 );
-$bb_ps_full  = array(
-	'F' => 'AL Wild Card Series',
-	'D' => 'AL Division Series',
-	'L' => 'AL Championship Series',
-	'W' => 'World Series',
-);
 
 // Before the first series is scheduled there's no team object from the schedule to lean on.
 $bb_ps_us = $bb_ps_current ? $bb_ps_current['guardians'] : array(
@@ -68,22 +62,6 @@ $bb_ps_matchup = static function ( $us, $them ) use ( $bb_ps_team ) {
 	return $bb_ps_team( $us ) . ' <span class="bb-matchup-vs">vs</span> ' . $bb_ps_team( $them );
 };
 
-/**
- * Round name, with the short form ("ALCS") swapped in on phones where the full one won't fit.
- * Only one is ever displayed, so a screen reader hears just that one.
- *
- * @param string $full  "AL Championship Series".
- * @param string $short "ALCS".
- * @return string Escaped markup.
- */
-$bb_ps_round = static function ( $full, $short ) {
-	if ( '' === (string) $short || $short === $full ) {
-		return esc_html( $full );
-	}
-
-	return '<span class="bb-round-full">' . esc_html( $full ) . '</span><span class="bb-round-short">' . esc_html( $short ) . '</span>';
-};
-
 $bb_ps_wild_card = array();
 $bb_ps_wc_label  = (string) ( $postseason['wild_card_label'] ?? '' );
 
@@ -106,7 +84,7 @@ switch ( $bb_ps_state ) {
 		$primary    = array(
 			array(
 				'label' => 'Round',
-				'html'  => $bb_ps_round( $bb_ps_current['round'], $bb_ps_current['round_short'] ),
+				'value' => $bb_ps_current['round_short'],
 				'class' => 'is-round',
 			),
 			array(
@@ -128,7 +106,7 @@ switch ( $bb_ps_state ) {
 		$primary    = array(
 			array(
 				'label' => 'Round',
-				'value' => $bb_ps_full[ $bb_ps_next ] ?? '',
+				'value' => $bb_ps_short[ $bb_ps_next ] ?? '',
 				'class' => 'is-round',
 			),
 			array(

@@ -308,7 +308,7 @@ class StandingsBlockTest extends TestCase {
 
 		$primary = $this->pairs( $html, 'is-primary' );
 		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5', 'Wild Card' ), array_keys( $primary ) );
-		$this->assertSame( '<span class="bb-round-full">AL Division Series</span><span class="bb-round-short">ALDS</span>', $primary['Round'] );
+		$this->assertSame( 'ALDS', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
 		$this->assertSame( 'Bye', $primary['Wild Card'] );
 

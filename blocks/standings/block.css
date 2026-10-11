@@ -204,10 +204,6 @@
 	font-weight: 400;
 }
 
-.bb-round-short {
-	display: none;
-}
-
 /* The inline "(if necessary)" is for screen readers only. Scoped here so the block doesn't depend
    on the theme shipping the class. */
 .basebelles-standings .screen-reader-text {
@@ -263,15 +259,6 @@
 
 	.bb-ticker-item.is-matchup {
 		order: -1;
-	}
-
-	/* "AL Championship Series" gets a third of a phone and runs into its neighbour. */
-	.bb-round-full {
-		display: none;
-	}
-
-	.bb-round-short {
-		display: inline;
 	}
 
 	/* Three across rather than four, so the labels ("G5 · vs CWS") fit; a Best of 7 lands 3-3-1. */
