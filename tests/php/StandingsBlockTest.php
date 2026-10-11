@@ -308,7 +308,7 @@ class StandingsBlockTest extends TestCase {
 
 		$primary = $this->pairs( $html, 'is-primary' );
 		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5', 'Wild Card' ), array_keys( $primary ) );
-		$this->assertSame( 'AL Division Series', $primary['Round'] );
+		$this->assertSame( 'ALDS', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
 		$this->assertSame( 'Bye', $primary['Wild Card'] );
 
@@ -321,6 +321,30 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( 'W 9-3', $games['G3 · @CWS'] );
 		$this->assertSame( array( 'Series · Best of 5', 'G1 · vs CWS', 'G2 · vs CWS' ), $this->negatives( $html ) );
 		$this->assertMatchesRegularExpression( '#bb-ticker-item is-next">\s*<dt class="bb-ticker-label">G4 · @CWS#', $html );
+	}
+
+	public function test_if_necessary_games_get_an_asterisk_and_a_note_under_the_card(): void {
+		$html  = $this->render_postseason( 'postseason', Fixtures::alds_2026_before_game_four() );
+		$games = $this->pairs( $html, 'is-secondary is-games' );
+
+		$this->assertSame( 'Today 8:00 PM', $games['G4 · @CWS'] );
+		$this->assertStringStartsWith( 'Sat 10/10<span class="bb-footnote-mark" aria-hidden="true">*</span>', $games['G5 · vs CWS'] );
+		$this->assertStringContainsString( '<span class="screen-reader-text"> (if necessary)</span>', $games['G5 · vs CWS'] );
+		$this->assertStringNotContainsString( 'if nec.', $html );
+		$this->assertMatchesRegularExpression( '#bb-ticker-item is-maybe">\s*<dt class="bb-ticker-label">G5 · vs CWS#', $html );
+		$this->assertStringNotContainsString( 'is-next is-maybe', $html );
+
+		// The note sits after the card, not inside it.
+		$this->assertMatchesRegularExpression( '#</div>\s*<p class="bb-ticker-note" aria-hidden="true">\* If necessary</p>\s*</div>\s*$#', $html );
+	}
+
+	public function test_no_note_once_no_game_is_if_necessary(): void {
+		$games    = Fixtures::alds_2026_before_game_four();
+		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-08' ) );
+		$html     = $this->render_postseason( 'postseason', $games, '2026-10-09' );
+
+		$this->assertStringNotContainsString( 'bb-ticker-note', $html );
+		$this->assertStringNotContainsString( 'bb-footnote-mark', $html );
 	}
 
 	public function test_wild_card_season_type_also_switches_to_the_postseason_ticker(): void {
