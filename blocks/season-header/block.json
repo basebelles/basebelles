@@ -2,7 +2,7 @@
     "name": "acf/basebelles-season-header",
     "title": "Season Header",
     "description": "Displays the current season.",
-    "style": [ "basebelles-style", "file:./block.css" ],
+    "style": [ "basebelles-season-header-style" ],
     "category": "basebelles",
     "icon": "slides",
     "keywords": ["season", "guardians", "baseball"],

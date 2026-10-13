@@ -2,7 +2,7 @@
     "name": "acf/basebelles-today-game",
     "title": "Today's Game",
     "description": "Displays the next Cleveland Guardians game(s) and probable pitchers.",
-    "style": [ "basebelles-style", "file:./block.css" ],
+    "style": [ "basebelles-today-game-style" ],
     "category": "basebelles",
     "icon": "calendar",
     "keywords": ["today", "game", "guardians", "baseball"],

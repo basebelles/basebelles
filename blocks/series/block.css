@@ -49,6 +49,14 @@
 	min-width: 0;
 }
 
+/* Used to come from the Today's Game block's unscoped .team-logo rule, back when every block's
+   CSS loaded on every page. */
+.series-results .team-logo img {
+	width: 60px;
+	height: 60px;
+	object-fit: contain;
+}
+
 .series-results .team-name {
 	font-weight: bold;
 	font-size: 1.2em;

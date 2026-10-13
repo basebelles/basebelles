@@ -29,6 +29,11 @@
 	text-transform: uppercase;
 }
 
+.season-col {
+	border: 1px solid var(--bb-sandstone-cream);
+	padding-bottom: 5px;
+}
+
 .season-col h3 {
 	font-size: 1.4rem;
 	font-style: italic;
