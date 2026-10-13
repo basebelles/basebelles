@@ -27,7 +27,14 @@ class Basebelles_Blocks {
 		// Each block.json names its handle here as its "style", so WordPress loads the CSS with
 		// the block (on demand in block themes), in the editor iframe too, and with our version for cache-busting
 		// (a block.json "file:" style would carry WordPress's version instead).
-		add_action( 'init', array( $this, 'register_styles' ) );
+		// This class is loaded from Basebelles::init(), i.e. while init is already running at
+		// priority 10, and a callback added to the priority that's mid-run never fires. So
+		// register now if init has started; the hook is only for an earlier load.
+		if ( did_action( 'init' ) ) {
+			$this->register_styles();
+		} else {
+			add_action( 'init', array( $this, 'register_styles' ) );
+		}
 
 		self::register_blocks();
 		add_filter( 'block_categories_all', array( $this, 'block_categories' ), 10, 2 );

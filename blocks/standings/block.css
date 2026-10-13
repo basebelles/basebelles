@@ -1,6 +1,6 @@
 /* Guardians Standings Block — ticker strip */
 .basebelles-standings {
-	max-width: 100%;
+	max-width: 100%!important;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -218,7 +218,6 @@
 	margin-top: 6px;
 	padding: 0 4px;
 	font-size: 1em;
-	color: var(--bb-slate-blue);
 }
 
 .bb-ticker-road,
