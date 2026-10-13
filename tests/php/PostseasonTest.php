@@ -248,6 +248,36 @@ class PostseasonTest extends TestCase {
 		);
 	}
 
+	public function test_rounds_include_the_series_that_ended_the_season(): void {
+		$seeds = array( 114 => 4, 117 => 5 );
+		$games = array(
+			Fixtures::ps_game( 'F', 1, 3, 117, true, 'Final', 4, 2, array( 'officialDate' => '2026-09-29' ) ),
+			Fixtures::ps_game( 'F', 2, 3, 117, true, 'Final', 6, 1, array( 'officialDate' => '2026-09-30' ) ),
+			Fixtures::ps_game( 'D', 1, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-03' ) ),
+			Fixtures::ps_game( 'D', 2, 5, 145, false, 'Final', 0, 2, array( 'officialDate' => '2026-10-04' ) ),
+			Fixtures::ps_game( 'D', 3, 5, 145, true, 'Final', 4, 5, array( 'officialDate' => '2026-10-06' ) ),
+		);
+
+		$status = $this->build( $games, '2026-10-07', $seeds );
+
+		$this->assertSame( 'eliminated', $status['state'] );
+		$this->assertSame(
+			array(
+				array(
+					'round'  => 'Wild Card',
+					'result' => 'Won 2-0 vs HOU',
+				),
+				array(
+					'round'  => 'ALDS',
+					'result' => 'Lost 0-3 vs CWS',
+				),
+			),
+			$status['rounds']
+		);
+		// The road still stops before the current round.
+		$this->assertCount( 1, $status['road'] );
+	}
+
 	public function test_the_road_is_empty_before_a_wild_card_teams_first_series(): void {
 		$this->assertSame( array(), $this->build( array(), '2026-09-28', array( 114 => 4 ) )['road'] );
 	}

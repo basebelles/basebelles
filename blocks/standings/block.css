@@ -63,7 +63,7 @@
 }
 
 .bb-ticker-label {
-	font-size: 10px;
+	font-size: 1em;
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -73,14 +73,14 @@
 
 .bb-ticker-value {
 	margin: 2px 0 0;
-	font-size: 14px;
+	font-size: 1.25em;
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 	color: var(--bb-deep-navy);
 }
 
 .bb-ticker-item.is-standing .bb-ticker-value {
-	font-size: 16px;
+	font-size: 1em;
 }
 
 /* --bb-accent-slate manages 6.4:1 on white but only 3.9:1 on the tinted row, short of the 4.5:1
@@ -91,7 +91,7 @@
 }
 
 .bb-ticker-row.is-secondary .bb-ticker-value {
-	font-size: 12px;
+	font-size: 0.75em;
 }
 
 /* Losing streak and negative run differential. */
@@ -130,6 +130,14 @@
 /* Wins and a series lead. The W/L prefix and "leads"/"Won" carry the meaning; colour backs it up. */
 .bb-ticker-item.is-positive .bb-ticker-value {
 	color: var(--bb-ticker-win, var(--bb-green));
+}
+
+.bb-ticker-row.is-games .bb-ticker-item.is-positive .bb-ticker-value {
+	background-color: var(--bb-ticker-win, var(--bb-green));
+	color: var(--bb-sandstone-cream);
+	border-radius: 10px;
+	padding: 5px;
+	font-weight: 700;
 }
 
 .bb-ticker-item.is-matchup .bb-ticker-value {
@@ -209,7 +217,7 @@
 	gap: 4px 16px;
 	margin-top: 6px;
 	padding: 0 4px;
-	font-size: 11px;
+	font-size: 1em;
 	color: var(--bb-slate-blue);
 }
 
@@ -220,6 +228,7 @@
 
 .bb-ticker-note {
 	margin-left: auto;
+	font-size: 0.75em;
 }
 
 /* A long road wraps between rounds, never inside one ("vs" / "CWS"). */
@@ -229,7 +238,6 @@
 
 .bb-ticker-road-label {
 	margin-right: 4px;
-	font-size: 10px;
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -245,6 +253,7 @@
 
 .bb-ticker-row.is-games .bb-ticker-item.is-maybe .bb-ticker-value {
 	font-weight: 400;
+	font-size: 0.75em;
 }
 
 /* The inline "(if necessary)" is for screen readers only. Scoped here so the block doesn't depend
@@ -259,6 +268,12 @@
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* Season complete: the regular season finish on top, one cell per round reached beneath it. */
+.bb-ticker-item.is-summary .bb-ticker-value {
+	font-size: 16px;
+	white-space: normal;
 }
 
 /* A Best of 7 needs ~130px a game to sit on one line. Below that it wraps 4 + 3 rather than
@@ -317,6 +332,16 @@
 
 	.bb-ticker-row.is-primary .bb-ticker-item + .bb-ticker-item {
 		border-left: 0;
+	}
+
+	/* Season complete: the summary has the row to itself, and "Won 3-2 vs CWS" needs half the
+	   card, so the (at most four) rounds go two across. */
+	.is-postseason.is-season-complete .bb-ticker-row.is-primary {
+		grid-template-columns: 1fr;
+	}
+
+	.bb-ticker-row.is-rounds {
+		grid-template-columns: repeat(2, 1fr);
 	}
 }
 

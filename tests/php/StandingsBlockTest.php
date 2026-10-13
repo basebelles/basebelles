@@ -310,7 +310,7 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( array( 'Round', 'Matchup', 'Series · Best of 5' ), array_keys( $primary ) );
 		$this->assertSame( 'ALDS', $primary['Round'] );
 		$this->assertSame( 'CWS leads 2-1', $primary['Series · Best of 5'] );
-		$this->assertMatchesRegularExpression( '#is-in-series">\s*<hr class="bb-ticker-rule" />\s*<h3 class="bb-ticker-heading">AL Division Series</h3>\s*<div class="bb-ticker">#', $html );
+		$this->assertMatchesRegularExpression( '#is-in-series">\s*<hr class="bb-ticker-rule" />\s*<h4 class="bb-ticker-heading">AL Division Series</h4>\s*<div class="bb-ticker">#', $html );
 
 		// Seeds sit next to each abbreviation.
 		$this->assertMatchesRegularExpression( '#CLE</span> <span class="bb-team-seed">\(2\)</span>#', $primary['Matchup'] );
@@ -353,24 +353,119 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringNotContainsString( 'bb-footnote-mark', $html );
 	}
 
-	public function test_wild_card_season_type_also_switches_to_the_postseason_ticker(): void {
-		$html = $this->render_postseason( 'wildCard', Fixtures::alds_2026_before_game_four() );
+	/**
+	 * A bye, an ALDS win over CWS, then whatever the ALCS and World Series games are.
+	 *
+	 * @param int  $alcs_wins  Our ALCS wins (out of a Best of 7 against TB).
+	 * @param bool $ws_sweep   Add a World Series sweep of LAD (needs $alcs_wins of 4).
+	 * @return array
+	 */
+	private function deep_run( int $alcs_wins, bool $ws_sweep = false ): array {
+		$games    = Fixtures::alds_2026_before_game_four();
+		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 5, 2, array( 'officialDate' => '2026-10-08' ) );
+		$games[4] = Fixtures::ps_game( 'D', 5, 5, 145, true, 'Final', 4, 3, array( 'officialDate' => '2026-10-10' ) );
 
-		$this->assertStringContainsString( 'is-postseason', $html );
+		$alcs_losses = 4 === $alcs_wins ? 2 : 4;
+		$number      = 0;
+
+		for ( $n = 0; $n < $alcs_wins; $n++ ) {
+			$games[] = Fixtures::ps_game( 'L', ++$number, 7, 139, false, 'Final', 6, 2 );
+		}
+
+		for ( $n = 0; $n < $alcs_losses; $n++ ) {
+			$games[] = Fixtures::ps_game( 'L', ++$number, 7, 139, false, 'Final', 1, 3 );
+		}
+
+		if ( $ws_sweep ) {
+			for ( $n = 1; $n <= 4; $n++ ) {
+				$games[] = Fixtures::ps_game( 'W', $n, 7, 119, 0 === $n % 2, 'Final', 5, 1 );
+			}
+		}
+
+		return $games;
 	}
 
-	public function test_eliminated_ticker(): void {
+	public function test_eliminated_shows_season_complete(): void {
 		$games    = Fixtures::alds_2026_before_game_four();
 		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-08' ) );
 
-		$html    = $this->render_postseason( 'postseason', $games, '2026-10-09' );
-		$primary = $this->pairs( $html, 'is-primary' );
+		Basebelles_Test_State::$fields['last_world_series_win'] = 'October 11, 1948';
 
-		$this->assertSame( 'Eliminated', $primary['Season'] );
-		$this->assertSame( 'Lost 1-3', $primary['ALDS'] );
-		$this->assertSame( '1-3', $primary['Postseason'] );
-		$this->assertArrayNotHasKey( 'Wild Card', $primary );
-		$this->assertSame( 'Not needed', $this->pairs( $html, 'is-secondary is-games' )['G5 · vs CWS'] );
+		$html = $this->render_postseason( 'postseason', $games, '2026-10-09' );
+
+		$this->assertStringContainsString( 'is-postseason is-season-complete', $html );
+		$this->assertStringContainsString( '<h4 class="bb-ticker-heading">Season Complete</h4>', $html );
+		$this->assertSame( array( 'Regular Season' => '2nd in the AL Central' ), $this->pairs( $html, 'is-primary' ) );
+
+		// The list ends on the round we lost; nothing after it.
+		$this->assertSame(
+			array(
+				'Wild Card' => 'Bye',
+				'ALDS'      => 'Lost 1-3 vs CWS',
+			),
+			$this->pairs( $html, 'is-secondary is-rounds' )
+		);
+		$this->assertSame( array( 'ALDS' ), $this->negatives( $html ) );
+		$this->assertStringNotContainsString( 'is-games', $html );
+		$this->assertMatchesRegularExpression( '#<span class="bb-ticker-road-label">The last World Series Win</span>\s*1948\s*</p>#', $html );
+		$this->assertStringNotContainsString( 'October', $html );
+	}
+
+	public function test_losing_the_alcs_lists_every_round_up_to_it(): void {
+		$html = $this->render_postseason( 'postseason', $this->deep_run( 2 ), '2026-10-25' );
+
+		$this->assertSame(
+			array(
+				'Wild Card' => 'Bye',
+				'ALDS'      => 'Won 3-2 vs CWS',
+				'ALCS'      => 'Lost 2-4 vs TB',
+			),
+			$this->pairs( $html, 'is-secondary is-rounds' )
+		);
+		$this->assertArrayNotHasKey( 'World Series', $this->pairs( $html, 'is-secondary is-rounds' ) );
+	}
+
+	public function test_world_series_champions_banner(): void {
+		Basebelles_Test_State::$fields['last_world_series_win'] = 'October 11, 1948';
+
+		$html = $this->render_postseason( 'postseason', $this->deep_run( 4, true ), '2026-10-31' );
+
+		$this->assertStringContainsString( 'is-season-complete is-champion', $html );
+		$this->assertStringContainsString( '<h4 class="bb-ticker-heading">Your World Champions for 2026 — The Cleveland Guardians</h4>', $html );
+		$this->assertStringNotContainsString( 'Season Complete', $html );
+		$this->assertSame(
+			array(
+				'Wild Card'    => 'Bye',
+				'ALDS'         => 'Won 3-2 vs CWS',
+				'ALCS'         => 'Won 4-2 vs TB',
+				'World Series' => 'Won 4-0 vs LAD',
+			),
+			$this->pairs( $html, 'is-secondary is-rounds' )
+		);
+		$this->assertStringNotContainsString( 'The last World Series Win', $html );
+	}
+
+	public function test_season_complete_stays_up_through_the_off_season(): void {
+		$games    = Fixtures::alds_2026_before_game_four();
+		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-08' ) );
+
+		$html = $this->render_postseason( 'offSeason', $games, '2026-12-01' );
+
+		$this->assertStringContainsString( 'is-season-complete', $html );
+	}
+
+	public function test_a_raw_ymd_last_world_series_win_still_gives_the_year(): void {
+		Basebelles_Test_State::$fields['last_world_series_win'] = '19481011';
+
+		$html = $this->render_postseason( 'postseason', null );
+
+		$this->assertMatchesRegularExpression( '#The last World Series Win</span>\s*1948\s*</p>#', $html );
+	}
+
+	public function test_no_last_world_series_line_when_the_field_is_empty(): void {
+		$html = $this->render_postseason( 'postseason', null );
+
+		$this->assertStringNotContainsString( 'bb-ticker-foot', $html );
 	}
 
 	public function test_between_rounds_ticker_has_no_games_row(): void {
@@ -385,18 +480,40 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringContainsString( 'bb-team is-tbd">TBD', $primary['Matchup'] );
 		$this->assertSame( 'Won 3-2 vs CWS', $primary['ALDS'] );
 		$this->assertArrayNotHasKey( 'Wild Card', $primary );
-		$this->assertStringContainsString( '<h3 class="bb-ticker-heading">AL Championship Series</h3>', $html );
+		$this->assertStringContainsString( '<h4 class="bb-ticker-heading">AL Championship Series</h4>', $html );
 		// The ALDS is already in the card; the road only adds what came before it.
 		$this->assertMatchesRegularExpression( '#Road here</span>\s*<span class="bb-ticker-road-leg">Wild Card — Bye</span>\s*</p>#', $html );
 		$this->assertStringNotContainsString( 'is-games', $html );
 	}
 
-	public function test_not_qualified_falls_back_to_the_regular_season_standings(): void {
+	public function test_missing_the_playoffs_shows_season_complete_without_a_postseason(): void {
 		// The fake API defaults to not_qualified.
+		Basebelles_Test_State::$fields['last_world_series_win'] = 'October 11, 1948';
+
 		$html = $this->render_postseason( 'postseason', null );
 
-		$this->assertStringNotContainsString( 'is-postseason', $html );
-		$this->assertSame( '2nd in the AL Central', $this->pairs( $html, 'is-primary' )['Standing'] );
+		$this->assertStringContainsString( 'is-season-complete', $html );
+		$this->assertSame( array( 'Regular Season' => '2nd in the AL Central' ), $this->pairs( $html, 'is-primary' ) );
+		$this->assertStringNotContainsString( 'bb-ticker-row is-secondary', $html );
+		$this->assertMatchesRegularExpression( '#The last World Series Win</span>\s*1948#', $html );
+	}
+
+	public function test_off_season_with_no_games_yet_falls_back_to_the_standings(): void {
+		// Current Season bumped to next year before Spring Training: nothing to sum up.
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
+		Basebelles_Test_State::$standings                 = Fixtures::standings(
+			array(
+				'wins'   => 0,
+				'losses' => 0,
+			)
+		);
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/standings/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertStringNotContainsString( 'is-season-complete', $html );
+		$this->assertStringContainsString( 'bb-ticker-row is-secondary', $html );
 	}
 
 	public function test_a_postseason_api_error_falls_back_to_the_regular_season_standings(): void {

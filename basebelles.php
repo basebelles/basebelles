@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the amazing features.
- * Version: 1.6.4
+ * Version: 1.6.5
  * Author: Ipstenu
  *
  * @package Base*Belles

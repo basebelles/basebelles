@@ -65,15 +65,29 @@ $basebelles_render_ticker_row = static function ( array $items, $row_class ) {
 	<?php
 };
 
-// Postseason: once Season Type is Wild Card or Post Season, a Guardians team that made it gets
-// the series ticker instead. One that didn't qualify (or an API failure) falls through to the
-// final regular-season standings below.
-if ( in_array( $current_type, array( 'wildCard', 'postseason' ), true ) && method_exists( $api, 'get_postseason_status' ) ) {
+// Postseason: once Season Type is Post Season, a Guardians team that's still playing
+// gets the series ticker instead. Once the season is over (eliminated, champions, or never made
+// it) it's the "Season complete" card, which stays up through the Off Season until Spring
+// Training. An API failure falls through to the final regular-season standings below.
+if ( in_array( $current_type, array( 'postseason', 'offSeason' ), true ) && method_exists( $api, 'get_postseason_status' ) ) {
 	$postseason = $api->get_postseason_status( (int) $season_year );
 
-	if ( ! is_wp_error( $postseason ) && is_array( $postseason ) && 'not_qualified' !== ( $postseason['state'] ?? 'not_qualified' ) ) {
-		require __DIR__ . '/postseason.php';
-		return;
+	if ( ! is_wp_error( $postseason ) && is_array( $postseason ) ) {
+		$bb_ps_state = (string) ( $postseason['state'] ?? 'not_qualified' );
+
+		if ( in_array( $bb_ps_state, array( 'eliminated', 'champion', 'not_qualified' ), true ) ) {
+			// Returns early (without rendering) when there's no regular season to report on yet,
+			// say Current Season was bumped to next year before Spring Training.
+			$bb_sc_rendered = false;
+			require __DIR__ . '/season-complete.php';
+
+			if ( $bb_sc_rendered ) {
+				return;
+			}
+		} else {
+			require __DIR__ . '/postseason.php';
+			return;
+		}
 	}
 }
 

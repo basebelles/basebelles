@@ -157,6 +157,8 @@ class Basebelles_Postseason {
 			'postseason_record' => self::postseason_record( $series ),
 			'series'            => $series,
 			'road'              => self::road( $series, $had_bye, '' ),
+			// Every decided round, the current one included, for the "Season complete" card.
+			'rounds'            => self::road( $series, $had_bye, '' ),
 		);
 
 		if ( empty( $series ) ) {
@@ -507,12 +509,13 @@ class Basebelles_Postseason {
 	}
 
 	/**
-	 * The rounds already behind us, oldest first, for the "Road here" line under the card. The
-	 * current round is left out: the card itself covers it.
+	 * The rounds already behind us, oldest first. For the "Road here" line under the card the
+	 * current round is left out, since the card itself covers it; with no current round given,
+	 * every decided round comes back (the "Season complete" card's list).
 	 *
 	 * @param array  $series   Game type => series.
 	 * @param bool   $had_bye  Whether we skipped the Wild Card Series.
-	 * @param string $current  Game type of the current round, or '' before the first one.
+	 * @param string $current  Game type of the round to stop before, or '' for all of them.
 	 * @return array<int, array{round: string, result: string}>
 	 */
 	private static function road( array $series, bool $had_bye, string $current ): array {

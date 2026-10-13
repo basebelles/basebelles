@@ -150,7 +150,6 @@
                         "offSeason": "Off Season",
                         "springTraining": "Spring Training",
                         "regularSeason": "Regular Season",
-                        "wildCard": "Wild Card",
                         "postseason": "Post Season"
                     },
                     "default_value": "",
@@ -443,5 +442,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1790882848
+    "modified": 1791925392
 }
