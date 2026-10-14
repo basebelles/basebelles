@@ -54,6 +54,15 @@ class Basebelles_API {
 	/** Cache TTL for roster lookups (rosters move, but not by the minute). */
 	const ROSTER_CACHE_TTL = 12 * HOUR_IN_SECONDS;
 
+	/** MLB.com's Guardians-only news feed, for the Game Hub's off-season news card. */
+	const NEWS_FEED_URL = 'https://www.mlb.com/guardians/feeds/news/rss.xml';
+	/** Cache TTL for the parsed news feed. */
+	const NEWS_CACHE_TTL = 15 * MINUTE_IN_SECONDS;
+	/** How long a failed news fetch waits before trying MLB.com again. */
+	const NEWS_RETRY_TTL = 5 * MINUTE_IN_SECONDS;
+	/** How far back the Game Hub looks for the last game. Covers the All-Star break. */
+	const LAST_GAME_LOOKBACK_DAYS = 10;
+
 	/**
 	 * Singleton instance.
 	 *
@@ -186,6 +195,232 @@ class Basebelles_API {
 		$status['guardians_logo_url'] = $this->get_logo_url_by_abbreviation( 'CLE' );
 
 		return $status;
+	}
+
+	/**
+	 * The Guardians' division for the Game Hub's regular-season card: every team's W, L, GB,
+	 * last ten and streak, plus the Guardians' wild card line.
+	 *
+	 * @param int|null $season_year Optional season year; defaults to ACF/options season.
+	 * @return array|WP_Error See Basebelles_Game_Hub::division_table(); rows carry logo URLs.
+	 */
+	public function get_division_table( $season_year = null ) {
+		$settings = $this->get_season_settings();
+		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
+
+		$data = $this->request_json(
+			'standings',
+			array(
+				'leagueId'       => self::AL_LEAGUE_ID,
+				'season'         => $year,
+				'standingsTypes' => 'regularSeason',
+				'hydrate'        => 'team,division',
+			),
+			self::API_CACHE_TTL
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		$table = Basebelles_Game_Hub::division_table( is_array( $data['records'] ?? null ) ? $data['records'] : array(), self::GUARDIANS_TEAM_ID );
+
+		if ( empty( $table['rows'] ) ) {
+			return new WP_Error( 'basebelles_api_team_missing', 'Could not find the Guardians in the standings response.' );
+		}
+
+		foreach ( $table['rows'] as $index => $row ) {
+			$table['rows'][ $index ]['logo_url'] = $this->get_logo_url_by_abbreviation( $row['abbreviation'] );
+		}
+
+		return $table;
+	}
+
+	/**
+	 * The Guardians' last finished regular-season game before today.
+	 *
+	 * @return array See Basebelles_Game_Hub::last_game(); empty when there's none in range.
+	 */
+	public function get_last_game() {
+		$today = $this->game_day();
+		$data  = $this->request_json(
+			'schedule',
+			array(
+				'sportId'   => 1,
+				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'gameType'  => 'R',
+				'startDate' => $this->shift_day( $today, -self::LAST_GAME_LOOKBACK_DAYS ),
+				'endDate'   => $this->shift_day( $today, -1 ),
+				'hydrate'   => 'team',
+			)
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return array();
+		}
+
+		return Basebelles_Game_Hub::last_game( (array) ( $data['dates'] ?? array() ), self::GUARDIANS_TEAM_ID, $today );
+	}
+
+	/**
+	 * "Wed–Thu vs CWS · Fri @ DET": the next few regular-season games after today.
+	 *
+	 * @param int $limit How many games to cover.
+	 * @return string Empty when nothing is scheduled in the lookahead window.
+	 */
+	public function get_next_games_line( $limit = 3 ) {
+		$today = $this->game_day();
+		$data  = $this->request_json(
+			'schedule',
+			array(
+				'sportId'   => 1,
+				'teamId'    => self::GUARDIANS_TEAM_ID,
+				'gameType'  => 'R',
+				'startDate' => $this->shift_day( $today, 1 ),
+				'endDate'   => $this->shift_day( $today, self::NEXT_GAME_LOOKAHEAD_DAYS ),
+				'hydrate'   => 'team',
+			)
+		);
+
+		if ( is_wp_error( $data ) ) {
+			return '';
+		}
+
+		return Basebelles_Game_Hub::next_games_line( (array) ( $data['dates'] ?? array() ), self::GUARDIANS_TEAM_ID, $today, (int) $limit );
+	}
+
+	/**
+	 * The day Spring Training begins (the Guardians' first Cactus League game), Y-m-d, or ''
+	 * when nothing upcoming is known.
+	 *
+	 * Season Settings' Spring Training start wins when it's set to a future date, so a lockout
+	 * or a schedule change can be corrected by hand. Otherwise it's the first game on the
+	 * Guardians' spring schedule for this year or next, and failing that MLB's league-wide
+	 * spring start date.
+	 *
+	 * @return string
+	 */
+	public function get_spring_training_start() {
+		$today = wp_date( 'Y-m-d' );
+
+		if ( function_exists( 'get_field' ) && class_exists( 'Basebelles_Season' ) ) {
+			$override = Basebelles_Season::parse_date( get_field( 'spring_start', 'option' ) );
+
+			if ( $override && $override->format( 'Y-m-d' ) >= $today ) {
+				return $override->format( 'Y-m-d' );
+			}
+		}
+
+		$year = (int) wp_date( 'Y' );
+
+		foreach ( array( $year, $year + 1 ) as $season ) {
+			$schedule = $this->request_json(
+				'schedule',
+				array(
+					'sportId'  => 1,
+					'teamId'   => self::GUARDIANS_TEAM_ID,
+					'season'   => $season,
+					'gameType' => 'S',
+				),
+				DAY_IN_SECONDS
+			);
+
+			if ( ! is_wp_error( $schedule ) ) {
+				$first = Basebelles_Game_Hub::first_date_from( (array) ( $schedule['dates'] ?? array() ), $today );
+
+				if ( '' !== $first ) {
+					return $first;
+				}
+			}
+
+			$seasons = $this->request_json( 'seasons/' . $season, array( 'sportId' => 1 ), DAY_IN_SECONDS );
+			$start   = is_wp_error( $seasons ) ? '' : (string) ( $seasons['seasons'][0]['springStartDate'] ?? '' );
+
+			if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $start ) && $start >= $today ) {
+				return $start;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Latest Guardians headlines from MLB.com's team feed, newest first.
+	 *
+	 * Parsed items are cached for NEWS_CACHE_TTL. A failed fetch serves the last good list (kept
+	 * for a day) and waits NEWS_RETRY_TTL before asking MLB.com again, so an outage there
+	 * neither blanks the card nor sends every page view off to retry.
+	 *
+	 * @param int $limit Most headlines to return (1-10).
+	 * @return array<int, array{title: string, url: string, timestamp: int}>
+	 */
+	public function get_guardians_news( $limit = 5 ) {
+		$limit     = max( 1, min( 10, (int) $limit ) );
+		$cache_key = 'basebelles_news_' . (int) floor( time() / self::NEWS_CACHE_TTL );
+		$items     = get_transient( $cache_key );
+
+		if ( false === $items ) {
+			$items = $this->fetch_guardians_news();
+
+			if ( is_wp_error( $items ) || empty( $items ) ) {
+				$last_good = get_transient( 'basebelles_news_last_good' );
+				$items     = is_array( $last_good ) ? $last_good : array();
+
+				set_transient( $cache_key, $items, self::NEWS_RETRY_TTL );
+			} else {
+				set_transient( $cache_key, $items, self::NEWS_CACHE_TTL );
+				set_transient( 'basebelles_news_last_good', $items, DAY_IN_SECONDS );
+			}
+		}
+
+		return array_slice( is_array( $items ) ? $items : array(), 0, $limit );
+	}
+
+	/**
+	 * Fetch and parse the news feed, uncached.
+	 *
+	 * @return array|WP_Error
+	 */
+	private function fetch_guardians_news() {
+		$response = wp_remote_get(
+			self::NEWS_FEED_URL,
+			array(
+				'timeout'    => self::API_TIMEOUT,
+				'user-agent' => 'Basebelles/' . ( Basebelles::$version ?? '1.0.2' ) . '; ' . home_url( '/' ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+			return new WP_Error( 'basebelles_news_http', 'The MLB.com news feed request failed.' );
+		}
+
+		return Basebelles_Game_Hub::parse_news( (string) wp_remote_retrieve_body( $response ), 10 );
+	}
+
+	/**
+	 * Today's date where the games are played (Y-m-d).
+	 *
+	 * @return string
+	 */
+	private function game_day() {
+		return ( new DateTime( 'now', new DateTimeZone( self::GAME_TIMEZONE ) ) )->format( 'Y-m-d' );
+	}
+
+	/**
+	 * A Y-m-d date moved by a number of days.
+	 *
+	 * @param string $date Y-m-d.
+	 * @param int    $days Days to add (negative to go back).
+	 * @return string
+	 */
+	private function shift_day( $date, $days ) {
+		return ( new DateTimeImmutable( $date . ' 12:00:00', new DateTimeZone( self::GAME_TIMEZONE ) ) )
+			->modify( sprintf( '%+d days', (int) $days ) )
+			->format( 'Y-m-d' );
 	}
 
 	/**
@@ -914,9 +1149,11 @@ class Basebelles_API {
 
 		$games_in_series = (int) ( $game['gamesInSeries'] ?? 1 );
 		$opponent_team   = $is_home ? $away_team : $home_team;
+		$game_type       = (string) ( $game['gameType'] ?? 'R' );
 
 		return array(
 			'game_pk'        => (int) ( $game['gamePk'] ?? 0 ),
+			'game_type'      => $game_type,
 			'game_number'    => (int) ( $game['gameNumber'] ?? 1 ),
 			'doubleheader'   => (string) ( $game['doubleHeader'] ?? 'N' ),
 			'day_date'       => $timestamp ? wp_date( 'D n/j', $timestamp, $timezone ) : '',
@@ -926,8 +1163,8 @@ class Basebelles_API {
 			'game_status'    => $game_status,
 			'away_team'      => $away_team,
 			'home_team'      => $home_team,
-			'away_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season ) : array(),
-			'home_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season ) : array(),
+			'away_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['away']['probablePitcher']['id'] ?? 0, $season, $game_type ) : array(),
+			'home_pitcher'   => $is_preview ? $this->get_pitcher_preview_data( $game['teams']['home']['probablePitcher']['id'] ?? 0, $season, $game_type ) : array(),
 			'recent_form'    => array(
 				'away' => $is_preview ? $this->get_recent_form( $away_team['id'] ) : array(),
 				'home' => $is_preview ? $this->get_recent_form( $home_team['id'] ) : array(),
@@ -1757,40 +1994,65 @@ class Basebelles_API {
 	/**
 	 * Get normalized probable pitcher data for previews.
 	 *
-	 * @param int $player_id MLB player ID.
-	 * @param int $season Season year.
+	 * In the postseason the line is the pitcher's postseason W-L and ERA, labelled as such. One
+	 * request asks for both game types; a pitcher making his first October start has no
+	 * postseason split yet, so he falls back to his regular-season line, labelled too.
+	 *
+	 * @param int    $player_id MLB player ID.
+	 * @param int    $season    Season year.
+	 * @param string $game_type The game's MLB gameType (R, F, D, L, W, ...).
 	 * @return array
 	 */
-	private function get_pitcher_preview_data( $player_id, $season ) {
-		$player_id = (int) $player_id;
-		$season    = (int) $season;
+	private function get_pitcher_preview_data( $player_id, $season, $game_type = 'R' ) {
+		$player_id     = (int) $player_id;
+		$season        = (int) $season;
+		$is_postseason = in_array( (string) $game_type, Basebelles_Postseason::ROUND_ORDER, true );
 
 		if ( $player_id <= 0 ) {
 			return array();
 		}
 
-		$player = $this->request_json(
-			'people/' . $player_id,
-			array(
-				'hydrate' => sprintf( 'stats(group=[pitching],type=[season],season=%d)', $season ),
-			)
-		);
+		$hydrate = $is_postseason
+			? sprintf( 'stats(group=[pitching],type=[season],season=%d,gameType=[R,P])', $season )
+			: sprintf( 'stats(group=[pitching],type=[season],season=%d)', $season );
+
+		$player = $this->request_json( 'people/' . $player_id, array( 'hydrate' => $hydrate ) );
 
 		if ( is_wp_error( $player ) || empty( $player['people'][0] ) ) {
 			return array();
 		}
 
 		$person = $player['people'][0];
-		$split  = $person['stats'][0]['splits'][0]['stat'] ?? array();
-		$hand   = strtoupper( (string) ( $person['pitchHand']['code'] ?? '' ) );
+		$splits = $person['stats'][0]['splits'] ?? array();
+		$split  = $splits[0]['stat'] ?? array();
+		$label  = '';
+
+		if ( $is_postseason ) {
+			$by_type = array();
+
+			foreach ( $splits as $one ) {
+				$by_type[ (string) ( $one['gameType'] ?? '' ) ] = $one['stat'] ?? array();
+			}
+
+			if ( (int) ( $by_type['P']['gamesPlayed'] ?? 0 ) > 0 ) {
+				$split = $by_type['P'];
+				$label = 'Postseason';
+			} else {
+				$split = $by_type['R'] ?? array();
+				$label = 'Reg. season';
+			}
+		}
+
+		$hand = strtoupper( (string) ( $person['pitchHand']['code'] ?? '' ) );
 
 		return array(
-			'id'     => $player_id,
-			'name'   => $person['fullName'] ?? '',
-			'hand'   => $hand ? $hand . 'HP' : '',
-			'record' => (int) ( $split['wins'] ?? 0 ) . '-' . (int) ( $split['losses'] ?? 0 ),
-			'era'    => (string) ( $split['era'] ?? '--' ),
-			'url'    => 'https://www.mlb.com/player/' . $player_id,
+			'id'         => $player_id,
+			'name'       => $person['fullName'] ?? '',
+			'hand'       => $hand ? $hand . 'HP' : '',
+			'record'     => (int) ( $split['wins'] ?? 0 ) . '-' . (int) ( $split['losses'] ?? 0 ),
+			'era'        => (string) ( $split['era'] ?? '--' ),
+			'stat_label' => $label,
+			'url'        => 'https://www.mlb.com/player/' . $player_id,
 		);
 	}
 

@@ -399,4 +399,55 @@ class TodayGameBlockTest extends TestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Series line
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_a_regular_season_series_keeps_its_status_line(): void {
+		$game = Fixtures::game(
+			array(
+				'game_type' => 'R',
+				'series'    => array( 'game_number' => 2, 'games_total' => 3, 'status_label' => 'CLE Leads 1-0' ),
+			)
+		);
+
+		$html = $this->render( array( $game ) );
+
+		$this->assertStringContainsString( 'tg-series-status', $html );
+		$this->assertStringContainsString( 'CLE Leads 1-0', $html );
+	}
+
+	public function test_a_postseason_game_drops_the_series_status_line(): void {
+		$game = Fixtures::game(
+			array(
+				'game_type' => 'L',
+				'series'    => array( 'game_number' => 2, 'games_total' => 7, 'status_label' => 'CLE Leads 1-0' ),
+			)
+		);
+
+		$html = $this->render( array( $game ) );
+
+		$this->assertStringNotContainsString( 'tg-series-status', $html );
+		$this->assertStringNotContainsString( 'CLE Leads 1-0', $html );
+	}
+
+	public function test_a_postseason_pitcher_line_carries_its_label(): void {
+		$game = Fixtures::game( array( 'game_type' => 'L' ) );
+		$game['away_pitcher']['stat_label'] = 'Postseason';
+		$game['home_pitcher']['stat_label'] = 'Reg. season';
+
+		$html = Basebelles_Today_Game_Panels::render_score_panel( $game, 'far', array() );
+
+		$this->assertStringContainsString( '<span class="pitcher-stat-label">Postseason</span>', $html );
+		$this->assertStringContainsString( '<span class="pitcher-stat-label">Reg. season</span>', $html );
+	}
+
+	public function test_a_regular_season_pitcher_line_has_no_label(): void {
+		$html = Basebelles_Today_Game_Panels::render_score_panel( Fixtures::game(), 'far', array() );
+
+		$this->assertStringNotContainsString( 'pitcher-stat-label', $html );
+	}
 }

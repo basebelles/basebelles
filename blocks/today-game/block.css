@@ -138,6 +138,15 @@
 	font-size: 0.85rem;
 }
 
+/* "Postseason" / "Reg. season" after the line, so a 5.40 ERA in October isn't read as his year. */
+.pitcher-stat-label {
+	display: block;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
 .game-scores {
 	font-size: 1.8rem;
 	font-weight: 800;
@@ -161,7 +170,7 @@
 	font-size: 0.9rem;
 	color: var(--bb-accent-slate);
 	text-align: center;
-	padding-top: 10px;
+	padding: 10px 0px;
 	border-top: 1px dashed var(--bb-sandstone-cream);
 	line-height: 1.5;
 }
@@ -214,10 +223,10 @@
 
 .tg-info-box {
 	text-align: center;
-	color: var(--bb-accent-slate);
+	color: var(--bb-deep-navy);
 	font-size: 0.9rem;
-	padding: 12px 16px;
-	border: 1px solid var(--bb-sandstone-cream);
+	padding: 16px;
+	border: 2px solid var(--bb-sandstone-cream);
 	border-radius: 4px;
 	background: color-mix(in srgb, var(--bb-light-blue) 12%, #fff);
 }

@@ -129,7 +129,12 @@ if ( $is_doubleheader ) {
 						<br />
 						<?php echo Basebelles_Today_Game_Panels::render_time_label( $game, $phase ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
+						<?php
+					// A postseason series has its own card (the Game Hub's series panel, the
+					// standings ticker), so the header doesn't repeat "CLE leads 1-0" here.
+					$is_postseason_game = in_array( (string) ( $game['game_type'] ?? '' ), Basebelles_Postseason::ROUND_ORDER, true );
+					?>
+					<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 && ! $is_postseason_game ) : ?>
 							<div class="tg-series-status">
 								Game <?php echo esc_html( $game['series']['game_number'] ); ?> of <?php echo esc_html( $game['series']['games_total'] ); ?>
 								<?php if ( ! empty( $game['series']['status_label'] ) ) : ?>

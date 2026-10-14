@@ -1,0 +1,17 @@
+{
+    "name": "acf/basebelles-game-hub",
+    "title": "Game Hub",
+    "description": "Front-page game section that follows the season: Today's Game with the division (regular season) or the series (postseason), and a Spring Training countdown with Guardians news (off season).",
+    "style": [ "basebelles-game-hub-style", "basebelles-today-game-style" ],
+    "category": "basebelles",
+    "icon": "layout",
+    "keywords": ["today", "game", "standings", "series", "news", "guardians"],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "supports": {
+        "align": true,
+        "anchor": true
+    }
+}

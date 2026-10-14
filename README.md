@@ -40,6 +40,7 @@ All blocks are registered from `blocks/class-blocks.php` and appear under the **
 
 | Block directory | Purpose (high level) |
 | ----------------- | ---------------------- |
+| `blocks/game-hub/` | Front-page game section that follows the season: Today's Game with the division table (regular season) or the series card (postseason); a Spring Training countdown and MLB.com Guardians headlines (off season). Cards live in `cards/`; pure shaping in `helpers/class-game-hub.php` |
 | `blocks/belles/` | Belle directory card grid |
 | `blocks/results/` | Game / results presentation |
 | `blocks/season-header/` | Season header UI |

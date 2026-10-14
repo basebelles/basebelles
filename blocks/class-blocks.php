@@ -55,6 +55,7 @@ class Basebelles_Blocks {
 		register_block_type( __DIR__ . '/streamable' );
 		register_block_type( __DIR__ . '/season-stats-header' );
 		register_block_type( __DIR__ . '/transactions' );
+		register_block_type( __DIR__ . '/game-hub' );
 	}
 
 	/**
@@ -73,6 +74,7 @@ class Basebelles_Blocks {
 		wp_register_style( 'basebelles-streamable-style', plugin_dir_url( __FILE__ ) . 'streamable/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-season-stats-header-style', plugin_dir_url( __FILE__ ) . 'season-stats-header/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-transactions-style', plugin_dir_url( __FILE__ ) . 'transactions/block.css', $deps, self::$version );
+		wp_register_style( 'basebelles-game-hub-style', plugin_dir_url( __FILE__ ) . 'game-hub/block.css', $deps, self::$version );
 	}
 
 	/**
