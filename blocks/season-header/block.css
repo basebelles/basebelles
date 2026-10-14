@@ -22,9 +22,9 @@
 	grid-template-columns: repeat(3, 1fr); /* Three equal columns */
 	gap: 20px;
 	text-align: center;
-	background: var(--bb-wine-red-banner);
+	background: var(--bb-sandstone-cream);
 	padding: 30px 20px;
-	color: var(--bb-sandstone-cream);
+	color: var(--bb-wine-red-banner);
 }
 
 /* Center the 2026 Season title above the grid */
@@ -36,7 +36,7 @@
 }
 
 .season-col {
-	border: 1px solid var(--bb-sandstone-cream);
+	border: 1px solid var(--bb-wine-red-banner);
 	padding-bottom: 5px;
 }
 
@@ -47,7 +47,7 @@
 }
 
 a.season-type-link {
-	color: var(--bb-sandstone-cream);
+	color: var(--bb-wine-red-banner);
 }
 
 .season-col span {
