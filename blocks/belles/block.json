@@ -2,7 +2,7 @@
     "name": "acf/basebelles-belles",
     "title": "Belle Directory",
     "description": "Lists every approved Belle as a card, with a Gravatar or a monogram fallback.",
-    "style": [ "basebelles-style", "file:./block.css" ],
+    "style": [ "basebelles-belles-style" ],
     "category": "basebelles",
     "icon": "groups",
     "keywords": ["belles", "members", "directory", "roster"],

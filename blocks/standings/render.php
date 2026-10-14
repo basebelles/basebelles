@@ -17,6 +17,17 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 	return;
 }
 
+// Nothing to show for the current season in the off season. An archive asking for a given
+// season_year still gets that season's standings. The editor gets a note so the block doesn't
+// just vanish.
+if ( (int) get_query_var( 'season_year' ) < 1900 && class_exists( 'Basebelles_Season' ) && Basebelles_Season::is_off_season() ) {
+	if ( is_admin() ) {
+		echo '<div class="basebelles-standings placeholder"><p>Standings are hidden during the off season.</p></div>';
+	}
+
+	return;
+}
+
 // Get the season type and year from ACF Options (Season Settings group) or query variables.
 // Default to regular season and current year.
 $season_settings = get_field( 'season_settings', 'option' );
@@ -65,15 +76,30 @@ $basebelles_render_ticker_row = static function ( array $items, $row_class ) {
 	<?php
 };
 
-// Postseason: once Season Type is Wild Card or Post Season, a Guardians team that made it gets
-// the series ticker instead. One that didn't qualify (or an API failure) falls through to the
-// final regular-season standings below.
-if ( in_array( $current_type, array( 'wildCard', 'postseason' ), true ) && method_exists( $api, 'get_postseason_status' ) ) {
+// Postseason: once Season Type is Post Season, a Guardians team that's still playing gets the
+// series ticker instead. Once the season is over (eliminated, champions, or never made it) it's
+// the "Season complete" card. Off Season only gets this far on an archive page for a given
+// season_year (see the top of this file). An API failure falls through to the final
+// regular-season standings below.
+if ( in_array( $current_type, array( 'postseason', 'offSeason' ), true ) && method_exists( $api, 'get_postseason_status' ) ) {
 	$postseason = $api->get_postseason_status( (int) $season_year );
 
-	if ( ! is_wp_error( $postseason ) && is_array( $postseason ) && 'not_qualified' !== ( $postseason['state'] ?? 'not_qualified' ) ) {
-		require __DIR__ . '/postseason.php';
-		return;
+	if ( ! is_wp_error( $postseason ) && is_array( $postseason ) ) {
+		$bb_ps_state = (string) ( $postseason['state'] ?? 'not_qualified' );
+
+		if ( in_array( $bb_ps_state, array( 'eliminated', 'champion', 'not_qualified' ), true ) ) {
+			// Returns early (without rendering) when there's no regular season to report on yet,
+			// say Current Season was bumped to next year before Spring Training.
+			$bb_sc_rendered = false;
+			require __DIR__ . '/season-complete.php';
+
+			if ( $bb_sc_rendered ) {
+				return;
+			}
+		} else {
+			require __DIR__ . '/postseason.php';
+			return;
+		}
 	}
 }
 

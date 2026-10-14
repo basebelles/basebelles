@@ -105,7 +105,7 @@
             "name": "sgen_game_count",
             "aria-label": "",
             "type": "number",
-            "instructions": "How many games are in this series. Usually three, but on rare occasions 2 or 4. Don't ask.",
+            "instructions": "How many games are in this series. Usually three, but on rare occasions 2 or 4. Don't ask. Post-season: taken from MLB's schedule when it's published.",
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
@@ -128,7 +128,7 @@
             "name": "sgen_game_number",
             "aria-label": "",
             "type": "number",
-            "instructions": "Season game number for the first game of this series. Auto-detected if left blank; fill in to override.",
+            "instructions": "Season game number for the first game of this series. Auto-detected if left blank; fill in to override. Not used in the post-season, where headings show the date.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -151,7 +151,7 @@
             "name": "sgen_home_away",
             "aria-label": "",
             "type": "true_false",
-            "instructions": "Is the game home or away?",
+            "instructions": "Is the game home or away? Post-season: venues come from MLB's schedule; this only matters if it isn't published yet, and then means \"we host Game 1\".",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -239,5 +239,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1748000010
+    "modified": 1792000000
 }

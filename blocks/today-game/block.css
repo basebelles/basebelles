@@ -7,7 +7,6 @@
 	border: 1px solid var(--bb-slate-blue);
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	width: 95%;
-	max-width: 650px;
 	margin: 20px auto;
 	border-radius: 4px;
 	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -115,8 +114,8 @@
 
 .tg-series-status {
 	margin-top: 4px;
-	font-size: 0.7rem;
-	font-weight: 400;
+	font-size: 0.9rem;
+	font-weight: 500;
 	color: var(--bb-accent-slate);
 	white-space: normal;
 }
@@ -139,6 +138,15 @@
 	font-size: 0.85rem;
 }
 
+/* "Postseason" / "Reg. season" after the line, so a 5.40 ERA in October isn't read as his year. */
+.pitcher-stat-label {
+	display: block;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
 .game-scores {
 	font-size: 1.8rem;
 	font-weight: 800;
@@ -159,10 +167,10 @@
 
 /* Broadcasts & Multi-game Footer */
 .game-broadcasts {
-	font-size: 0.75rem;
+	font-size: 0.9rem;
 	color: var(--bb-accent-slate);
 	text-align: center;
-	padding-top: 10px;
+	padding: 10px 0px;
 	border-top: 1px dashed var(--bb-sandstone-cream);
 	line-height: 1.5;
 }
@@ -215,10 +223,10 @@
 
 .tg-info-box {
 	text-align: center;
-	color: var(--bb-accent-slate);
+	color: var(--bb-deep-navy);
 	font-size: 0.9rem;
-	padding: 12px 16px;
-	border: 1px solid var(--bb-sandstone-cream);
+	padding: 16px;
+	border: 2px solid var(--bb-sandstone-cream);
 	border-radius: 4px;
 	background: color-mix(in srgb, var(--bb-light-blue) 12%, #fff);
 }
@@ -528,7 +536,7 @@
 	width: 100%;
 	border-collapse: collapse;
 	margin-bottom: 15px;
-	font-size: 0.8rem;
+	font-size: 0.9rem;
 }
 
 .tg-lineup caption,

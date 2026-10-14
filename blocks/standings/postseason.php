@@ -208,7 +208,7 @@ foreach ( $games as $bb_ps_game ) {
 <div class="basebelles-standings is-postseason is-<?php echo esc_attr( str_replace( '_', '-', $bb_ps_state ) ); ?>">
 	<?php if ( '' !== $bb_ps_heading ) : ?>
 		<hr class="bb-ticker-rule" />
-		<h3 class="bb-ticker-heading"><?php echo esc_html( $bb_ps_heading ); ?></h3>
+		<h4 class="bb-ticker-heading"><?php echo esc_html( $bb_ps_heading ); ?></h4>
 	<?php endif; ?>
 	<div class="bb-ticker">
 		<?php $basebelles_render_ticker_row( $primary, 'is-primary' ); ?>

@@ -2,7 +2,7 @@
     "name": "acf/basebelles-streamable",
     "title": "MLB.com video",
     "description": "Embed a Streamable MLB.com video with responsive, centered layout.",
-    "style": [ "basebelles-style", "file:./block.css" ],
+    "style": [ "basebelles-streamable-style" ],
     "category": "basebelles",
     "icon": "video-alt3",
     "keywords": [ "streamable", "video", "embed", "mlb" ],

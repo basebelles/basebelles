@@ -86,12 +86,11 @@ $slug_to_type = array(
 	'regular-season'  => 'regularSeason',
 	'post-season'     => 'postseason',
 );
-// Map the Season Settings "Current Type" choice onto an API season type. The Wild Card round
-// is part of the postseason, and the off season shows the regular season.
+// Map the Season Settings "Current Type" choice onto an API season type. The off season shows
+// the regular season.
 $settings_type_map = array(
 	'springTraining' => 'springTraining',
 	'regularSeason'  => 'regularSeason',
-	'wildCard'       => 'postseason',
 	'postseason'     => 'postseason',
 );
 $season_type       = $settings_type_map[ $season_settings['season_type'] ?? '' ] ?? 'regularSeason';

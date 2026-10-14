@@ -63,6 +63,11 @@ function wp_date( $format, $timestamp = null, $timezone = null ) {
 	return gmdate( $format, null === $timestamp ? time() : (int) $timestamp );
 }
 
+/** The tests run in UTC, which is what wp_date() above already assumes. */
+function wp_timezone() {
+	return new DateTimeZone( 'UTC' );
+}
+
 /** Defaults to false, matching a front-end request; Belle tests flip it to reach admin paths. */
 function is_admin() {
 	return Basebelles_Test_State::$is_admin;
@@ -677,6 +682,21 @@ class Basebelles_Test_State {
 	/** @var array|WP_Error Payload for Basebelles_API::get_guardians_roster(). */
 	public static $roster = array();
 
+	/** @var array|WP_Error Payload for Basebelles_API::get_division_table(). */
+	public static $division_table = array();
+
+	/** @var array Payload for Basebelles_API::get_last_game(). */
+	public static $last_game = array();
+
+	/** @var string Payload for Basebelles_API::get_next_games_line(). */
+	public static $next_games_line = '';
+
+	/** @var string Payload for Basebelles_API::get_spring_training_start() (Y-m-d or ''). */
+	public static $spring_start = '';
+
+	/** @var array Payload for Basebelles_API::get_guardians_news(). */
+	public static $news = array();
+
 	/** @var array<int, array> Form ID => form data array, as WPForms stores it. */
 	public static $forms = array();
 
@@ -733,6 +753,11 @@ class Basebelles_Test_State {
 		self::$screen             = null;
 		self::$wpforms            = new Basebelles_Test_WPForms();
 		self::$roster             = array();
+		self::$division_table     = array();
+		self::$last_game          = array();
+		self::$next_games_line    = '';
+		self::$spring_start       = '';
+		self::$news               = array();
 	}
 
 	/**
@@ -848,6 +873,26 @@ class Basebelles_API {
 		return Basebelles_Test_State::$postseason;
 	}
 
+	public function get_division_table( $season_year = null ) {
+		return Basebelles_Test_State::$division_table;
+	}
+
+	public function get_last_game() {
+		return Basebelles_Test_State::$last_game;
+	}
+
+	public function get_next_games_line( $limit = 3 ) {
+		return Basebelles_Test_State::$next_games_line;
+	}
+
+	public function get_spring_training_start() {
+		return Basebelles_Test_State::$spring_start;
+	}
+
+	public function get_guardians_news( $limit = 5 ) {
+		return array_slice( Basebelles_Test_State::$news, 0, (int) $limit );
+	}
+
 	/** Same lookup as the real one, against Basebelles_Test_State::$team_info. */
 	public function get_team_by_taxonomy_slug( $taxonomy_slug ) {
 		foreach ( Basebelles_Test_State::$team_info as $key => $team ) {
@@ -871,6 +916,8 @@ require_once BASEBELLES_PLUGIN_DIR . '/blocks/today-game/class-panels.php';
 
 // Pure logic, no HTTP: tested directly, while the fake API above stands in for the fetching.
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-postseason.php';
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season.php';
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-game-hub.php';
 
 // Requiring this constructs the singleton, which registers hooks and the post type against the
 // stubs above. is_admin() is false at bootstrap, so nothing gets scheduled.

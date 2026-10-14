@@ -248,6 +248,36 @@ class PostseasonTest extends TestCase {
 		);
 	}
 
+	public function test_rounds_include_the_series_that_ended_the_season(): void {
+		$seeds = array( 114 => 4, 117 => 5 );
+		$games = array(
+			Fixtures::ps_game( 'F', 1, 3, 117, true, 'Final', 4, 2, array( 'officialDate' => '2026-09-29' ) ),
+			Fixtures::ps_game( 'F', 2, 3, 117, true, 'Final', 6, 1, array( 'officialDate' => '2026-09-30' ) ),
+			Fixtures::ps_game( 'D', 1, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-03' ) ),
+			Fixtures::ps_game( 'D', 2, 5, 145, false, 'Final', 0, 2, array( 'officialDate' => '2026-10-04' ) ),
+			Fixtures::ps_game( 'D', 3, 5, 145, true, 'Final', 4, 5, array( 'officialDate' => '2026-10-06' ) ),
+		);
+
+		$status = $this->build( $games, '2026-10-07', $seeds );
+
+		$this->assertSame( 'eliminated', $status['state'] );
+		$this->assertSame(
+			array(
+				array(
+					'round'  => 'Wild Card',
+					'result' => 'Won 2-0 vs HOU',
+				),
+				array(
+					'round'  => 'ALDS',
+					'result' => 'Lost 0-3 vs CWS',
+				),
+			),
+			$status['rounds']
+		);
+		// The road still stops before the current round.
+		$this->assertCount( 1, $status['road'] );
+	}
+
 	public function test_the_road_is_empty_before_a_wild_card_teams_first_series(): void {
 		$this->assertSame( array(), $this->build( array(), '2026-09-28', array( 114 => 4 ) )['road'] );
 	}
@@ -303,5 +333,72 @@ class PostseasonTest extends TestCase {
 		$games[] = Fixtures::ps_game( 'D', 1, 5, 145, true, 'Final', 9, 0, array( 'gameType' => 'R', 'officialDate' => '2026-09-27' ) );
 
 		$this->assertSame( 'CWS leads 2-1', $this->build( $games )['current']['status_label'] );
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Series Generator plan
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_plan_uses_the_real_schedule_for_dates_and_venues(): void {
+		$plan = Basebelles_Postseason::plan_series(
+			Fixtures::ps_dates( Fixtures::alds_2026_before_game_four() ),
+			'20261003',
+			'20261010',
+			self::CLE,
+			7,
+			false
+		);
+
+		$this->assertTrue( $plan['from_schedule'] );
+		$this->assertSame( 5, $plan['games_in_series'], 'MLB says best of five, whatever the form says.' );
+		$this->assertSame(
+			array( '2026-10-03', '2026-10-05', '2026-10-07', '2026-10-08', '2026-10-10' ),
+			array_column( $plan['games'], 'date' )
+		);
+		$this->assertSame( array( true, true, false, false, true ), array_column( $plan['games'], 'is_home' ) );
+		$this->assertSame( array( false, false, false, false, true ), array_column( $plan['games'], 'if_necessary' ) );
+	}
+
+	public function test_plan_ignores_games_outside_the_date_range(): void {
+		$games   = Fixtures::alds_2026_before_game_four();
+		$games[] = Fixtures::ps_game( 'L', 1, 7, 139, false, 'Preview', null, null, array( 'officialDate' => '2026-10-12' ) );
+
+		$plan = Basebelles_Postseason::plan_series( Fixtures::ps_dates( $games ), '2026-10-12', '2026-10-20', self::CLE, 7, true );
+
+		$this->assertSame( 7, $plan['games_in_series'] );
+		$this->assertSame( '2026-10-12', $plan['games'][0]['date'] );
+		$this->assertFalse( $plan['games'][0]['is_home'], 'Game 1 at Tampa, per the schedule, not the toggle.' );
+	}
+
+	public function test_plan_finds_the_whole_series_from_a_blank_end_date(): void {
+		$plan = Basebelles_Postseason::plan_series( Fixtures::ps_dates( Fixtures::alds_2026_before_game_four() ), '20261003', '', self::CLE, 5, false );
+
+		$this->assertSame( '2026-10-10', $plan['games'][4]['date'] );
+		$this->assertTrue( $plan['games'][4]['is_home'] );
+	}
+
+	public function test_unpublished_seven_game_series_falls_back_to_2_3_2(): void {
+		$plan = Basebelles_Postseason::plan_series( array(), '20261012', '20261020', self::CLE, 7, true );
+
+		$this->assertFalse( $plan['from_schedule'] );
+		$this->assertSame( array( true, true, false, false, false, true, true ), array_column( $plan['games'], 'is_home' ) );
+		$this->assertSame( array( '', '', '', '', '', '', '' ), array_column( $plan['games'], 'date' ) );
+		$this->assertSame( array( false, false, false, false, true, true, true ), array_column( $plan['games'], 'if_necessary' ) );
+	}
+
+	public function test_fallback_without_home_field_advantage_flips_the_pattern(): void {
+		$plan = Basebelles_Postseason::plan_series( array(), '20261003', '20261010', self::CLE, 5, false );
+
+		$this->assertSame( array( false, false, true, true, false ), array_column( $plan['games'], 'is_home' ) );
+		$this->assertSame( array( false, false, false, true, true ), array_column( $plan['games'], 'if_necessary' ) );
+	}
+
+	public function test_fallback_wild_card_is_all_at_the_higher_seed(): void {
+		$plan = Basebelles_Postseason::plan_series( array(), '20260930', '20261002', self::CLE, 3, false );
+
+		$this->assertSame( array( false, false, false ), array_column( $plan['games'], 'is_home' ) );
+		$this->assertTrue( $plan['games'][2]['if_necessary'] );
 	}
 }

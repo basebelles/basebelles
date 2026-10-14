@@ -2,7 +2,7 @@
     "name": "acf/basebelles-transactions",
     "title": "Latest Transactions",
     "description": "Lists recent Cleveland Guardians MLB transactions from the last 30 days.",
-    "style": [ "basebelles-style", "file:./block.css" ],
+    "style": [ "basebelles-transactions-style" ],
     "category": "basebelles",
     "icon": "list-view",
     "keywords": ["transactions", "guardians", "baseball", "mlb"],

@@ -10,6 +10,12 @@
 	display: block;
 }
 
+.off-season-last-ws {
+	margin: 16px 0 0;
+	font-size: 1.2rem;
+	font-style: italic;
+}
+
 /* Wrapper for the three columns */
 .basebelles-season-header-grid {
 	display: grid;
@@ -27,6 +33,11 @@
 	font-size: 2.2rem;
 	font-weight: bold;
 	text-transform: uppercase;
+}
+
+.season-col {
+	border: 1px solid var(--bb-sandstone-cream);
+	padding-bottom: 5px;
 }
 
 .season-col h3 {

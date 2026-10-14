@@ -21,6 +21,16 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 	return;
 }
 
+// No games to show in the off season; the season header has the off-season picture. The editor
+// gets a note so the block doesn't just vanish.
+if ( class_exists( 'Basebelles_Season' ) && Basebelles_Season::is_off_season() ) {
+	if ( is_admin() ) {
+		echo '<div class="basebelles-today-game placeholder"><p>Today\'s Game is hidden during the off season.</p></div>';
+	}
+
+	return;
+}
+
 $plugin_url    = plugin_dir_url( dirname( __DIR__, 2 ) . '/basebelles.php' );
 $game_settings = call_user_func( 'get_field', 'game_settings', 'option' );
 $off_day_image = ! empty( $game_settings['off_day_image'] )
@@ -119,7 +129,12 @@ if ( $is_doubleheader ) {
 						<br />
 						<?php echo Basebelles_Today_Game_Panels::render_time_label( $game, $phase ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 ) : ?>
+						<?php
+					// A postseason series has its own card (the Game Hub's series panel, the
+					// standings ticker), so the header doesn't repeat "CLE leads 1-0" here.
+					$is_postseason_game = in_array( (string) ( $game['game_type'] ?? '' ), Basebelles_Postseason::ROUND_ORDER, true );
+					?>
+					<?php if ( ( $game['series']['games_total'] ?? 1 ) > 1 && ! $is_postseason_game ) : ?>
 							<div class="tg-series-status">
 								Game <?php echo esc_html( $game['series']['game_number'] ); ?> of <?php echo esc_html( $game['series']['games_total'] ); ?>
 								<?php if ( ! empty( $game['series']['status_label'] ) ) : ?>

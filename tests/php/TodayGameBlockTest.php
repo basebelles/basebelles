@@ -98,6 +98,24 @@ class TodayGameBlockTest extends TestCase {
 		$this->assertStringContainsString( 'blocks/today-game/off-day.jpg', $html );
 	}
 
+	public function test_the_off_season_hides_the_block(): void {
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
+
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_the_off_season_leaves_a_note_in_the_editor(): void {
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
+		Basebelles_Test_State::$is_admin                  = true;
+
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringContainsString( 'hidden during the off season', $html );
+		$this->assertStringNotContainsString( 'game-card', $html );
+	}
+
 	public function test_an_off_day_uses_the_custom_image_when_one_is_set(): void {
 		Basebelles_Test_State::$fields['game_settings'] = array(
 			'show_off_days' => true,
@@ -380,5 +398,56 @@ class TodayGameBlockTest extends TestCase {
 		$html = (string) ob_get_clean();
 
 		$this->assertSame( '', trim( $html ) );
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Series line
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_a_regular_season_series_keeps_its_status_line(): void {
+		$game = Fixtures::game(
+			array(
+				'game_type' => 'R',
+				'series'    => array( 'game_number' => 2, 'games_total' => 3, 'status_label' => 'CLE Leads 1-0' ),
+			)
+		);
+
+		$html = $this->render( array( $game ) );
+
+		$this->assertStringContainsString( 'tg-series-status', $html );
+		$this->assertStringContainsString( 'CLE Leads 1-0', $html );
+	}
+
+	public function test_a_postseason_game_drops_the_series_status_line(): void {
+		$game = Fixtures::game(
+			array(
+				'game_type' => 'L',
+				'series'    => array( 'game_number' => 2, 'games_total' => 7, 'status_label' => 'CLE Leads 1-0' ),
+			)
+		);
+
+		$html = $this->render( array( $game ) );
+
+		$this->assertStringNotContainsString( 'tg-series-status', $html );
+		$this->assertStringNotContainsString( 'CLE Leads 1-0', $html );
+	}
+
+	public function test_a_postseason_pitcher_line_carries_its_label(): void {
+		$game = Fixtures::game( array( 'game_type' => 'L' ) );
+		$game['away_pitcher']['stat_label'] = 'Postseason';
+		$game['home_pitcher']['stat_label'] = 'Reg. season';
+
+		$html = Basebelles_Today_Game_Panels::render_score_panel( $game, 'far', array() );
+
+		$this->assertStringContainsString( '<span class="pitcher-stat-label">Postseason</span>', $html );
+		$this->assertStringContainsString( '<span class="pitcher-stat-label">Reg. season</span>', $html );
+	}
+
+	public function test_a_regular_season_pitcher_line_has_no_label(): void {
+		$html = Basebelles_Today_Game_Panels::render_score_panel( Fixtures::game(), 'far', array() );
+
+		$this->assertStringNotContainsString( 'pitcher-stat-label', $html );
 	}
 }

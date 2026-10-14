@@ -150,7 +150,6 @@
                         "offSeason": "Off Season",
                         "springTraining": "Spring Training",
                         "regularSeason": "Regular Season",
-                        "wildCard": "Wild Card",
                         "postseason": "Post Season"
                     },
                     "default_value": "",
@@ -181,6 +180,32 @@
                     "step": "",
                     "prepend": "",
                     "append": ""
+                },
+                {
+                    "key": "field_5abc7d6ac4fb",
+                    "label": "Off Season Image",
+                    "name": "off_season_image",
+                    "aria-label": "",
+                    "type": "image",
+                    "instructions": "Optional. Replaces the default picture the season header shows in the off season.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "url",
+                    "library": "all",
+                    "min_width": "",
+                    "min_height": "",
+                    "min_size": "",
+                    "max_width": "",
+                    "max_height": "",
+                    "max_size": "",
+                    "mime_types": "",
+                    "allow_in_bindings": 0,
+                    "preview_size": "medium"
                 }
             ]
         },
@@ -443,5 +468,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1790882848
+    "modified": 1791931252
 }

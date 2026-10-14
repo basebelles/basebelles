@@ -24,9 +24,17 @@ class Basebelles_Blocks {
 	 */
 	public function __construct() {
 		self::$version = Basebelles::$version;
-		add_action( 'init', array( $this, 'register_styles' ) );
-		// enqueue_block_assets loads in the iframed editor (Site Editor / templates); enqueue_block_editor_assets does not.
-		add_action( 'enqueue_block_assets', array( $this, 'enqueue_styles' ) );
+		// Each block.json names its handle here as its "style", so WordPress loads the CSS with
+		// the block (on demand in block themes), in the editor iframe too, and with our version for cache-busting
+		// (a block.json "file:" style would carry WordPress's version instead).
+		// This class is loaded from Basebelles::init(), i.e. while init is already running at
+		// priority 10, and a callback added to the priority that's mid-run never fires. So
+		// register now if init has started; the hook is only for an earlier load.
+		if ( did_action( 'init' ) ) {
+			$this->register_styles();
+		} else {
+			add_action( 'init', array( $this, 'register_styles' ) );
+		}
 
 		self::register_blocks();
 		add_filter( 'block_categories_all', array( $this, 'block_categories' ), 10, 2 );
@@ -47,6 +55,7 @@ class Basebelles_Blocks {
 		register_block_type( __DIR__ . '/streamable' );
 		register_block_type( __DIR__ . '/season-stats-header' );
 		register_block_type( __DIR__ . '/transactions' );
+		register_block_type( __DIR__ . '/game-hub' );
 	}
 
 	/**
@@ -65,6 +74,7 @@ class Basebelles_Blocks {
 		wp_register_style( 'basebelles-streamable-style', plugin_dir_url( __FILE__ ) . 'streamable/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-season-stats-header-style', plugin_dir_url( __FILE__ ) . 'season-stats-header/block.css', $deps, self::$version );
 		wp_register_style( 'basebelles-transactions-style', plugin_dir_url( __FILE__ ) . 'transactions/block.css', $deps, self::$version );
+		wp_register_style( 'basebelles-game-hub-style', plugin_dir_url( __FILE__ ) . 'game-hub/block.css', $deps, self::$version );
 	}
 
 	/**
@@ -87,24 +97,6 @@ class Basebelles_Blocks {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Enqueue the styles for the plugin.
-	 *
-	 * @return void
-	 */
-	public function enqueue_styles() {
-		$deps = array( 'basebelles-style' );
-		wp_enqueue_style( 'basebelles-belles-style', plugin_dir_url( __FILE__ ) . 'belles/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-results-style', plugin_dir_url( __FILE__ ) . 'results/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-series-style', plugin_dir_url( __FILE__ ) . 'series/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-season-header-style', plugin_dir_url( __FILE__ ) . 'season-header/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-standings-style', plugin_dir_url( __FILE__ ) . 'standings/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-today-game-style', plugin_dir_url( __FILE__ ) . 'today-game/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-streamable-style', plugin_dir_url( __FILE__ ) . 'streamable/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-season-stats-header-style', plugin_dir_url( __FILE__ ) . 'season-stats-header/block.css', $deps, self::$version );
-		wp_enqueue_style( 'basebelles-transactions-style', plugin_dir_url( __FILE__ ) . 'transactions/block.css', $deps, self::$version );
 	}
 }
 

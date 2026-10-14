@@ -828,6 +828,9 @@ class Basebelles_Today_Game_Panels {
 					<span><?php echo esc_html( $away_pitcher['record'] ); ?></span>
 					&bull;
 					<span class="pitcher-era"><?php echo esc_html( $away_pitcher['era'] ); ?> ERA</span>
+					<?php if ( ! empty( $away_pitcher['stat_label'] ) ) : ?>
+						<span class="pitcher-stat-label"><?php echo esc_html( $away_pitcher['stat_label'] ); ?></span>
+					<?php endif; ?>
 				</div>
 			</div>
 			<div class="game-meta">v.s.</div>
@@ -846,6 +849,9 @@ class Basebelles_Today_Game_Panels {
 					<span><?php echo esc_html( $home_pitcher['record'] ); ?></span>
 					&bull;
 					<span class="pitcher-era"><?php echo esc_html( $home_pitcher['era'] ); ?> ERA</span>
+					<?php if ( ! empty( $home_pitcher['stat_label'] ) ) : ?>
+						<span class="pitcher-stat-label"><?php echo esc_html( $home_pitcher['stat_label'] ); ?></span>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
