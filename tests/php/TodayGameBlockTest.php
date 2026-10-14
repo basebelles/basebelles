@@ -98,6 +98,24 @@ class TodayGameBlockTest extends TestCase {
 		$this->assertStringContainsString( 'blocks/today-game/off-day.jpg', $html );
 	}
 
+	public function test_the_off_season_hides_the_block(): void {
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
+
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_the_off_season_leaves_a_note_in_the_editor(): void {
+		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
+		Basebelles_Test_State::$is_admin                  = true;
+
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringContainsString( 'hidden during the off season', $html );
+		$this->assertStringNotContainsString( 'game-card', $html );
+	}
+
 	public function test_an_off_day_uses_the_custom_image_when_one_is_set(): void {
 		Basebelles_Test_State::$fields['game_settings'] = array(
 			'show_off_days' => true,

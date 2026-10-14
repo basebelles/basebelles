@@ -75,6 +75,7 @@ class Basebelles {
 
 		// General Helpers
 		require_once 'helpers/class-postseason.php';
+		require_once 'helpers/class-season.php';
 		require_once 'helpers/class-api.php';
 		require_once 'helpers/class-impostercide.php';
 		require_once 'helpers/class-in-progress.php';

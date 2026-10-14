@@ -10,6 +10,12 @@
 	display: block;
 }
 
+.off-season-last-ws {
+	margin: 16px 0 0;
+	font-size: 1.2rem;
+	font-style: italic;
+}
+
 /* Wrapper for the three columns */
 .basebelles-season-header-grid {
 	display: grid;

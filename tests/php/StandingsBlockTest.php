@@ -445,13 +445,31 @@ class StandingsBlockTest extends TestCase {
 		$this->assertStringNotContainsString( 'The last World Series Win', $html );
 	}
 
-	public function test_season_complete_stays_up_through_the_off_season(): void {
+	public function test_off_season_hides_the_block_even_after_a_postseason(): void {
 		$games    = Fixtures::alds_2026_before_game_four();
 		$games[3] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 3, array( 'officialDate' => '2026-10-08' ) );
 
 		$html = $this->render_postseason( 'offSeason', $games, '2026-12-01' );
 
-		$this->assertStringContainsString( 'is-season-complete', $html );
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_a_past_postseason_end_date_counts_as_the_off_season(): void {
+		// Season Type still says Post Season, but the end date has passed: same call as the header.
+		Basebelles_Test_State::$fields['post_end'] = 'October 1, 2000';
+
+		$html = $this->render_postseason( 'postseason', null );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_off_season_leaves_a_note_in_the_editor(): void {
+		Basebelles_Test_State::$is_admin = true;
+
+		$html = $this->render_postseason( 'offSeason', null );
+
+		$this->assertStringContainsString( 'Standings are hidden during the off season.', $html );
+		$this->assertStringNotContainsString( 'bb-ticker', $html );
 	}
 
 	public function test_a_raw_ymd_last_world_series_win_still_gives_the_year(): void {
@@ -496,24 +514,6 @@ class StandingsBlockTest extends TestCase {
 		$this->assertSame( array( 'Regular Season' => '2nd in the AL Central' ), $this->pairs( $html, 'is-primary' ) );
 		$this->assertStringNotContainsString( 'bb-ticker-row is-secondary', $html );
 		$this->assertMatchesRegularExpression( '#The last World Series Win</span>\s*1948#', $html );
-	}
-
-	public function test_off_season_with_no_games_yet_falls_back_to_the_standings(): void {
-		// Current Season bumped to next year before Spring Training: nothing to sum up.
-		Basebelles_Test_State::$fields['season_settings'] = array( 'season_type' => 'offSeason' );
-		Basebelles_Test_State::$standings                 = Fixtures::standings(
-			array(
-				'wins'   => 0,
-				'losses' => 0,
-			)
-		);
-
-		ob_start();
-		require BASEBELLES_PLUGIN_DIR . '/blocks/standings/render.php';
-		$html = (string) ob_get_clean();
-
-		$this->assertStringNotContainsString( 'is-season-complete', $html );
-		$this->assertStringContainsString( 'bb-ticker-row is-secondary', $html );
 	}
 
 	public function test_a_postseason_api_error_falls_back_to_the_regular_season_standings(): void {

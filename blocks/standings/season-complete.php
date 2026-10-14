@@ -72,20 +72,8 @@ foreach ( $bb_sc_rounds as $bb_sc_round ) {
 	);
 }
 
-// The year of the last title, from Guardians Settings (ACF returns "F j, Y"; older saves may be
-// the raw Ymd). Not shown in a championship year: the banner already says it.
-$bb_sc_last_ws = '';
-
-if ( ! $bb_sc_champion && function_exists( 'get_field' ) ) {
-	$bb_sc_ws_raw = trim( (string) get_field( 'last_world_series_win', 'option' ) );
-	$bb_sc_ws     = '' !== $bb_sc_ws_raw ? DateTimeImmutable::createFromFormat( '!F j, Y', $bb_sc_ws_raw ) : false;
-
-	if ( false !== $bb_sc_ws ) {
-		$bb_sc_last_ws = $bb_sc_ws->format( 'Y' );
-	} elseif ( preg_match( '/^(\d{4})/', $bb_sc_ws_raw, $bb_sc_match ) ) {
-		$bb_sc_last_ws = $bb_sc_match[1];
-	}
-}
+// The year of the last title. Not shown in a championship year: the banner already says it.
+$bb_sc_last_ws = $bb_sc_champion ? '' : Basebelles_Season::last_world_series_year();
 ?>
 
 <div class="basebelles-standings is-postseason is-season-complete<?php echo $bb_sc_champion ? ' is-champion' : ''; ?>">

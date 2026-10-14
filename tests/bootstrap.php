@@ -63,6 +63,11 @@ function wp_date( $format, $timestamp = null, $timezone = null ) {
 	return gmdate( $format, null === $timestamp ? time() : (int) $timestamp );
 }
 
+/** The tests run in UTC, which is what wp_date() above already assumes. */
+function wp_timezone() {
+	return new DateTimeZone( 'UTC' );
+}
+
 /** Defaults to false, matching a front-end request; Belle tests flip it to reach admin paths. */
 function is_admin() {
 	return Basebelles_Test_State::$is_admin;
@@ -871,6 +876,7 @@ require_once BASEBELLES_PLUGIN_DIR . '/blocks/today-game/class-panels.php';
 
 // Pure logic, no HTTP: tested directly, while the fake API above stands in for the fetching.
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-postseason.php';
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season.php';
 
 // Requiring this constructs the singleton, which registers hooks and the post type against the
 // stubs above. is_admin() is false at bootstrap, so nothing gets scheduled.

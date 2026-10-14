@@ -21,6 +21,16 @@ if ( ! class_exists( 'Basebelles_API' ) ) {
 	return;
 }
 
+// No games to show in the off season; the season header has the off-season picture. The editor
+// gets a note so the block doesn't just vanish.
+if ( class_exists( 'Basebelles_Season' ) && Basebelles_Season::is_off_season() ) {
+	if ( is_admin() ) {
+		echo '<div class="basebelles-today-game placeholder"><p>Today\'s Game is hidden during the off season.</p></div>';
+	}
+
+	return;
+}
+
 $plugin_url    = plugin_dir_url( dirname( __DIR__, 2 ) . '/basebelles.php' );
 $game_settings = call_user_func( 'get_field', 'game_settings', 'option' );
 $off_day_image = ! empty( $game_settings['off_day_image'] )
