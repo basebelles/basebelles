@@ -146,25 +146,11 @@ class Basebelles_API {
 			$year = (int) gmdate( 'Y' );
 		}
 
-		// Plain schedule rather than schedule/postseason/series: that endpoint ignores teamId and
-		// returns every series in both leagues.
-		$schedule = $this->request_json(
-			'schedule',
-			array(
-				'sportId'  => 1,
-				'teamId'   => self::GUARDIANS_TEAM_ID,
-				'season'   => $year,
-				'gameType' => 'F,D,L,W',
-				'hydrate'  => 'team,linescore',
-			),
-			self::POSTSEASON_CACHE_TTL
-		);
+		$dates = $this->get_postseason_schedule( $year );
 
-		if ( is_wp_error( $schedule ) ) {
-			return $schedule;
+		if ( is_wp_error( $dates ) ) {
+			return $dates;
 		}
-
-		$dates = is_array( $schedule['dates'] ?? null ) ? $schedule['dates'] : array();
 
 		// Seeds come from the final regular-season standings. The NL is only needed for a World
 		// Series opponent's seed, so it's only fetched once there's a World Series game to show.
@@ -195,6 +181,35 @@ class Basebelles_API {
 		$status['guardians_logo_url'] = $this->get_logo_url_by_abbreviation( 'CLE' );
 
 		return $status;
+	}
+
+	/**
+	 * The Guardians' postseason schedule for one year: every Wild Card, Division Series, LCS
+	 * and World Series game, "if necessary" ones included.
+	 *
+	 * @param int $year Season year.
+	 * @return array|WP_Error The schedule payload's `dates` array.
+	 */
+	public function get_postseason_schedule( $year ) {
+		// Plain schedule rather than schedule/postseason/series: that endpoint ignores teamId and
+		// returns every series in both leagues.
+		$schedule = $this->request_json(
+			'schedule',
+			array(
+				'sportId'  => 1,
+				'teamId'   => self::GUARDIANS_TEAM_ID,
+				'season'   => (int) $year,
+				'gameType' => 'F,D,L,W',
+				'hydrate'  => 'team,linescore',
+			),
+			self::POSTSEASON_CACHE_TTL
+		);
+
+		if ( is_wp_error( $schedule ) ) {
+			return $schedule;
+		}
+
+		return is_array( $schedule['dates'] ?? null ) ? $schedule['dates'] : array();
 	}
 
 	/**

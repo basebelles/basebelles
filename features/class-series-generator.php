@@ -69,11 +69,13 @@ class Basebelles_Series_Generator {
 		$game_number = (int) get_field( 'sgen_game_number', self::OPTIONS_POST_ID );
 		$is_home     = get_field( 'sgen_home_away', self::OPTIONS_POST_ID ) ? '1' : '0';
 		$season_type = get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) ? get_field( 'sgen_season_type', self::OPTIONS_POST_ID ) : 'regular-season';
+		$postseason  = 'post-season' === $season_type;
 
 		// Look up team data and pre-fill current W/L records from the API.
 		$team_term = '';
 		$guards_wl = '1 - 0';
 		$oppo_wl   = '0 - 1';
+		$ps_dates  = array();
 
 		if ( class_exists( 'Basebelles_API' ) ) {
 			$api       = Basebelles_API::get_instance();
@@ -100,8 +102,12 @@ class Basebelles_Series_Generator {
 				}
 			}
 
-			// Auto-detect season game number from schedule unless manually overridden.
-			if ( ! $game_number ) {
+			if ( $postseason ) {
+				// Real dates and venues for each game. An error just means the fallback pattern.
+				$fetched  = $date ? $api->get_postseason_schedule( (int) substr( $date, 0, 4 ) ) : array();
+				$ps_dates = is_wp_error( $fetched ) ? array() : $fetched;
+			} elseif ( ! $game_number ) {
+				// Auto-detect season game number from schedule unless manually overridden.
 				$detected = $api->get_season_game_number_for_date( $date, $api_season_type );
 				if ( ! is_wp_error( $detected ) ) {
 					$game_number = $detected;
@@ -127,6 +133,41 @@ class Basebelles_Series_Generator {
 
 		$post_date = wp_date( 'F j, Y', strtotime( $date . ' 12:00:00' ) );
 
+		// One entry per game: heading text in the brackets, venue, and an "if necessary" marker.
+		$games   = array();
+		$warning = '';
+
+		if ( $postseason && class_exists( 'Basebelles_Postseason' ) && class_exists( 'Basebelles_API' ) ) {
+			$plan       = Basebelles_Postseason::plan_series( $ps_dates, $date, $end_date, Basebelles_API::GUARDIANS_TEAM_ID, $game_count, '1' === $is_home );
+			$game_count = $plan['games_in_series'];
+
+			foreach ( $plan['games'] as $game ) {
+				$games[] = array(
+					'num'          => $game['number'],
+					'label'        => '' !== $game['date'] ? wp_date( 'j M', strtotime( $game['date'] . ' 12:00:00' ) ) : '??',
+					'is_home'      => $game['is_home'] ? '1' : '0',
+					'if_necessary' => $game['if_necessary'],
+				);
+			}
+
+			// The series header shows where Game 1 is.
+			$is_home = $games[0]['is_home'];
+
+			if ( ! $plan['from_schedule'] ) {
+				$warning = 'MLB hasn&rsquo;t published this series yet, so venues follow the usual pattern and game dates are left as ??. Double-check them before publishing.';
+			}
+		} else {
+			for ( $i = 1; $i <= $game_count; $i++ ) {
+				$season_game = $game_number + ( $i - 1 );
+				$games[]     = array(
+					'num'          => $i,
+					'label'        => $season_game > 0 ? (string) $season_game : '??',
+					'is_home'      => $is_home,
+					'if_necessary' => false,
+				);
+			}
+		}
+
 		$post_content = $this->pattern_content(
 			'game-series-header',
 			array(
@@ -137,10 +178,11 @@ class Basebelles_Series_Generator {
 			)
 		) . "\n\n";
 
-		for ( $i = 1; $i <= $game_count; $i++ ) {
-			$season_game   = $game_number + ( $i - 1 );
-			$post_content .= $this->game_section( $i, $opponent, $is_home, $season_game, $guards_wl, $oppo_wl );
+		foreach ( $games as $game ) {
+			$post_content .= $this->game_section( $game, $opponent, $guards_wl, $oppo_wl );
 		}
+
+		$venues = array_unique( wp_list_pluck( $games, 'is_home' ) );
 
 		$post_content .= $this->pattern_content( 'game-series-end' );
 
@@ -159,16 +201,24 @@ class Basebelles_Series_Generator {
 				wp_set_object_terms( $new_post_id, $team_term, 'team' );
 			}
 			wp_set_object_terms( $new_post_id, $season_type, 'season-type' );
-			wp_set_object_terms( $new_post_id, '1' === $is_home ? 'home' : 'away', 'venue-type' );
+			// A split post-season series gets both terms.
+			$venue_terms = array_map(
+				static function ( $home ) {
+					return '1' === $home ? 'home' : 'away';
+				},
+				array_values( $venues )
+			);
+			wp_set_object_terms( $new_post_id, $venue_terms, 'venue-type' );
 			wp_set_object_terms( $new_post_id, 'games', 'category' );
 
 			$this->set_notice(
-				'success',
+				$warning ? 'warning' : 'success',
 				sprintf(
-					'Draft created: <a href="%s" target="_blank">Series vs %s &mdash; %s</a>',
+					'Draft created: <a href="%s" target="_blank">Series vs %s &mdash; %s</a>%s',
 					esc_url( get_edit_post_link( $new_post_id ) ),
 					esc_html( $opponent_display_name ),
-					esc_html( $post_date )
+					esc_html( $post_date ),
+					$warning ? '<br>' . $warning : ''
 				)
 			);
 		} else {
@@ -209,23 +259,32 @@ class Basebelles_Series_Generator {
 	/**
 	 * Build one game section from the pattern file, substituting dynamic values.
 	 *
-	 * @param int    $num         Game number in the series (1, 2, 3…).
-	 * @param string $opponent    Opponent team slug.
-	 * @param string $is_home     '1' for home, '0' for away.
-	 * @param int    $season_game Season game number for the heading (0 → '??').
-	 * @param string $guards_wl   Guardians current W/L record (e.g. '34 - 20').
-	 * @param string $oppo_wl     Opponent current W/L record (e.g. '28 - 26').
+	 * @param array  $game      {
+	 *     @type int    $num          Game number in the series (1, 2, 3…).
+	 *     @type string $label        Bracketed heading text: season game number in the regular
+	 *                                season, '13 Oct' in the post-season, '??' if unknown.
+	 *     @type string $is_home      '1' for home, '0' for away.
+	 *     @type bool   $if_necessary Adds "if necessary" to the heading.
+	 * }
+	 * @param string $opponent  Opponent team slug.
+	 * @param string $guards_wl Guardians current W/L record (e.g. '34 - 20').
+	 * @param string $oppo_wl   Opponent current W/L record (e.g. '28 - 26').
 	 * @return string
 	 */
-	protected function game_section( $num, $opponent, $is_home, $season_game = 0, $guards_wl = '1 - 0', $oppo_wl = '0 - 1' ) {
-		$game_display = $season_game > 0 ? $season_game : '??';
+	protected function game_section( $game, $opponent, $guards_wl = '1 - 0', $oppo_wl = '0 - 1' ) {
+		$heading = sprintf(
+			'Game %d (%s)%s - WONLOST',
+			$game['num'],
+			esc_html( $game['label'] ),
+			$game['if_necessary'] ? ' - if necessary' : ''
+		);
 
 		return $this->pattern_content(
 			'game-series-one-game',
 			array(
-				'Game 1 (00) - WONLOST'           => "Game {$num} ({$game_display}) - WONLOST",
+				'Game 1 (00) - WONLOST'           => $heading,
 				'"field_69c708d15fe00": "tbd"'     => '"field_69c708d15fe00": "' . $opponent . '"',
-				'"field_69c706cbee27f": "1"'       => '"field_69c706cbee27f": "' . $is_home . '"',
+				'"field_69c706cbee27f": "1"'       => '"field_69c706cbee27f": "' . $game['is_home'] . '"',
 				'"field_69c7084e1ddb6": "1 - 0"'   => '"field_69c7084e1ddb6": "' . $guards_wl . '"',
 				'"field_69c708d15fe04": "0 - 1"'   => '"field_69c708d15fe04": "' . $oppo_wl . '"',
 			)

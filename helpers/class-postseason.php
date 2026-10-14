@@ -45,6 +45,17 @@ class Basebelles_Postseason {
 	const SKIP_STATES = array( 'Postponed', 'Cancelled' );
 
 	/**
+	 * Who hosts each game, by series length, from the point of view of the team with home-field
+	 * advantage (true = they're at home). Wild Card is all at the higher seed, the Division Series
+	 * is 2-2-1, the LCS and World Series are 2-3-2. Only used when MLB hasn't published the games.
+	 */
+	const HOME_PATTERNS = array(
+		3 => array( true, true, true ),
+		5 => array( true, true, false, false, true ),
+		7 => array( true, true, false, false, false, true, true ),
+	);
+
+	/**
 	 * Work out playoff seeds for one league from a regular-season standings payload.
 	 *
 	 * MLB doesn't publish seeds, but they follow directly from the standings: the three division
@@ -188,6 +199,104 @@ class Basebelles_Postseason {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Lay out the games of one postseason series for the Series Generator: each game's date,
+	 * whether we're at home, and whether it's an "if necessary" game.
+	 *
+	 * The schedule is the source of truth. The series is the first round with a game between
+	 * $start and $end (all of its games are used, even ones after $end); its length comes from
+	 * MLB's gamesInSeries. Any game MLB hasn't listed
+	 * (or the whole series, if nothing is published yet) falls back to HOME_PATTERNS, with
+	 * $home_advantage saying whether we host Game 1, and gets no date.
+	 *
+	 * @param array  $dates          Schedule `dates` array (gameType F,D,L,W).
+	 * @param string $start          First day of the series, Y-m-d or Ymd.
+	 * @param string $end            Last day of the series, Y-m-d or Ymd.
+	 * @param int    $team_id        Our team.
+	 * @param int    $game_count     Series length to use if the schedule doesn't say.
+	 * @param bool   $home_advantage Fallback only: whether we host Game 1.
+	 * @return array{from_schedule: bool, games_in_series: int, games: array<int, array{number: int, date: string, is_home: bool, if_necessary: bool}>}
+	 */
+	public static function plan_series( array $dates, string $start, string $end, int $team_id, int $game_count, bool $home_advantage ): array {
+		$start = self::ymd( $start );
+		$end   = self::ymd( '' !== $end ? $end : $start );
+
+		$in_range = array();
+
+		foreach ( $dates as $day ) {
+			foreach ( $day['games'] ?? array() as $game ) {
+				$official = (string) ( $game['officialDate'] ?? ( $day['date'] ?? '' ) );
+
+				if ( '' !== $official && $official >= $start && $official <= $end ) {
+					$in_range[] = $game;
+				}
+			}
+		}
+
+		// The range only picks the round; every game of that round counts, so a blank or early
+		// end date still finds Games 5-7.
+		$in_rounds = self::group_games_by_round( array( array( 'games' => $in_range ) ) );
+		$all       = self::group_games_by_round( $dates );
+		$games     = $in_rounds ? $all[ array_key_first( $in_rounds ) ] : array();
+		$total     = 0;
+
+		foreach ( $games as $game ) {
+			$total = max( $total, (int) ( $game['gamesInSeries'] ?? 0 ) );
+		}
+
+		if ( $total < 1 ) {
+			$total = max( 1, $game_count, $games ? max( array_keys( $games ) ) : 0 );
+		}
+
+		$wins_needed = intdiv( $total, 2 ) + 1;
+		$pattern     = self::HOME_PATTERNS[ $total ] ?? array_fill( 0, $total, true );
+		$plan        = array();
+
+		for ( $number = 1; $number <= $total; $number++ ) {
+			$game = $games[ $number ] ?? null;
+
+			if ( null !== $game ) {
+				$plan[] = array(
+					'number'       => $number,
+					'date'         => (string) ( $game['officialDate'] ?? '' ),
+					'is_home'      => 'home' === self::sides( $game, $team_id )['us'],
+					'if_necessary' => 'Y' === ( $game['ifNecessary'] ?? 'N' ),
+				);
+				continue;
+			}
+
+			$hosts  = $pattern[ $number - 1 ] ?? true;
+			$plan[] = array(
+				'number'       => $number,
+				'date'         => '',
+				'is_home'      => $home_advantage ? $hosts : ! $hosts,
+				'if_necessary' => $number > $wins_needed,
+			);
+		}
+
+		return array(
+			'from_schedule'   => ! empty( $games ),
+			'games_in_series' => $total,
+			'games'           => $plan,
+		);
+	}
+
+	/**
+	 * Normalise ACF's Ymd (or anything strtotime reads) to Y-m-d for string comparison.
+	 *
+	 * @param string $date Date string.
+	 * @return string Y-m-d, or '' if unparseable.
+	 */
+	private static function ymd( string $date ): string {
+		if ( preg_match( '/^\d{8}$/', $date ) ) {
+			return substr( $date, 0, 4 ) . '-' . substr( $date, 4, 2 ) . '-' . substr( $date, 6, 2 );
+		}
+
+		$time = strtotime( $date );
+
+		return false === $time ? '' : gmdate( 'Y-m-d', $time );
 	}
 
 	/**
