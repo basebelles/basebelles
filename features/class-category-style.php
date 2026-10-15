@@ -31,11 +31,32 @@ class Basebelles_Category_Style {
 	const QUERY_CLASS = 'bb-home-posts';
 
 	/**
-	 * How many .bb-home-posts Query blocks are currently rendering (more than one only if nested).
-	 *
-	 * @var int
+	 * Extra class for the compact rows under the lead post. Their diamonds are too small for
+	 * pills, so the category and team go in a line above the title instead.
 	 */
-	private static $home_posts_depth = 0;
+	const ROWS_CLASS = 'bb-home-posts--rows';
+
+	/**
+	 * Post tag slug => result, for the series status on game posts ("Series Win"). The tag's own
+	 * name is what's shown, so renaming a tag in the admin renames the label.
+	 */
+	const SERIES_TAGS = array(
+		'series-win'   => 'win',
+		'series-won'   => 'win',
+		'series-lost'  => 'loss',
+		'series-loss'  => 'loss',
+		'series-split' => 'split',
+		'series-tied'  => 'split',
+		'series-tie'   => 'split',
+	);
+
+	/**
+	 * The .bb-home-posts Query blocks currently rendering, innermost last: 'rows' for the
+	 * compact rows, 'list' otherwise. More than one only if nested.
+	 *
+	 * @var string[]
+	 */
+	private static $home_posts_stack = array();
 
 	/**
 	 * Constructor.
@@ -51,6 +72,9 @@ class Basebelles_Category_Style {
 		add_filter( 'render_block_core/query', array( $this, 'leave_query' ), 10, 2 );
 
 		add_filter( 'render_block_core/post-featured-image', array( $this, 'render_featured_image' ), 10, 3 );
+		add_filter( 'render_block_core/post-title', array( $this, 'render_post_title' ), 10, 3 );
+		add_filter( 'render_block_core/post-date', array( $this, 'render_post_date' ), 10, 3 );
+		add_filter( 'render_block_core/read-more', array( $this, 'render_read_more' ), 10, 3 );
 	}
 
 	/**
@@ -257,7 +281,7 @@ class Basebelles_Category_Style {
 	 */
 	public function enter_query( $parsed_block ) {
 		if ( self::is_home_posts_query( $parsed_block ) ) {
-			++self::$home_posts_depth;
+			self::$home_posts_stack[] = self::has_class( $parsed_block, self::ROWS_CLASS ) ? 'rows' : 'list';
 		}
 
 		return $parsed_block;
@@ -271,11 +295,144 @@ class Basebelles_Category_Style {
 	 * @return string Unchanged.
 	 */
 	public function leave_query( $block_content, $block ) {
-		if ( self::is_home_posts_query( $block ) && self::$home_posts_depth > 0 ) {
-			--self::$home_posts_depth;
+		if ( self::is_home_posts_query( $block ) && ! empty( self::$home_posts_stack ) ) {
+			array_pop( self::$home_posts_stack );
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Which kind of .bb-home-posts Query is rendering: 'list', 'rows', or '' for none.
+	 *
+	 * @return string
+	 */
+	private static function current_query() {
+		return empty( self::$home_posts_stack ) ? '' : (string) end( self::$home_posts_stack );
+	}
+
+	/**
+	 * The post a block inside the loop is rendering, from its context.
+	 *
+	 * @param object|null $instance WP_Block instance.
+	 * @return int 0 when unknown.
+	 */
+	private static function post_id_from( $instance ) {
+		return isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : 0;
+	}
+
+	/**
+	 * The series result a post is tagged with ("Series Win"), from SERIES_TAGS.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array{label: string, result: string}|null Null when it has none of those tags.
+	 */
+	public static function series_status_for_post( $post_id ) {
+		$tags = get_the_terms( (int) $post_id, 'post_tag' );
+
+		if ( empty( $tags ) || is_wp_error( $tags ) ) {
+			return null;
+		}
+
+		foreach ( $tags as $tag ) {
+			$slug = (string) $tag->slug;
+
+			if ( isset( self::SERIES_TAGS[ $slug ] ) ) {
+				return array(
+					'label'  => (string) $tag->name,
+					'result' => self::SERIES_TAGS[ $slug ],
+				);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The series status pill, or '' for a post without a series tag.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string
+	 */
+	private static function series_pill( $post_id ) {
+		$status = self::series_status_for_post( $post_id );
+
+		if ( null === $status ) {
+			return '';
+		}
+
+		return '<span class="bb-series-status is-' . esc_attr( $status['result'] ) . '">' . esc_html( $status['label'] ) . '</span>';
+	}
+
+	/**
+	 * In the compact rows, put "Games & Series · @ Blue Jays" above the title, since the
+	 * small diamonds there carry no pills.
+	 *
+	 * @param string $block_content Rendered block.
+	 * @param array  $block         Parsed block.
+	 * @param object $instance      WP_Block instance.
+	 * @return string
+	 */
+	public function render_post_title( $block_content, $block, $instance = null ) {
+		if ( 'rows' !== self::current_query() || '' === trim( (string) $block_content ) ) {
+			return $block_content;
+		}
+
+		$post_id  = self::post_id_from( $instance );
+		$category = $post_id ? self::category_for_post( $post_id ) : null;
+
+		if ( null === $category ) {
+			return $block_content;
+		}
+
+		$parts = array( $category['name'] );
+
+		if ( self::GAME_CATEGORY === $category['slug'] ) {
+			$team = self::team_for_post( $post_id );
+
+			if ( null !== $team ) {
+				$parts[] = $team['label'];
+			}
+		}
+
+		return '<p class="bb-post-meta">' . esc_html( implode( ' · ', $parts ) ) . '</p>' . $block_content;
+	}
+
+	/**
+	 * In the compact rows, the series status goes after the date (there's no Read More there).
+	 *
+	 * @param string $block_content Rendered block.
+	 * @param array  $block         Parsed block.
+	 * @param object $instance      WP_Block instance.
+	 * @return string
+	 */
+	public function render_post_date( $block_content, $block, $instance = null ) {
+		if ( 'rows' !== self::current_query() || '' === trim( (string) $block_content ) ) {
+			return $block_content;
+		}
+
+		$pill = self::series_pill( self::post_id_from( $instance ) );
+
+		return '' === $pill ? $block_content : '<div class="bb-post-date-row">' . $block_content . $pill . '</div>';
+	}
+
+	/**
+	 * In the home posts, a game post tagged with its series result shows that in place of
+	 * Read More. The title is already the link.
+	 *
+	 * @param string $block_content Rendered block.
+	 * @param array  $block         Parsed block.
+	 * @param object $instance      WP_Block instance.
+	 * @return string
+	 */
+	public function render_read_more( $block_content, $block, $instance = null ) {
+		if ( '' === self::current_query() ) {
+			return $block_content;
+		}
+
+		$pill = self::series_pill( self::post_id_from( $instance ) );
+
+		return '' === $pill ? $block_content : $pill;
 	}
 
 	/**
@@ -287,11 +444,12 @@ class Basebelles_Category_Style {
 	 * @return string
 	 */
 	public function render_featured_image( $block_content, $block, $instance = null ) {
-		if ( self::$home_posts_depth < 1 || '' === trim( (string) $block_content ) ) {
+		// The compact rows' diamonds are too small for pills; render_post_title() covers them.
+		if ( 'list' !== self::current_query() || '' === trim( (string) $block_content ) ) {
 			return $block_content;
 		}
 
-		$post_id = isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : 0;
+		$post_id = self::post_id_from( $instance );
 
 		if ( ! $post_id ) {
 			return $block_content;
@@ -328,9 +486,20 @@ class Basebelles_Category_Style {
 			return false;
 		}
 
-		$class_name = (string) ( $block['attrs']['className'] ?? '' );
+		return self::has_class( $block, self::QUERY_CLASS );
+	}
 
-		return in_array( self::QUERY_CLASS, preg_split( '/\s+/', $class_name ), true );
+	/**
+	 * Whether a parsed block's className includes a class (whole-word match).
+	 *
+	 * @param array  $block      Parsed block.
+	 * @param string $class_name Class to look for.
+	 * @return bool
+	 */
+	private static function has_class( $block, $class_name ) {
+		$classes = (string) ( $block['attrs']['className'] ?? '' );
+
+		return in_array( $class_name, preg_split( '/\s+/', $classes ), true );
 	}
 
 	/**
@@ -355,7 +524,7 @@ class Basebelles_Category_Style {
 	 * @return void
 	 */
 	public static function reset_state() {
-		self::$home_posts_depth = 0;
+		self::$home_posts_stack = array();
 	}
 }
 

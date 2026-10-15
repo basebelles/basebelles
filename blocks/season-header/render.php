@@ -2,6 +2,11 @@
 /**
  * ACF Block Render Template for Season Header
  *
+ * One bar for the whole season -- spring training, regular season, postseason -- each part as
+ * wide as it is on the calendar, with a pin for today. Basebelles_Season_Timeline does the
+ * working out; this gathers the inputs and draws it. The off season adds the snowy-field
+ * picture under the bar.
+ *
  * @var array $block The block settings and attributes.
  */
 
@@ -10,30 +15,10 @@ if ( ! function_exists( 'get_field' ) ) {
 	return;
 }
 
-$parse_season_date = array( 'Basebelles_Season', 'parse_date' );
-
 // ACF Group: Season Info (group_69cd81d38a341)
 $season_settings = get_field( 'season_settings', 'option' );
-$season_settings = $season_settings ? $season_settings : [];
-$season_details  = array(
-	'spring_training' => [
-		'start'  => get_field( 'spring_start', 'option' ) ?: 'TBD',
-		'end'    => get_field( 'spring_end', 'option' ) ?: 'TBD',
-		'record' => get_field( 'spring_record', 'option' ) ?? '',
-	],
-	'regular_season'  => [
-		'start'  => get_field( 'reg_start', 'option' ) ?: 'TBD',
-		'end'    => get_field( 'reg_end', 'option' ) ?: 'TBD',
-		'record' => get_field( 'reg_record', 'option' ) ?? '',
-	],
-	'post_season'     => [
-		'start'  => get_field( 'post_start', 'option' ) ?: 'TBD',
-		'end'    => get_field( 'post_end', 'option' ) ?: 'TBD',
-		'record' => get_field( 'post_record', 'option' ) ?? '',
-	],
-);
+$season_settings = $season_settings ? $season_settings : array();
 
-// Overall Settings
 // Basebelles_Season works out the effective type (the setting, moved on by past dates), so the
 // off-season picture switches at the same moment Today's Game and the standings hide.
 $season_type  = Basebelles_Season::current_type();
@@ -41,72 +26,95 @@ $this_season  = (int) ( $season_settings['current_season'] ?? wp_date( 'Y' ) );
 $off_season   = Basebelles_Season::off_season_image_url();
 $last_ws_year = Basebelles_Season::last_world_series_year();
 
-// Season Data
-$season_data = array(
-	'spring_training' => [
-		'name'   => 'Spring Training',
-		'type'   => 'springTraining',
-		'start'  => empty( $season_details['spring_training']['start'] ) ? 'TBD' : $season_details['spring_training']['start'],
-		'end'    => empty( $season_details['spring_training']['end'] ) ? 'TBD' : $season_details['spring_training']['end'],
-		'class'  => ( 'springTraining' === $season_type ) ? 'active' : ( ( 'offSeason' === $season_type ) ? '' : 'over' ),
-		'link'   => '/season-type/spring-training/?season_year=' . $this_season,
-		'record' => empty( $season_details['spring_training']['record'] ) ? '' : $season_details['spring_training']['record'],
-	],
-	'regular_season'  => [
-		'name'   => 'Regular Season',
-		'type'   => 'regularSeason',
-		'start'  => empty( $season_details['regular_season']['start'] ) ? 'TBD' : $season_details['regular_season']['start'],
-		'end'    => empty( $season_details['regular_season']['end'] ) ? 'TBD' : $season_details['regular_season']['end'],
-		'class'  => ( 'regularSeason' === $season_type ) ? 'active' : ( in_array( $season_type, array( 'postSeason', 'offSeason' ), true ) ? 'over' : '' ),
-		'link'   => '/season-type/regular-season/?season_year=' . $this_season,
-		'record' => empty( $season_details['regular_season']['record'] ) ? '' : $season_details['regular_season']['record'],
-	],
-	'post_season'     => [
-		'name'   => 'Post Season',
-		'type'   => 'postSeason',
-		'start'  => empty( $season_details['post_season']['start'] ) ? 'TBD' : $season_details['post_season']['start'],
-		'end'    => empty( $season_details['post_season']['end'] ) ? 'TBD' : $season_details['post_season']['end'],
-		'class'  => ( 'postSeason' === $season_type ) ? 'active' : '',
-		'link'   => '/season-type/post-season/?season_year=' . $this_season,
-		'record' => empty( $season_details['post_season']['record'] ) ? '' : $season_details['post_season']['record'],
-	],
+$season_phases = array();
+
+foreach ( array(
+	'spring_training' => array( 'spring', 'spring-training' ),
+	'regular_season'  => array( 'reg', 'regular-season' ),
+	'post_season'     => array( 'post', 'post-season' ),
+) as $phase_key => $phase_fields ) {
+	$season_phases[ $phase_key ] = array(
+		'start'    => Basebelles_Season::parse_date( get_field( $phase_fields[0] . '_start', 'option' ) ),
+		'end'      => Basebelles_Season::parse_date( get_field( $phase_fields[0] . '_end', 'option' ) ),
+		'record'   => (string) ( get_field( $phase_fields[0] . '_record', 'option' ) ?? '' ),
+		// Regular season and postseason only; spring training has no standings.
+		'standing' => 'spring' === $phase_fields[0] ? '' : (string) ( get_field( $phase_fields[0] . '_standing', 'option' ) ?? '' ),
+		'link'     => '/season-type/' . $phase_fields[1] . '/?season_year=' . $this_season,
+	);
+}
+
+// Only the postseason segment reads the live status, so only ask for it once there's one.
+$postseason_status = null;
+
+if ( in_array( $season_type, array( 'postSeason', 'offSeason' ), true )
+	&& class_exists( 'Basebelles_API' )
+	&& method_exists( 'Basebelles_API', 'get_postseason_status' ) ) {
+	$postseason_result = Basebelles_API::get_instance()->get_postseason_status( $this_season );
+	$postseason_status = ( is_array( $postseason_result ) && ! is_wp_error( $postseason_result ) ) ? $postseason_result : null;
+}
+
+$timeline = Basebelles_Season_Timeline::build(
+	$season_phases,
+	$season_type,
+	new DateTimeImmutable( 'today', wp_timezone() ),
+	$postseason_status
 );
+
+// A plain-words version of the bar for screen readers, since the bar itself is hidden from them.
+$timeline_summary = array();
+
+foreach ( $timeline['segments'] as $segment ) {
+	$timeline_summary[] = $segment['phrase'] . ' ' . array(
+		'done'     => 'finished',
+		'current'  => 'under way',
+		'upcoming' => 'coming up',
+	)[ $segment['state'] ];
+}
 ?>
-<div class="basebelles-season-header-grid">
-	<div class="season-year-title">
-		<?php echo esc_html( $this_season ); ?> Season
+<div class="basebelles-season-header-grid bb-season-timeline">
+	<div class="bb-tl-top">
+		<div class="season-year-title"><?php echo esc_html( (string) $this_season ); ?> Season</div>
+		<div class="bb-tl-now"><?php echo esc_html( $timeline['now'] ); ?></div>
 	</div>
-	<?php if ( 'offSeason' === $season_type ) { ?>
-			<div class="off-season-container">
-				<img class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
-				<?php if ( '' !== $last_ws_year ) : ?>
-					<p class="off-season-last-ws">The Guardians last won the World Series in <?php echo esc_html( $last_ws_year ); ?></p>
-				<?php endif; ?>
-			</div>
-	<?php } else { ?>
-		<?php foreach ( $season_data as $season_type => $season ) { ?>
-			<div class="season-col <?php echo esc_attr( $season_type ); ?>">
-				<h3><a href="<?php echo esc_attr( $season['link'] ); ?>" class="season-type-link"><?php echo esc_html( $season['name'] ); ?></a></h3>
-				<span class="<?php echo esc_attr( $season['class'] ); ?>">
-					<?php
-					// Format the start and end dates to be MON DAY
-					$start_date = $parse_season_date( $season['start'] );
-					$end_date   = $parse_season_date( $season['end'] );
-					$start      = $start_date ? $start_date->format( 'M j' ) : 'TBD';
-					$end        = $end_date ? $end_date->format( 'M j' ) : 'TBD';
-					if ( $start === $end ) {
-						echo esc_html( $start );
-					} else {
-						echo esc_html( $start . ' - ' . $end );
-					}
-					?>
-				</span>
-				<?php if ( ! empty( $season['record'] ) ) { ?>
-					<span class="season-record">
-						<?php echo esc_html( $season['record'] ); ?>
-					</span>
-				<?php } ?>
-			</div>
-		<?php } ?>
-	<?php } ?>
+
+	<p class="screen-reader-text"><?php echo esc_html( implode( ', ', $timeline_summary ) . '.' ); ?></p>
+
+	<div class="bb-tl-bar" aria-hidden="true">
+		<?php foreach ( $timeline['segments'] as $segment ) : ?>
+			<span class="bb-tl-seg is-<?php echo esc_attr( $segment['state'] ); ?>" style="--bb-tl-w: <?php echo esc_attr( (string) $segment['width'] ); ?>%">
+				<span class="bb-tl-fill" style="width: <?php echo esc_attr( (string) $segment['fill'] ); ?>%"></span>
+			</span>
+		<?php endforeach; ?>
+		<?php if ( null !== $timeline['pin'] ) : ?>
+			<span class="bb-tl-pin<?php echo '' !== $timeline['pin_side'] ? ' is-' . esc_attr( $timeline['pin_side'] ) : ''; ?>" style="left: <?php echo esc_attr( (string) $timeline['pin'] ); ?>%">
+				<span class="bb-tl-pin-label">Today</span>
+			</span>
+		<?php endif; ?>
+	</div>
+
+	<ol class="bb-tl-labels">
+		<?php foreach ( $timeline['segments'] as $segment ) : ?>
+			<li class="bb-tl-label is-<?php echo esc_attr( $segment['state'] ); ?>" style="--bb-tl-w: <?php echo esc_attr( (string) $segment['width'] ); ?>%">
+				<a class="bb-tl-name" href="<?php echo esc_attr( $segment['link'] ); ?>"><?php echo esc_html( $segment['short'] ); ?></a>
+				<span class="bb-tl-result"><?php echo esc_html( $segment['result'] ); ?></span>
+			</li>
+		<?php endforeach; ?>
+	</ol>
+
+	<?php if ( ! empty( $timeline['months'] ) ) : ?>
+		<div class="bb-tl-months" aria-hidden="true">
+			<?php foreach ( $timeline['months'] as $month_tick ) : ?>
+				<span style="left: <?php echo esc_attr( (string) $month_tick[1] ); ?>%"><?php echo esc_html( $month_tick[0] ); ?></span>
+			<?php endforeach; ?>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( 'offSeason' === $season_type ) : ?>
+		<div class="off-season-container">
+			<img class="off-season-image" src="<?php echo esc_url( $off_season ); ?>" alt="Off Season - See you in the spring!" />
+			<?php if ( '' !== $last_ws_year ) : ?>
+				<p class="off-season-last-ws">The Guardians last won the World Series in <?php echo esc_html( $last_ws_year ); ?></p>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 </div>

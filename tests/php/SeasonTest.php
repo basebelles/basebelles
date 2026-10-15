@@ -128,13 +128,55 @@ class SeasonTest extends TestCase {
 		$this->assertStringNotContainsString( 'off-season-last-ws', $html );
 	}
 
-	public function test_the_header_shows_the_columns_outside_the_off_season(): void {
+	public function test_the_header_shows_the_timeline_outside_the_off_season(): void {
 		$this->settings( array( 'season_type' => 'regularSeason' ) );
 		Basebelles_Test_State::$fields['last_world_series_win'] = 'October 11, 1948';
 
 		$html = $this->render_header();
 
-		$this->assertStringContainsString( 'season-col', $html );
+		$this->assertStringContainsString( 'bb-tl-bar', $html );
+		$this->assertSame( 3, preg_match_all( '#class="bb-tl-label #', $html ) );
 		$this->assertStringNotContainsString( 'off-season', $html );
+	}
+
+	public function test_the_off_season_keeps_the_timeline_above_the_picture(): void {
+		$this->settings( array( 'season_type' => 'offSeason' ) );
+
+		$html = $this->render_header();
+
+		$this->assertStringContainsString( 'bb-tl-bar', $html );
+		$this->assertLessThan( strpos( $html, 'off-season-container' ), strpos( $html, 'bb-tl-bar' ) );
+		$this->assertStringContainsString( 'Season complete', $html );
+	}
+
+	public function test_the_header_draws_real_widths_and_the_record_from_settings(): void {
+		$this->settings(
+			array(
+				'season_type'    => 'regularSeason',
+				'current_season' => (int) gmdate( 'Y' ),
+			)
+		);
+		// Relative to today, so the regular season is always the one under way.
+		$day  = static fn ( int $offset ): string => gmdate( 'F j, Y', time() + $offset * DAY_IN_SECONDS );
+		$year = gmdate( 'Y' );
+		Basebelles_Test_State::$fields['spring_start']  = $day( -60 );
+		Basebelles_Test_State::$fields['spring_end']    = $day( -31 );
+		Basebelles_Test_State::$fields['spring_record'] = '6 – 4';
+		Basebelles_Test_State::$fields['reg_start']     = $day( -30 );
+		Basebelles_Test_State::$fields['reg_end']       = $day( 30 );
+		Basebelles_Test_State::$fields['reg_record']    = '85 – 77';
+		Basebelles_Test_State::$fields['reg_standing']  = 'AL Central champs';
+		Basebelles_Test_State::$fields['post_start']    = $day( 31 );
+		Basebelles_Test_State::$fields['post_end']      = $day( 60 );
+
+		$post_span = gmdate( 'M j', time() + 31 * DAY_IN_SECONDS ) . ' – ' . gmdate( 'M j', time() + 60 * DAY_IN_SECONDS );
+
+		$html = $this->render_header();
+
+		$this->assertStringContainsString( '<span class="bb-tl-result">6 – 4</span>', $html );
+		$this->assertStringContainsString( 'Now: Regular season · 85 – 77 · AL Central champs', $html );
+		$this->assertStringContainsString( '<span class="bb-tl-result">' . $post_span . '</span>', $html );
+		$this->assertStringContainsString( 'bb-tl-pin', $html );
+		$this->assertStringContainsString( '/season-type/regular-season/?season_year=' . $year, $html );
 	}
 }

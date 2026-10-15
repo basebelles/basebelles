@@ -63,6 +63,15 @@ class Basebelles_API {
 	/** How far back the Game Hub looks for the last game. Covers the All-Star break. */
 	const LAST_GAME_LOOKBACK_DAYS = 10;
 
+	/** OpenWeather's free 5-day / 3-hour forecast. Takes lat/lon, so no geocoding is needed. */
+	const WEATHER_FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
+	/** OpenWeather refreshes the forecast every few hours; half an hour keeps us well inside the free tier. */
+	const WEATHER_CACHE_TTL = 30 * MINUTE_IN_SECONDS;
+	/** After a failed forecast fetch, wait this long before asking OpenWeather again. */
+	const WEATHER_RETRY_TTL = 5 * MINUTE_IN_SECONDS;
+	/** The free forecast stops at five days out; past that a game gets no weather row. */
+	const WEATHER_HORIZON = 5 * DAY_IN_SECONDS;
+
 	/**
 	 * Singleton instance.
 	 *
@@ -1000,7 +1009,7 @@ class Basebelles_API {
 				'sportId' => 1,
 				'date'    => $date,
 				'teamId'  => self::GUARDIANS_TEAM_ID,
-				'hydrate' => 'team,linescore,probablePitcher,broadcasts',
+				'hydrate' => 'team,linescore,probablePitcher,broadcasts,venue(location,fieldInfo)',
 			)
 		);
 
@@ -1059,7 +1068,7 @@ class Basebelles_API {
 				'teamId'    => self::GUARDIANS_TEAM_ID,
 				'startDate' => wp_date( 'Y-m-d', strtotime( $date . ' +1 day' ) ),
 				'endDate'   => wp_date( 'Y-m-d', strtotime( $date . ' +' . self::NEXT_GAME_LOOKAHEAD_DAYS . ' days' ) ),
-				'hydrate'   => 'team,linescore,probablePitcher,broadcasts',
+				'hydrate'   => 'team,linescore,probablePitcher,broadcasts,venue(location,fieldInfo)',
 			)
 		);
 
@@ -1193,6 +1202,7 @@ class Basebelles_API {
 			),
 			'scores'         => $has_scores ? $this->get_game_scores( $game, $game_status, $detailed_status ) : array(),
 			'broadcasts'     => $this->get_game_broadcasts( $is_home, $game['broadcasts'] ?? array() ),
+			'venue'          => $this->normalize_venue( $game['venue'] ?? array() ),
 			'sort_time'      => $timestamp ? $timestamp : 0,
 			'show_label'     => false,
 		);
@@ -1272,6 +1282,137 @@ class Basebelles_API {
 		return $guardians_wins > $opponent_wins
 			? 'CLE ' . $verb . ' ' . $guardians_wins . '-' . $opponent_wins
 			: $opponent_abbr . ' ' . $verb . ' ' . $opponent_wins . '-' . $guardians_wins;
+	}
+
+	/**
+	 * Normalize the hydrated venue (venue(location,fieldInfo)) from a schedule payload.
+	 *
+	 * MLB's coordinates are the ballpark itself, so neutral-site games (London, Mexico City, the
+	 * Little League Classic) get the right forecast without any lookup table of our own.
+	 *
+	 * @param array $venue Raw venue payload.
+	 * @return array{name: string, city: string, state: string, lat: float|null, lon: float|null, roof: string}
+	 */
+	private function normalize_venue( $venue ) {
+		$venue    = is_array( $venue ) ? $venue : array();
+		$location = $venue['location'] ?? array();
+		$coords   = $location['defaultCoordinates'] ?? array();
+
+		return array(
+			'name'  => (string) ( $venue['name'] ?? '' ),
+			'city'  => (string) ( $location['city'] ?? '' ),
+			'state' => (string) ( $location['stateAbbrev'] ?? '' ),
+			'lat'   => isset( $coords['latitude'] ) ? (float) $coords['latitude'] : null,
+			'lon'   => isset( $coords['longitude'] ) ? (float) $coords['longitude'] : null,
+			// "Open", "Retractable" or "Dome".
+			'roof'  => (string) ( $venue['fieldInfo']['roofType'] ?? '' ),
+		);
+	}
+
+	/**
+	 * The OpenWeather API key, from the OPEN_WEATHER_MAP constant in wp-config.php.
+	 *
+	 * @return string Empty when the constant isn't defined.
+	 */
+	private function get_weather_api_key() {
+		return defined( 'OPEN_WEATHER_MAP' ) ? (string) constant( 'OPEN_WEATHER_MAP' ) : '';
+	}
+
+	/**
+	 * Forecast at the ballpark for a game's first pitch.
+	 *
+	 * Fetched server-side so the API key never reaches the browser. Picks the 3-hour forecast slot
+	 * nearest first pitch. Returns null when there's no key, no venue coordinates, the game is
+	 * past the forecast's five-day horizon, or OpenWeather can't be reached.
+	 *
+	 * @param array $game Normalized game from normalize_scheduled_game().
+	 * @return array{temp: int, feels_like: int, description: string, icon: string, wind_mph: int, wind_dir: string, pop: int, venue: string, roof: string}|null
+	 */
+	public function get_game_weather( array $game ) {
+		$api_key     = $this->get_weather_api_key();
+		$venue       = $game['venue'] ?? array();
+		$first_pitch = (int) ( $game['sort_time'] ?? 0 );
+
+		if ( '' === $api_key || ! isset( $venue['lat'], $venue['lon'] ) || $first_pitch <= 0 ) {
+			return null;
+		}
+
+		if ( $first_pitch - time() > self::WEATHER_HORIZON ) {
+			return null;
+		}
+
+		// Two decimals is about a kilometre: plenty for a ballpark, and it keeps the cache key stable.
+		$lat       = round( (float) $venue['lat'], 2 );
+		$lon       = round( (float) $venue['lon'], 2 );
+		$retry_key = 'basebelles_weather_retry_' . md5( $lat . ',' . $lon );
+
+		if ( false !== get_transient( $retry_key ) ) {
+			return null;
+		}
+
+		$url = add_query_arg(
+			array(
+				'lat'   => $lat,
+				'lon'   => $lon,
+				'units' => 'imperial',
+				'appid' => rawurlencode( $api_key ),
+			),
+			self::WEATHER_FORECAST_URL
+		);
+
+		$data = $this->fetch_and_cache_json( $url, self::WEATHER_CACHE_TTL );
+
+		if ( is_wp_error( $data ) || empty( $data['list'] ) || ! is_array( $data['list'] ) ) {
+			set_transient( $retry_key, 1, self::WEATHER_RETRY_TTL );
+			return null;
+		}
+
+		$slot = null;
+		$gap  = PHP_INT_MAX;
+
+		foreach ( $data['list'] as $entry ) {
+			$distance = abs( (int) ( $entry['dt'] ?? 0 ) - $first_pitch);
+
+			if ( $distance < $gap ) {
+				$gap  = $distance;
+				$slot = $entry;
+			}
+		}
+
+		// Nearest slot more than three hours away means first pitch is outside the forecast window.
+		if ( null === $slot || $gap > 3 * HOUR_IN_SECONDS ) {
+			return null;
+		}
+
+		$venue_label = $venue['name'] ?? '';
+
+		if ( ! empty( $venue['city'] ) ) {
+			$venue_label .= ( '' !== $venue_label ? ', ' : '' ) . $venue['city'];
+		}
+
+		return array(
+			'temp'        => (int) round( (float) ( $slot['main']['temp'] ?? 0 ) ),
+			'feels_like'  => (int) round( (float) ( $slot['main']['feels_like'] ?? 0 ) ),
+			'description' => (string) ( $slot['weather'][0]['description'] ?? '' ),
+			'icon'        => (string) ( $slot['weather'][0]['icon'] ?? '' ),
+			'wind_mph'    => (int) round( (float) ( $slot['wind']['speed'] ?? 0 ) ),
+			'wind_dir'    => $this->compass_direction( (float) ( $slot['wind']['deg'] ?? 0 ) ),
+			'pop'         => (int) round( 100 * (float) ( $slot['pop'] ?? 0 ) ),
+			'venue'       => $venue_label,
+			'roof'        => (string) ( $venue['roof'] ?? '' ),
+		);
+	}
+
+	/**
+	 * Turn a wind bearing into a compass point ("NW").
+	 *
+	 * @param float $degrees Meteorological bearing the wind blows from.
+	 * @return string
+	 */
+	private function compass_direction( $degrees ) {
+		$points = array( 'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW' );
+
+		return $points[ (int) round( fmod( $degrees + 360, 360 ) / 45 ) % 8 ];
 	}
 
 	/**

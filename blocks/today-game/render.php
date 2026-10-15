@@ -79,7 +79,7 @@ $dh_heading = '';
 if ( $is_doubleheader ) {
 	$first      = $games[0];
 	$dh_heading = trim(
-		( $schedule['day_date'] ?? '' ) . ' · '
+		Basebelles_Today_Game_Panels::render_day_label( $first ) . ' · '
 		. ( $first['away_team']['short_name'] ?? '' ) . ' @ ' . ( $first['home_team']['short_name'] ?? '' )
 	);
 }
@@ -125,7 +125,7 @@ if ( $is_doubleheader ) {
 						<div class="team-record"><?php echo esc_html( $game['away_team']['record'] ); ?></div>
 					</div>
 					<div class="game-meta">
-						<?php echo esc_html( $game['day_date'] ); ?>
+						<?php echo esc_html( Basebelles_Today_Game_Panels::render_day_label( $game ) ); ?>
 						<br />
 						<?php echo Basebelles_Today_Game_Panels::render_time_label( $game, $phase ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo Basebelles_Today_Game_Panels::render_header_score( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -169,6 +169,14 @@ if ( $is_doubleheader ) {
 				</div>
 
 				<?php echo Basebelles_Today_Game_Panels::render( $game, $phase, $live_feed, ! empty( $schedule['next_game'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+				<?php
+				// The forecast goes with the countdown: only in the run-up to first pitch, and only
+				// then is OpenWeather asked. today-game.js hides it when the countdown runs out.
+				if ( Basebelles_Today_Game_Panels::has_countdown( $game, $phase, ! empty( $schedule['next_game'] ) ) && method_exists( $api, 'get_game_weather' ) ) {
+					echo Basebelles_Today_Game_Panels::render_weather( $api->get_game_weather( $game ), $phase ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+				?>
 			</div>
 		<?php endforeach; ?>
 

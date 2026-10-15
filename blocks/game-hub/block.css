@@ -152,11 +152,17 @@
 
 /* --- Series card (postseason) --- */
 
+/* Centered with the status under it; the game list and "Road here" line stay left-aligned. */
+.basebelles-game-hub .bb-hub-series .bb-hub-eyebrow {
+	text-align: center;
+}
+
 .bb-hub-series-status {
 	margin: 0 0 20px;
 	font-size: clamp(1.5rem, 2.6vw, 2rem);
 	font-weight: 800;
 	line-height: 1.1;
+	text-align: center;
 }
 
 .bb-hub-series-status.is-positive {

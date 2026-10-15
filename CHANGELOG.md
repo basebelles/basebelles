@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.7] - Unreleased
+
+### Added
+
+- Today's Game shows the first-pitch forecast at the ballpark (temperature, conditions, wind, rain chance) before the game starts, with a note for retractable-roof and domed parks. Uses MLB's venue coordinates and the OpenWeather 5-day forecast, fetched server-side with the `OPEN_WEATHER_MAP` key from `wp-config.php`.
+- Season Settings has a Standing field on the Regular Season and Post Season tabs ("AL Central champs", "AL champions"). The regular-season standing shows after the record on the season timeline; the postseason standing replaces the live last-round result.
+
+- Game posts tagged with their series result (Series Win, Series Lost, and series-split/tie slugs) show it as a colored pill on the homepage: in place of Read More on the lead post, after the date in the rows. The tag's name is the label.
+
+### Changed
+
+- Homepage posts (Home Posts pattern) are now "Belle News": a heading with an All Belle News link, the newest post large (220px diamond, pills, excerpt, Read it), then the next four as compact two-column rows (76px diamonds, no excerpt). In the rows the category and opponent move from the image into a colored line above the title. The dot separators are gone.
+- Season Header is now a season timeline: one bar with spring training, regular season and postseason sized to their real dates, finished parts filled, the current part filled up to a "Today" pin, and month ticks underneath. Each part shows its record (or its dates before it starts); the postseason shows the last decided round from the live postseason status, falling back to the Post Season record field. A line at the top says what's on now ("Now: ALCS · Tied 1-1"). On phones the labels become a list under the bar. The off-season picture now sits under the bar instead of replacing it.
+- Today's Game header says "Today" instead of the date on game day, matching the postseason series card. Doubleheader headings do the same.
+- Today's Game Plays and Players tabs are disabled (dashed, with a tooltip) until they have something to show: Plays until first pitch, Players until MLB posts lineups. A live poll switches them on.
+- Today's Game countdown is a navy scoreboard chip under a small "First pitch in" label, so it reads as a clock instead of competing with the game time. It fills in on page load instead of showing "…" for the first second.
+- The first-pitch forecast only shows alongside the countdown (within a day of first pitch), and goes away the moment the countdown runs out instead of waiting for MLB to mark the game Live. Games further out no longer ask OpenWeather at all.
+- Game Hub series card: the round heading and the series status ("Tied 1-1") are centered.
+- The first-pitch forecast icon sits on a blue-gray disc, so pale cloud emoji don't vanish on the white card.
+
 ## [1.6.6] - 2026-10-14
 
 ### Changed

@@ -202,6 +202,136 @@ a.wp-block-latest-posts__post-title {
 	color: var(--bb-cat-color, var(--bb-wine-red));
 }
 
+/*
+ * Belle News on the homepage (patterns/home-posts.php): the newest post large, then four
+ * compact rows. Both Query blocks carry .bb-home-posts, so the colors and tints above apply.
+ */
+.bb-home-news-head {
+	margin-bottom: 1.5rem;
+}
+
+.bb-home-news-head h2 {
+	margin: 0;
+	color: var(--bb-deep-navy);
+}
+
+.bb-home-news-all {
+	margin: 0;
+	font-weight: 700;
+}
+
+.bb-home-news-all a {
+	color: var(--bb-wine-red);
+	text-decoration: none;
+	border-bottom: 2px solid currentColor;
+}
+
+.bb-home-news-all a::after {
+	content: " \2192";
+}
+
+/* Lead post */
+.bb-home-posts--lead .bb-lead {
+	gap: 2rem;
+	padding-bottom: 1.75rem;
+	border-bottom: 2px solid var(--bb-wine-red);
+}
+
+/* Wraps under the diamond once there's no room for a readable column beside it. */
+.bb-home-posts--lead .bb-lead-body {
+	flex: 1 1 18rem;
+	min-width: 0;
+}
+
+.bb-home-posts--lead .wp-block-post-title {
+	margin: 0 0 0.35rem;
+	font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+	line-height: 1.2;
+}
+
+.bb-home-posts--lead .wp-block-post-excerpt {
+	margin-block: 0.75rem 1rem;
+}
+
+.bb-home-posts--lead .wp-block-read-more {
+	font-weight: 700;
+	color: var(--bb-deep-navy);
+	text-decoration: none;
+	border-bottom: 2px solid currentColor;
+}
+
+/* Compact rows */
+.bb-home-posts--rows {
+	margin-top: 0.5rem;
+}
+
+.bb-home-posts--rows .wp-block-post-template {
+	column-gap: 2rem;
+	row-gap: 0;
+}
+
+.bb-home-posts--rows .bb-row {
+	gap: 1rem;
+	padding-block: 1rem;
+	border-bottom: 1px solid #e2dccb;
+}
+
+.bb-home-posts--rows .bb-row-body {
+	min-width: 0;
+}
+
+.bb-home-posts--rows .wp-block-post-title {
+	margin: 0;
+	font-size: 1.1rem;
+	line-height: 1.3;
+}
+
+.bb-home-posts--rows .wp-block-post-featured-image {
+	border-radius: 10px;
+}
+
+/* "Games & Series · @ Blue Jays", added above the title by class-category-style.php. */
+.bb-home-posts .bb-post-meta {
+	margin: 0 0 0.25rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.07em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: var(--bb-cat-color, var(--bb-wine-red));
+}
+
+.bb-home-posts .bb-post-date-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.25rem;
+}
+
+/* Series result from the post's tag ("Series Win"), in place of Read More / after the date. */
+.bb-home-posts .bb-series-status {
+	display: inline-block;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: var(--bb-accent-slate);
+	color: #fff;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.07em;
+	line-height: 1.4;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.bb-home-posts .bb-series-status.is-win {
+	background: var(--bb-green);
+}
+
+.bb-home-posts .bb-series-status.is-loss {
+	background: var(--bb-wine-red);
+}
+
 /* Homepage Pullquote */
 .home .wp-block-pullquote cite {
 	font-size: .5em!important;

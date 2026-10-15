@@ -200,14 +200,53 @@ class TodayGameBlockTest extends TestCase {
 	}
 
 	public function test_the_heading_names_the_day_and_the_matchup(): void {
+		// Pinned to the fixture's own day: the default sort_time is "two hours from now", which
+		// would make the heading say "Today" instead.
+		$sept_4 = gmmktime( 18, 10, 0, 9, 4, 2026 );
+
 		$html = $this->render(
 			array(
-				Fixtures::game(),
-				Fixtures::game( array( 'game_pk' => 777002, 'game_number' => 2 ) ),
+				Fixtures::game( array( 'sort_time' => $sept_4 ) ),
+				Fixtures::game( array( 'game_pk' => 777002, 'game_number' => 2, 'sort_time' => $sept_4 + 18000 ) ),
 			)
 		);
 
 		$this->assertStringContainsString( 'Fri 9/4 · Tigers @ Guardians', $html );
+	}
+
+	public function test_a_doubleheader_today_is_headed_today(): void {
+		$html = $this->render(
+			array(
+				Fixtures::game( array( 'sort_time' => time() ) ),
+				Fixtures::game( array( 'game_pk' => 777002, 'game_number' => 2, 'sort_time' => time() + 18000 ) ),
+			)
+		);
+
+		$this->assertStringContainsString( 'Today · Tigers @ Guardians', $html );
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Card header day line
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_a_game_today_says_today_in_the_header(): void {
+		$html = $this->render( array( Fixtures::game( array( 'sort_time' => time() ) ) ) );
+
+		$this->assertMatchesRegularExpression( '#<div class="game-meta">\s*Today\s*<br />#', $html );
+		$this->assertStringNotContainsString( 'Fri 9/4', $html );
+	}
+
+	public function test_a_game_on_another_day_keeps_its_date_in_the_header(): void {
+		Basebelles_Test_State::$schedule              = Fixtures::schedule( array( Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) ) ) );
+		Basebelles_Test_State::$schedule['next_game'] = true;
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/today-game/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '#<div class="game-meta">\s*Fri 9/4\s*<br />#', $html );
 	}
 
 	/**
@@ -449,5 +488,120 @@ class TodayGameBlockTest extends TestCase {
 		$html = Basebelles_Today_Game_Panels::render_score_panel( Fixtures::game(), 'far', array() );
 
 		$this->assertStringNotContainsString( 'pitcher-stat-label', $html );
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * First pitch forecast
+	 * -----------------------------------------------------------------------
+	 */
+
+	/**
+	 * A get_game_weather() result.
+	 *
+	 * @param array $overrides Keys to replace.
+	 * @return array
+	 */
+	private function weather( array $overrides = array() ): array {
+		return array_merge(
+			array(
+				'temp'        => 68,
+				'feels_like'  => 67,
+				'description' => 'scattered clouds',
+				'icon'        => '03d',
+				'wind_mph'    => 9,
+				'wind_dir'    => 'NW',
+				'pop'         => 20,
+				'venue'       => 'Progressive Field, Cleveland',
+				'roof'        => 'Open',
+			),
+			$overrides
+		);
+	}
+
+	public function test_a_pregame_card_shows_the_forecast_under_the_tabs(): void {
+		Basebelles_Test_State::$weather = $this->weather();
+
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringContainsString( 'tg-weather', $html );
+		$this->assertStringContainsString( 'Progressive Field, Cleveland', $html );
+		$this->assertStringContainsString( '68°F', $html );
+		$this->assertStringContainsString( 'Scattered clouds', $html );
+		$this->assertStringContainsString( 'Wind 9 mph NW · 20% chance of rain', $html );
+		$this->assertStringNotContainsString( 'Feels like', $html );
+		$this->assertStringNotContainsString( 'tg-weather-roof', $html );
+		$this->assertLessThan( strpos( $html, 'tg-weather' ), strpos( $html, 'tg-tabs' ) );
+	}
+
+	public function test_a_live_or_final_game_never_asks_for_weather(): void {
+		Basebelles_Test_State::$weather = $this->weather();
+
+		$html = $this->render( array( Fixtures::live_game(), Fixtures::final_game( 2, 6, array( 'game_pk' => 777002 ) ) ) );
+
+		$this->assertStringNotContainsString( 'tg-weather', $html );
+		$this->assertSame( array(), Basebelles_Test_State::$weather_calls );
+	}
+
+	/** The forecast goes with the countdown, so a game more than a day out gets neither. */
+	public function test_a_game_more_than_a_day_out_gets_no_forecast(): void {
+		Basebelles_Test_State::$weather = $this->weather();
+
+		$html = $this->render( array( Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) ) ) );
+
+		$this->assertStringNotContainsString( 'tg-countdown', $html );
+		$this->assertStringNotContainsString( 'tg-weather', $html );
+		$this->assertSame( array(), Basebelles_Test_State::$weather_calls );
+	}
+
+	public function test_a_next_game_stand_in_gets_no_forecast(): void {
+		Basebelles_Test_State::$weather               = $this->weather();
+		Basebelles_Test_State::$schedule              = Fixtures::schedule( array( Fixtures::game( array( 'sort_time' => time() + 20 * HOUR_IN_SECONDS ) ) ) );
+		Basebelles_Test_State::$schedule['next_game'] = true;
+
+		ob_start();
+		require BASEBELLES_PLUGIN_DIR . '/blocks/today-game/render.php';
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'tg-info-box', $html );
+		$this->assertStringNotContainsString( 'tg-weather', $html );
+		$this->assertSame( array(), Basebelles_Test_State::$weather_calls );
+	}
+
+	public function test_the_forecast_shows_alongside_the_countdown(): void {
+		Basebelles_Test_State::$weather = $this->weather();
+
+		$html = $this->render( array( Fixtures::game( array( 'sort_time' => time() + 600 ) ) ) );
+
+		$this->assertStringContainsString( 'tg-countdown', $html );
+		$this->assertStringContainsString( 'tg-weather', $html );
+	}
+
+	public function test_no_forecast_renders_nothing(): void {
+		$html = $this->render( array( Fixtures::game() ) );
+
+		$this->assertStringNotContainsString( 'tg-weather', $html );
+		$this->assertSame( array( 777001 ), Basebelles_Test_State::$weather_calls );
+	}
+
+	public function test_a_roofed_park_gets_a_roof_note(): void {
+		$retractable = Basebelles_Today_Game_Panels::render_weather( $this->weather( array( 'roof' => 'Retractable' ) ), 'far' );
+		$dome        = Basebelles_Today_Game_Panels::render_weather( $this->weather( array( 'roof' => 'Dome' ) ), 'near' );
+
+		$this->assertStringContainsString( 'Retractable roof', $retractable );
+		$this->assertStringContainsString( 'Indoors', $dome );
+	}
+
+	public function test_forecast_details_skip_zero_rain_and_add_a_big_feels_like_gap(): void {
+		$html = Basebelles_Today_Game_Panels::render_weather( $this->weather( array( 'pop' => 0, 'feels_like' => 61 ) ), 'far' );
+
+		$this->assertStringNotContainsString( 'chance of rain', $html );
+		$this->assertStringContainsString( 'Feels like 61°', $html );
+	}
+
+	public function test_render_weather_refuses_non_pregame_phases(): void {
+		foreach ( array( 'live', 'delayed', 'postponed', 'final' ) as $phase ) {
+			$this->assertSame( '', Basebelles_Today_Game_Panels::render_weather( $this->weather(), $phase ) );
+		}
 	}
 }
