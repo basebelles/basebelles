@@ -473,6 +473,21 @@ class Basebelles_API {
 	}
 
 	/**
+	 * A team's playoff seed for a season, from the final regular-season standings.
+	 *
+	 * @param int    $team_id MLB team ID.
+	 * @param string $league  The team's league label from the team list, e.g. "AL Central".
+	 * @param int    $year    Season year.
+	 * @return int|null Seed 1-6, or null when the team didn't qualify (or the standings are unavailable).
+	 */
+	public function get_team_playoff_seed( $team_id, $league, $year ) {
+		$league_id = 0 === strpos( (string) $league, 'NL' ) ? self::NL_LEAGUE_ID : self::AL_LEAGUE_ID;
+		$seeds     = $this->get_postseason_seeds( $league_id, (int) $year );
+
+		return isset( $seeds[ (int) $team_id ] ) ? (int) $seeds[ (int) $team_id ] : null;
+	}
+
+	/**
 	 * Whether a schedule `dates` payload contains a game of the given type.
 	 *
 	 * @param array  $dates     Schedule `dates` array.
@@ -2364,7 +2379,7 @@ class Basebelles_API {
 	 * @param string $slug Team slug.
 	 * @return string
 	 */
-	private function get_team_logo_url( $slug ) {
+	public function get_team_logo_url( $slug ) {
 		if ( '' === $slug ) {
 			return '';
 		}
