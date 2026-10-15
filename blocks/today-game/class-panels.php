@@ -136,6 +136,86 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
+	 * Phases that get the first-pitch forecast. Once the game starts the forecast is stale, and
+	 * the CSS hides the row as soon as polling moves .tg-tabs out of these phases.
+	 */
+	const WEATHER_PHASES = array( 'far', 'near' );
+
+	/** OpenWeather icon code prefix => emoji, matching the 📻/📺 broadcast lines. */
+	const WEATHER_ICONS = array(
+		'01' => '☀️',
+		'02' => '🌤️',
+		'03' => '⛅',
+		'04' => '☁️',
+		'09' => '🌧️',
+		'10' => '🌦️',
+		'11' => '⛈️',
+		'13' => '🌨️',
+		'50' => '🌫️',
+	);
+
+	/**
+	 * The first-pitch forecast row under the tabs.
+	 *
+	 * @param array|null $weather Result of Basebelles_API::get_game_weather().
+	 * @param string     $phase   Result of self::get_phase( $game ).
+	 * @return string Empty when there's nothing to show.
+	 */
+	public static function render_weather( $weather, $phase ) {
+		if ( empty( $weather ) || ! is_array( $weather ) || ! in_array( $phase, self::WEATHER_PHASES, true ) ) {
+			return '';
+		}
+
+		$icon_code = (string) ( $weather['icon'] ?? '' );
+		$icon      = self::WEATHER_ICONS[ substr( $icon_code, 0, 2 ) ] ?? '';
+
+		// Clear skies after dark read better as a moon.
+		if ( '01n' === $icon_code ) {
+			$icon = '🌙';
+		}
+
+		$details = array( 'Wind ' . (int) $weather['wind_mph'] . ' mph ' . $weather['wind_dir'] );
+
+		if ( (int) $weather['pop'] > 0 ) {
+			$details[] = (int) $weather['pop'] . '% chance of rain';
+		}
+
+		if ( abs( (int) $weather['feels_like'] - (int) $weather['temp'] ) >= 3 ) {
+			$details[] = 'Feels like ' . (int) $weather['feels_like'] . '°';
+		}
+
+		$roof_notes = array(
+			'Retractable' => 'Retractable roof',
+			'Dome'        => 'Indoors',
+		);
+		$roof_note  = $roof_notes[ $weather['roof'] ?? '' ] ?? '';
+
+		ob_start();
+		?>
+		<div class="tg-weather">
+			<div class="tg-weather-label">
+				First pitch forecast<?php echo ! empty( $weather['venue'] ) ? ' &middot; ' . esc_html( $weather['venue'] ) : ''; ?>
+			</div>
+			<div class="tg-weather-main">
+				<?php if ( '' !== $icon ) : ?>
+					<span class="tg-weather-icon" aria-hidden="true"><?php echo esc_html( $icon ); ?></span>
+				<?php endif; ?>
+				<span class="tg-weather-temp"><?php echo esc_html( (string) (int) $weather['temp'] ); ?>°F</span>
+				<span class="tg-weather-desc"><?php echo esc_html( ucfirst( (string) $weather['description'] ) ); ?></span>
+			</div>
+			<div class="tg-weather-details">
+				<?php echo esc_html( implode( ' · ', $details ) ); ?>
+				<?php if ( '' !== $roof_note ) : ?>
+					<span class="tg-weather-roof"><?php echo esc_html( $roof_note ); ?></span>
+				<?php endif; ?>
+			</div>
+		</div>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * The .game-time element in the card header: a LIVE badge, a delay badge, or the scheduled
 	 * first-pitch time. Shared by the block and the REST endpoint so a game that goes into (or
 	 * comes out of) a delay mid-poll gets the right badge without the browser guessing at it.
@@ -328,22 +408,96 @@ class Basebelles_Today_Game_Panels {
 			return '<div class="tg-info-box" role="note">Game details will be available closer to game time.</div>';
 		}
 
+		$panels = array(
+			'score'   => self::render_score_panel( $game, $phase, $live_feed ),
+			'plays'   => self::render_plays_panel( $live_feed ),
+			'stats'   => self::render_stats_panel( $game, $phase, $live_feed ),
+			'players' => self::render_players_panel( $game, $live_feed ),
+		);
+
 		ob_start();
 		?>
 		<div class="tg-tabs" data-game-pk="<?php echo esc_attr( (string) $game['game_pk'] ); ?>" data-phase="<?php echo esc_attr( $phase ); ?>">
 			<div class="tg-tab-bar" role="tablist">
-				<button type="button" class="tg-tab is-active" data-tab="score" role="tab" aria-selected="true">Status</button>
-				<button type="button" class="tg-tab" data-tab="plays" role="tab" aria-selected="false">Plays</button>
-				<button type="button" class="tg-tab" data-tab="stats" role="tab" aria-selected="false">Stats</button>
-				<button type="button" class="tg-tab" data-tab="players" role="tab" aria-selected="false">Players</button>
+				<?php foreach ( self::TABS as $tab_name => $tab ) : ?>
+					<?php
+					$is_active  = 'score' === $tab_name;
+					$is_pending = isset( $tab['pending'] ) && self::is_empty_panel( $panels[ $tab_name ] );
+					?>
+					<button
+						type="button"
+						class="tg-tab<?php echo $is_active ? ' is-active' : ''; ?>"
+						data-tab="<?php echo esc_attr( $tab_name ); ?>"
+						role="tab"
+						aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
+						<?php if ( isset( $tab['pending'] ) ) : ?>
+							data-pending-title="<?php echo esc_attr( $tab['pending'] ); ?>"
+						<?php endif; ?>
+						<?php if ( $is_pending ) : ?>
+							disabled
+							title="<?php echo esc_attr( $tab['pending'] ); ?>"
+						<?php endif; ?>
+					><?php echo esc_html( $tab['label'] ); ?></button>
+				<?php endforeach; ?>
 			</div>
-			<div class="tg-panel is-active" data-panel="score"><?php echo self::render_score_panel( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-			<div class="tg-panel" data-panel="plays"><?php echo self::render_plays_panel( $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-			<div class="tg-panel" data-panel="stats"><?php echo self::render_stats_panel( $game, $phase, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-			<div class="tg-panel" data-panel="players"><?php echo self::render_players_panel( $game, $live_feed ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+			<?php foreach ( $panels as $panel_name => $panel_html ) : ?>
+				<div class="tg-panel<?php echo 'score' === $panel_name ? ' is-active' : ''; ?>" data-panel="<?php echo esc_attr( $panel_name ); ?>"><?php echo $panel_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+			<?php endforeach; ?>
 		</div>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * The four tabs, in order. A tab with a 'pending' note is disabled (with that note as its
+	 * tooltip) while its panel has nothing in it yet -- Plays before first pitch, Players before
+	 * MLB posts lineups -- so nobody clicks into an empty tab and thinks the card is broken.
+	 * Status and Stats always have something to show.
+	 */
+	const TABS = array(
+		'score'   => array( 'label' => 'Status' ),
+		'plays'   => array(
+			'label'   => 'Plays',
+			'pending' => 'Plays start at first pitch',
+		),
+		'stats'   => array( 'label' => 'Stats' ),
+		'players' => array(
+			'label'   => 'Players',
+			'pending' => 'Lineups aren\'t posted yet',
+		),
+	);
+
+	/**
+	 * Whether a rendered panel is only the "nothing yet" placeholder. today-game.js makes the same
+	 * check after a live poll replaces a panel, so a tab switches on once its content arrives.
+	 *
+	 * @param string $panel_html Rendered panel markup.
+	 * @return bool
+	 */
+	public static function is_empty_panel( $panel_html ) {
+		return 0 === strpos( trim( (string) $panel_html ), '<p class="tg-empty">' );
+	}
+
+	/**
+	 * The day line in the card header: "Today" when the game is today in the game time zone,
+	 * otherwise the short date ("Thu 10/15"). Matches the postseason series card, which already
+	 * says "Today 1:00 PM", so the two cards side by side don't spell the same day two ways.
+	 *
+	 * @param array $game Normalized game array.
+	 * @return string
+	 */
+	public static function render_day_label( array $game ) {
+		$first_pitch = (int) ( $game['sort_time'] ?? 0 );
+
+		if ( $first_pitch > 0 ) {
+			$timezone = new DateTimeZone( Basebelles_API::GAME_TIMEZONE );
+
+			if ( wp_date( 'Y-m-d', $first_pitch, $timezone ) === wp_date( 'Y-m-d', null, $timezone ) ) {
+				return 'Today';
+			}
+		}
+
+		return (string) ( $game['day_date'] ?? '' );
 	}
 
 	/**
@@ -474,6 +628,30 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
+	 * Whether the card shows the "First pitch in" countdown: always in the near phase, and in the
+	 * far phase once first pitch is within COUNTDOWN_WINDOW. A next-game stand-in that's still far
+	 * out gets the info box instead of tabs, so no countdown either.
+	 *
+	 * The first-pitch forecast follows this exactly -- it's only useful in the run-up to the game.
+	 *
+	 * @param array  $game      Normalized game array.
+	 * @param string $phase     Result of self::get_phase( $game ).
+	 * @param bool   $not_today True for an off day's next-game stand-in.
+	 * @return bool
+	 */
+	public static function has_countdown( array $game, $phase, $not_today = false ) {
+		if ( 'near' === $phase ) {
+			return true;
+		}
+
+		if ( 'far' !== $phase || $not_today ) {
+			return false;
+		}
+
+		return ( (int) ( $game['sort_time'] ?? 0 ) - time() ) <= self::COUNTDOWN_WINDOW;
+	}
+
+	/**
 	 * Far-phase Score content: the pitching matchup, with a countdown to first pitch in place of
 	 * the Stats tab's season-form line (there's nothing to count down to once the game is close).
 	 * The countdown is left off entirely while first pitch is more than COUNTDOWN_WINDOW away.
@@ -482,11 +660,9 @@ class Basebelles_Today_Game_Panels {
 	 * @return string
 	 */
 	private static function render_far_score( array $game ) {
-		$seconds_to_first_pitch = (int) ( $game['sort_time'] ?? 0 ) - time();
-
 		ob_start();
 		echo self::render_pitching_matchup( $game ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		if ( $seconds_to_first_pitch <= self::COUNTDOWN_WINDOW ) :
+		if ( self::has_countdown( $game, 'far' ) ) :
 			?>
 			<div class="tg-far-countdown">
 				<?php echo self::render_countdown_timer( $game ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -508,7 +684,8 @@ class Basebelles_Today_Game_Panels {
 		ob_start();
 		?>
 		<div class="tg-countdown" data-first-pitch="<?php echo esc_attr( $first_pitch ); ?>">
-			First pitch in <span class="tg-countdown-value">&hellip;</span>
+			<span class="tg-countdown-label">First pitch in</span>
+			<span class="tg-countdown-value">&hellip;</span>
 		</div>
 		<?php
 		return (string) ob_get_clean();
@@ -833,7 +1010,7 @@ class Basebelles_Today_Game_Panels {
 					<?php endif; ?>
 				</div>
 			</div>
-			<div class="game-meta">v.s.</div>
+			<div class="game-meta">vs.</div>
 			<div class="pitcher-home">
 				<div class="pitcher-name">
 					<?php if ( ! empty( $home_pitcher['url'] ) ) : ?>

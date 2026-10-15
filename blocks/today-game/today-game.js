@@ -129,6 +129,17 @@
 		return ( hours > 0 ? hours + ':' + paddedMinutes : minutes ) + ':' + paddedSeconds;
 	}
 
+	// The forecast only goes with the countdown. MLB often takes a few minutes to mark a game
+	// Live, so waiting for the phase to change (the CSS rule) would leave it up past first pitch.
+	function hideForecast( instance ) {
+		var card    = instance.closest( '.game-card' );
+		var weather = card ? card.querySelector( '.tg-weather' ) : null;
+
+		if ( weather ) {
+			weather.hidden = true;
+		}
+	}
+
 	function wireCountdown( instance ) {
 		var countdownEl = instance.querySelector( '.tg-countdown' );
 
@@ -143,15 +154,26 @@
 			return;
 		}
 
-		var tick = window.setInterval( function () {
+		var tick;
+
+		function update() {
 			var remaining = firstPitch - Date.now();
 			valueEl.textContent = formatCountdown( remaining );
 
 			if ( remaining <= 0 ) {
 				window.clearInterval( tick );
+				hideForecast( instance );
 				refreshInstance( instance, true );
 			}
-		}, 1000 );
+
+			return remaining;
+		}
+
+		// Fill the chip straight away -- otherwise it sits on "…" for the first second, which is
+		// a lot more noticeable now that it's a big navy block.
+		if ( update() > 0 ) {
+			tick = window.setInterval( update, 1000 );
+		}
 	}
 
 	// The whole element is swapped for the server's version rather than rebuilt here: LIVE, a
@@ -205,6 +227,32 @@
 		}
 	}
 
+	// Same rule as Basebelles_Today_Game_Panels::is_empty_panel(): a panel holding only the
+	// "nothing yet" note keeps its tab disabled. Run after every poll so Plays switches on at
+	// first pitch and Players once lineups land, without a reload.
+	function syncPendingTabs( instance ) {
+		var tabs = instance.querySelectorAll( '.tg-tab[data-pending-title]' );
+
+		for ( var i = 0; i < tabs.length; i++ ) {
+			var name  = tabs[ i ].getAttribute( 'data-tab' );
+			var panel = instance.querySelector( '.tg-panel[data-panel="' + name + '"]' );
+			var first = panel ? panel.firstElementChild : null;
+			var empty = !! first && first.classList.contains( 'tg-empty' ) && 1 === panel.children.length;
+
+			tabs[ i ].disabled = empty;
+
+			if ( empty ) {
+				tabs[ i ].title = tabs[ i ].getAttribute( 'data-pending-title' );
+
+				if ( tabs[ i ].classList.contains( 'is-active' ) ) {
+					setActiveTab( instance, 'score' );
+				}
+			} else {
+				tabs[ i ].removeAttribute( 'title' );
+			}
+		}
+	}
+
 	function applyPanelUpdate( instance, data ) {
 		instance.setAttribute( 'data-phase', data.phase );
 		updateTimeLabel( instance, data.time_label );
@@ -236,6 +284,8 @@
 				}
 			}
 		}
+
+		syncPendingTabs( instance );
 	}
 
 	function refreshInstance( instance, startPollingIfLive ) {

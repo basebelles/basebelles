@@ -476,4 +476,112 @@ class PanelsTest extends TestCase {
 		$this->assertStringContainsString( 'tg-header-score', $html );
 		$this->assertStringContainsString( '3', $html );
 	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Pending tabs
+	 * -----------------------------------------------------------------------
+	 */
+
+	/**
+	 * The opening tag of one tab button.
+	 *
+	 * @param string $html Rendered tabs.
+	 * @param string $tab  data-tab value.
+	 * @return string
+	 */
+	private function tab_tag( string $html, string $tab ): string {
+		preg_match( '#<button[^>]*data-tab="' . $tab . '"[^>]*>#s', $html, $found );
+
+		return $found[0] ?? '';
+	}
+
+	public function test_pregame_plays_and_players_tabs_are_disabled_with_a_reason(): void {
+		$html = Basebelles_Today_Game_Panels::render( Fixtures::game(), 'far', Fixtures::live_feed() );
+
+		$plays   = $this->tab_tag( $html, 'plays' );
+		$players = $this->tab_tag( $html, 'players' );
+
+		$this->assertMatchesRegularExpression( '#\sdisabled\s#', $plays );
+		$this->assertStringContainsString( 'title="Plays start at first pitch"', $plays );
+		$this->assertMatchesRegularExpression( '#\sdisabled\s#', $players );
+		$this->assertStringContainsString( 'title="Lineups aren&#039;t posted yet"', $players );
+	}
+
+	public function test_status_and_stats_tabs_are_never_disabled(): void {
+		$html = Basebelles_Today_Game_Panels::render( Fixtures::game(), 'far', Fixtures::live_feed() );
+
+		foreach ( array( 'score', 'stats' ) as $tab ) {
+			$tag = $this->tab_tag( $html, $tab );
+
+			$this->assertNotSame( '', $tag );
+			$this->assertDoesNotMatchRegularExpression( '#\sdisabled\s#', $tag );
+			$this->assertStringNotContainsString( 'data-pending-title', $tag );
+		}
+	}
+
+	public function test_plays_tab_switches_on_once_there_are_plays(): void {
+		$feed                 = Fixtures::live_feed();
+		$feed['recent_plays'] = array(
+			array(
+				'inning'      => 1,
+				'half'        => 'top',
+				'description' => 'Riley Greene singles on a line drive to right field.',
+				'is_scoring'  => false,
+			),
+		);
+
+		$plays = $this->tab_tag( Basebelles_Today_Game_Panels::render( Fixtures::live_game(), 'live', $feed ), 'plays' );
+
+		$this->assertDoesNotMatchRegularExpression( '#\sdisabled\s#', $plays );
+		$this->assertDoesNotMatchRegularExpression( '#\stitle=#', $plays );
+		// Still carries the note, so today-game.js can disable it again if a poll comes back empty.
+		$this->assertStringContainsString( 'data-pending-title="Plays start at first pitch"', $plays );
+	}
+
+	public function test_is_empty_panel_only_matches_the_placeholder(): void {
+		$this->assertTrue( Basebelles_Today_Game_Panels::is_empty_panel( '<p class="tg-empty">No plays yet.</p>' ) );
+		$this->assertTrue( Basebelles_Today_Game_Panels::is_empty_panel( "\n\t<p class=\"tg-empty\">No plays yet.</p>\n" ) );
+		$this->assertFalse( Basebelles_Today_Game_Panels::is_empty_panel( '<ul class="tg-plays"><li>Single</li></ul>' ) );
+		$this->assertFalse( Basebelles_Today_Game_Panels::is_empty_panel( '' ) );
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Countdown (and so the forecast)
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_has_countdown_matches_when_the_countdown_is_drawn(): void {
+		$soon  = Fixtures::game( array( 'sort_time' => time() + 2 * HOUR_IN_SECONDS ) );
+		$later = Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) );
+
+		$this->assertTrue( Basebelles_Today_Game_Panels::has_countdown( $soon, 'near' ) );
+		$this->assertTrue( Basebelles_Today_Game_Panels::has_countdown( $soon, 'far' ) );
+		$this->assertFalse( Basebelles_Today_Game_Panels::has_countdown( $later, 'far' ) );
+		$this->assertFalse( Basebelles_Today_Game_Panels::has_countdown( $soon, 'far', true ) );
+		$this->assertTrue( Basebelles_Today_Game_Panels::has_countdown( $soon, 'near', true ) );
+
+		foreach ( array( 'live', 'delayed', 'postponed', 'final' ) as $phase ) {
+			$this->assertFalse( Basebelles_Today_Game_Panels::has_countdown( $soon, $phase ), $phase );
+		}
+	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Day label
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_day_label_says_today_for_a_game_today(): void {
+		$this->assertSame( 'Today', Basebelles_Today_Game_Panels::render_day_label( Fixtures::game( array( 'sort_time' => time() ) ) ) );
+	}
+
+	public function test_day_label_keeps_the_date_for_another_day(): void {
+		$this->assertSame( 'Fri 9/4', Basebelles_Today_Game_Panels::render_day_label( Fixtures::game( array( 'sort_time' => time() + 2 * DAY_IN_SECONDS ) ) ) );
+	}
+
+	public function test_day_label_falls_back_to_the_date_without_a_first_pitch_time(): void {
+		$this->assertSame( 'Fri 9/4', Basebelles_Today_Game_Panels::render_day_label( Fixtures::game( array( 'sort_time' => 0 ) ) ) );
+	}
 }

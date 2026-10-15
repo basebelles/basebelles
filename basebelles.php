@@ -3,7 +3,7 @@
  * Plugin Name: Base*Belles
  * Plugin URI:  https://github.com/Ipstenu/basebelles
  * Description: All the base code for Base*Belles - This controls all the amazing features.
- * Version: 1.6.6
+ * Version: 1.6.7
  * Author: Ipstenu
  *
  * @package Base*Belles
@@ -76,6 +76,7 @@ class Basebelles {
 		// General Helpers
 		require_once 'helpers/class-postseason.php';
 		require_once 'helpers/class-season.php';
+		require_once 'helpers/class-season-timeline.php';
 		require_once 'helpers/class-game-hub.php';
 		require_once 'helpers/class-api.php';
 		require_once 'helpers/class-impostercide.php';

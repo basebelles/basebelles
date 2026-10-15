@@ -368,6 +368,27 @@
             "append": ""
         },
         {
+            "key": "field_6a4f1c2b7d901",
+            "label": "Standing",
+            "name": "reg_standing",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Shown after the record on the season timeline, e.g. \"AL Central champs\" or \"2nd in AL Central\".",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "AL Central champs",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_6a347f6ef11e6",
             "label": "Post Season",
             "name": "",
@@ -445,6 +466,27 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_6a4f1c2b7d902",
+            "label": "Standing",
+            "name": "post_standing",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "How the postseason ended, e.g. \"AL champions\". Shown on the season timeline in place of the last round played; leave empty to show the live result.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "AL champions",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -468,5 +510,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1791931252
+    "modified": 1792080186
 }

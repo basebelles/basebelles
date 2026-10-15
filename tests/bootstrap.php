@@ -600,6 +600,12 @@ class Basebelles_Test_State {
 	/** @var array|WP_Error Payload for Basebelles_API::get_guardians_today_game(). */
 	public static $schedule = array();
 
+	/** @var array|null Payload for Basebelles_API::get_game_weather(). */
+	public static $weather = null;
+
+	/** @var int[] game_pks passed to get_game_weather(), in order. */
+	public static $weather_calls = array();
+
 	/** @var array|WP_Error Payload for Basebelles_API::fetch_standings(). */
 	public static $standings = array();
 
@@ -724,6 +730,8 @@ class Basebelles_Test_State {
 		self::$team_info         = array();
 		self::$schedule          = array();
 		self::$standings         = array();
+		self::$weather           = null;
+		self::$weather_calls     = array();
 		self::$postseason        = array( 'state' => 'not_qualified' );
 		self::$live_feeds        = array();
 		self::$live_feed_default = array();
@@ -847,6 +855,9 @@ class Basebelles_Test_WPForms_Forms {
  */
 class Basebelles_API {
 
+	/** Mirrors the real class; Basebelles_Today_Game_Panels::render_day_label() reads it. */
+	const GAME_TIMEZONE = 'America/New_York';
+
 	public static function get_instance() {
 		return new self();
 	}
@@ -859,6 +870,12 @@ class Basebelles_API {
 		Basebelles_Test_State::$live_feed_calls[] = (int) $game_pk;
 
 		return Basebelles_Test_State::$live_feeds[ (int) $game_pk ] ?? Basebelles_Test_State::$live_feed_default;
+	}
+
+	public function get_game_weather( array $game ) {
+		Basebelles_Test_State::$weather_calls[] = (int) ( $game['game_pk'] ?? 0 );
+
+		return Basebelles_Test_State::$weather;
 	}
 
 	public function fetch_standings( $season_type = 'regularSeason', $season_year = null, $team_id = 0 ) {
@@ -917,6 +934,7 @@ require_once BASEBELLES_PLUGIN_DIR . '/blocks/today-game/class-panels.php';
 // Pure logic, no HTTP: tested directly, while the fake API above stands in for the fetching.
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-postseason.php';
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season.php';
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season-timeline.php';
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-game-hub.php';
 
 // Requiring this constructs the singleton, which registers hooks and the post type against the

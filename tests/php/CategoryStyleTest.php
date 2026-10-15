@@ -386,4 +386,144 @@ class CategoryStyleTest extends TestCase {
 
 		$this->assertSame( self::FIGURE, $html );
 	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Compact rows and series status
+	 * -----------------------------------------------------------------------
+	 */
+
+	private const TITLE    = '<h4 class="wp-block-post-title"><a href="https://example.test/post/">Your AL Central Champions</a></h4>';
+	private const DATE     = '<div class="wp-block-post-date"><time datetime="2026-09-28">28 September 2026</time></div>';
+	private const READMORE = '<a class="wp-block-read-more" href="https://example.test/post/">Read it</a>';
+
+	/**
+	 * Run one render filter inside a .bb-home-posts Query with the given class.
+	 *
+	 * @param string $method  Filter method on the style object.
+	 * @param string $content Block content.
+	 * @param string $classes The Query block's className.
+	 * @return string
+	 */
+	private function render_in( string $method, string $content, string $classes ): string {
+		$query = self::home_query( $classes );
+
+		$this->style->enter_query( $query );
+		$html = $this->style->$method( $content, array(), self::instance( self::POST_ID ) );
+		$this->style->leave_query( '', $query );
+
+		return $html;
+	}
+
+	private static function set_series_tag( string $slug, string $name ): void {
+		Basebelles_Test_State::$post_terms[ self::POST_ID ]['post_tag'] = array(
+			self::term( 40, 'Recap', 'recap' ),
+			self::term( 41, $name, $slug ),
+		);
+	}
+
+	public function test_rows_get_no_pills_on_their_small_diamonds(): void {
+		self::set_categories( array( self::games() ) );
+		self::set_team( 'toronto-blue-jays', 'Toronto Blue Jays', 'away' );
+
+		$html = $this->render_in( 'render_featured_image', self::FIGURE, 'bb-home-posts bb-home-posts--rows' );
+
+		$this->assertSame( self::FIGURE, $html );
+	}
+
+	public function test_rows_get_the_category_and_team_above_the_title(): void {
+		self::set_categories( array( self::games() ) );
+		self::set_team( 'toronto-blue-jays', 'Toronto Blue Jays', 'away' );
+
+		$html = $this->render_in( 'render_post_title', self::TITLE, 'bb-home-posts bb-home-posts--rows' );
+
+		$this->assertSame( '<p class="bb-post-meta">Games &amp; Series · @ Blue Jays</p>' . self::TITLE, $html );
+	}
+
+	public function test_a_non_game_row_gets_just_the_category(): void {
+		self::set_categories( array( self::news() ) );
+		self::set_team( 'toronto-blue-jays', 'Toronto Blue Jays', 'home' );
+
+		$html = $this->render_in( 'render_post_title', self::TITLE, 'bb-home-posts bb-home-posts--rows' );
+
+		$this->assertStringStartsWith( '<p class="bb-post-meta">News</p>', $html );
+	}
+
+	public function test_the_lead_title_is_left_alone(): void {
+		self::set_categories( array( self::games() ) );
+
+		$this->assertSame( self::TITLE, $this->render_in( 'render_post_title', self::TITLE, 'bb-home-posts bb-home-posts--lead' ) );
+	}
+
+	public function test_the_lead_keeps_its_pills(): void {
+		self::set_categories( array( self::games() ) );
+
+		$html = $this->render_in( 'render_featured_image', self::FIGURE, 'bb-home-posts bb-home-posts--lead' );
+
+		$this->assertStringContainsString( 'bb-cat-pill--category', $html );
+	}
+
+	public function test_series_status_reads_the_tag_name(): void {
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$this->assertSame(
+			array(
+				'label'  => 'Series Win',
+				'result' => 'win',
+			),
+			Basebelles_Category_Style::series_status_for_post( self::POST_ID )
+		);
+	}
+
+	/** The site's real loss tag is series-loss. */
+	public function test_series_loss_is_a_loss(): void {
+		self::set_series_tag( 'series-loss', 'Series Lost' );
+
+		$this->assertSame( 'loss', Basebelles_Category_Style::series_status_for_post( self::POST_ID )['result'] );
+	}
+
+	public function test_a_post_without_a_series_tag_has_no_status(): void {
+		Basebelles_Test_State::$post_terms[ self::POST_ID ]['post_tag'] = array( self::term( 40, 'Recap', 'recap' ) );
+
+		$this->assertNull( Basebelles_Category_Style::series_status_for_post( self::POST_ID ) );
+	}
+
+	public function test_the_series_status_replaces_read_more(): void {
+		self::set_series_tag( 'series-lost', 'Series Lost' );
+
+		$html = $this->render_in( 'render_read_more', self::READMORE, 'bb-home-posts bb-home-posts--lead' );
+
+		$this->assertSame( '<span class="bb-series-status is-loss">Series Lost</span>', $html );
+	}
+
+	public function test_read_more_stays_without_a_series_tag(): void {
+		$this->assertSame( self::READMORE, $this->render_in( 'render_read_more', self::READMORE, 'bb-home-posts bb-home-posts--lead' ) );
+	}
+
+	public function test_read_more_is_untouched_outside_the_home_posts(): void {
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$this->assertSame( self::READMORE, $this->style->render_read_more( self::READMORE, array(), self::instance( self::POST_ID ) ) );
+	}
+
+	public function test_rows_put_the_series_status_after_the_date(): void {
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$html = $this->render_in( 'render_post_date', self::DATE, 'bb-home-posts bb-home-posts--rows' );
+
+		$this->assertSame( '<div class="bb-post-date-row">' . self::DATE . '<span class="bb-series-status is-win">Series Win</span></div>', $html );
+	}
+
+	public function test_a_row_without_a_series_tag_keeps_the_plain_date(): void {
+		$this->assertSame( self::DATE, $this->render_in( 'render_post_date', self::DATE, 'bb-home-posts bb-home-posts--rows' ) );
+	}
+
+	public function test_the_series_label_is_escaped(): void {
+		self::set_series_tag( 'series-win', '<b>Series</b> Win' );
+
+		$html = $this->render_in( 'render_read_more', self::READMORE, 'bb-home-posts' );
+
+		$this->assertStringContainsString( '&lt;b&gt;Series&lt;/b&gt; Win', $html );
+		$this->assertStringNotContainsString( '<b>', $html );
+	}
 }

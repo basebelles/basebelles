@@ -51,6 +51,7 @@
 
 .game-meta,
 .game-time {
+	font-size: 1.25em;
 	font-weight: 700;
 	white-space: nowrap;
 }
@@ -204,7 +205,7 @@
 	border: 1px solid var(--bb-slate-blue);
 	border-radius: 4px;
 	padding: 8px 4px;
-	font-size: 0.8rem;
+	font-size: 1rem;
 	font-weight: 700;
 	letter-spacing: 0.03em;
 	text-transform: uppercase;
@@ -216,6 +217,14 @@
 	background: var(--bb-deep-navy);
 	border-color: var(--bb-deep-navy);
 	color: #fff;
+}
+
+/* Plays before first pitch, Players before lineups: shown so the card's shape doesn't jump when
+   they switch on, but plainly not clickable yet. */
+.tg-tab:disabled {
+	border-style: dashed;
+	opacity: 0.45;
+	cursor: not-allowed;
 }
 
 .tg-panel { display: none; }
@@ -245,20 +254,44 @@
 	border-top: 1px dashed var(--bb-sandstone-cream);
 }
 
+/* "First pitch in" as a small label over a navy scoreboard chip, so the countdown reads as the
+   clock rather than a second title competing with the time in the header. */
 .tg-countdown {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
 	text-align: center;
-	font-size: 1rem;
-	font-weight: 700;
-	margin-bottom: 15px;
+	margin: 15px 0px;
 }
 
 .tg-far-countdown .tg-countdown {
 	margin-bottom: 0;
 }
 
+/* Matches .tg-weather-label, the other small label on the card. */
+.tg-countdown-label {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
+}
+
+/* tabular-nums keeps the digits from shifting as they tick; min-width keeps the chip from
+   shrinking when 1:00:00 rolls over to 59:59. */
 .tg-countdown-value {
+	display: inline-block;
+	min-width: 5.5ch;
+	padding: 8px 18px;
+	border-radius: 8px;
+	background: var(--bb-deep-navy);
+	color: var(--bb-sandstone-cream);
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.04em;
 	font-variant-numeric: tabular-nums;
-	color: var(--bb-deep-navy);
 }
 
 .tg-near-records,
@@ -686,4 +719,72 @@
 /* The panel supplies the padding, and the switcher above already names the game. */
 .tg-dh-panel .tg-tabs {
 	margin-top: 15px;
+}
+
+/* --- First pitch forecast (pre-game only) --- */
+.tg-weather {
+	margin-top: 15px;
+	padding-top: 12px;
+	border-top: 1px dashed var(--bb-sandstone-cream);
+	text-align: center;
+	line-height: 1.4;
+}
+
+/* The server only renders the row pre-game; this hides it once polling moves the game on, so a
+   page left open through first pitch doesn't keep showing a stale forecast. */
+.tg-tabs:not([data-phase="far"]):not([data-phase="near"]) ~ .tg-weather {
+	display: none;
+}
+
+.tg-weather-label {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
+}
+
+.tg-weather-main {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin: 4px 0;
+}
+
+/* Emoji can't be recolored, and the cloud ones are pale gray on a white card. A blue-gray disc
+   behind the icon gives the pale ones an edge without dulling the sun or rain icons. */
+.tg-weather-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 50%;
+	background: #b3c0cb;
+	background: color-mix(in srgb, var(--bb-slate-blue) 30%, #fff);
+	font-size: 1.4rem;
+	line-height: 1;
+}
+
+.tg-weather-temp {
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.tg-weather-details {
+	font-size: 0.9rem;
+	color: var(--bb-accent-slate);
+}
+
+.tg-weather-roof {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 0 8px;
+	border: 1px solid var(--bb-accent-slate);
+	border-radius: 10px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
 }
