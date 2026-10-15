@@ -5,13 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.7] - Unreleased
+## [1.6.7] - 2026-10-15
 
 ### Added
 
 - Today's Game shows the first-pitch forecast at the ballpark (temperature, conditions, wind, rain chance) before the game starts, with a note for retractable-roof and domed parks. Uses MLB's venue coordinates and the OpenWeather 5-day forecast, fetched server-side with the `OPEN_WEATHER_MAP` key from `wp-config.php`.
 - Season Settings has a Standing field on the Regular Season and Post Season tabs ("AL Central champs", "AL champions"). The regular-season standing shows after the record on the season timeline; the postseason standing replaces the live last-round result.
-
 - Game posts tagged with their series result (Series Win, Series Lost, and series-split/tie slugs) show it as a colored pill on the homepage: in place of Read More on the lead post, after the date in the rows. The tag's name is the label.
 
 ### Changed
