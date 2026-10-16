@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.8] - UNRELEASED
+## [1.6.8] - 2026-10-16
 
 ### Added
 
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team archive headers lead with the team: logo, name, league and season, then a stat strip that changes with the season type. Regular season shows record, division rank, run differential, games back, streak and last 10; post season shows the Wild Card result (or a bye), the last series result ("ALDS: Lost 1 – 3"), the regular-season record and the Guardians' next game; spring training shows record and win percentage. A tag beside the name says how the playoffs are going ("ALDS · Tied 2-2", "Eliminated"), or "Missed playoffs" for a team that didn't make it. Teams that played the Guardians show how that series ended ("Eliminated in ALDS by CLE"); other playoff teams show their seed, since only the Guardians' series are tracked.
 - The Spring Training and Regular Season archive bar hides any stat that has no data.
 - The Game Hub's post-season series card drops its "Road here" line, since the summary at the top of the page already covers earlier rounds. The "* If necessary" note stays.
+- Today's Game shows the final result headline ("The Guardians win") larger: 3rem, up from 1.3rem.
 
 ### Fixed
 
