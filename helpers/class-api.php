@@ -144,37 +144,45 @@ class Basebelles_API {
 	 * Guardians postseason status for the standings ticker: round, seeds, series score, each
 	 * game's result, and whether they had a Wild Card bye. See Basebelles_Postseason for states.
 	 *
+	 * Pass another team's ID (team archives) and the same status comes back from their side:
+	 * the `guardians*` keys then mean "this team", `opponent*` the team they played.
+	 *
 	 * @param int|null $season_year Optional season year; defaults to ACF/options season.
+	 * @param int      $team_id     MLB team ID; defaults to the Guardians.
 	 * @return array|WP_Error
 	 */
-	public function get_postseason_status( $season_year = null ) {
+	public function get_postseason_status( $season_year = null, $team_id = self::GUARDIANS_TEAM_ID ) {
 		$settings = $this->get_season_settings();
 		$year     = ( null !== $season_year && is_numeric( $season_year ) ) ? (int) $season_year : (int) $settings['season'];
+		$team_id  = (int) $team_id > 0 ? (int) $team_id : self::GUARDIANS_TEAM_ID;
 
 		if ( $year < 1900 ) {
 			$year = (int) gmdate( 'Y' );
 		}
 
-		$dates = $this->get_postseason_schedule( $year );
+		$dates = $this->get_postseason_schedule( $year, $team_id );
 
 		if ( is_wp_error( $dates ) ) {
 			return $dates;
 		}
 
-		// Seeds come from the final regular-season standings. The NL is only needed for a World
-		// Series opponent's seed, so it's only fetched once there's a World Series game to show.
-		$seeds = $this->get_postseason_seeds( self::AL_LEAGUE_ID, $year );
-
-		if ( $this->schedule_has_game_type( $dates, 'W' ) ) {
-			$seeds += $this->get_postseason_seeds( self::NL_LEAGUE_ID, $year );
-		}
+		// Seeds come from the final regular-season standings. For the Guardians the NL is only
+		// needed for a World Series opponent's seed, so it's only fetched once there's a World
+		// Series game to show. Any other team could be in either league, so both are fetched,
+		// and which one the team is seeded in says which league's round names to use.
+		$al_seeds = $this->get_postseason_seeds( self::AL_LEAGUE_ID, $year );
+		$nl_seeds = ( self::GUARDIANS_TEAM_ID !== $team_id || $this->schedule_has_game_type( $dates, 'W' ) )
+			? $this->get_postseason_seeds( self::NL_LEAGUE_ID, $year )
+			: array();
+		$seeds    = $al_seeds + $nl_seeds;
+		$league   = isset( $nl_seeds[ $team_id ] ) ? 'NL' : 'AL';
 
 		$today  = ( new DateTime( 'now', new DateTimeZone( self::GAME_TIMEZONE ) ) )->format( 'Y-m-d' );
-		$status = Basebelles_Postseason::build_status( $dates, $seeds, $today, self::GUARDIANS_TEAM_ID, self::GAME_TIMEZONE );
+		$status = Basebelles_Postseason::build_status( $dates, $seeds, $today, $team_id, self::GAME_TIMEZONE, $league );
 
 		if ( ! empty( $status['seed_mismatch'] ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( sprintf( 'Base*Belles: Guardians seed (%s) disagrees with the Wild Card schedule for %d; showing what the schedule says.', (string) $status['seed'], $year ) );
+			error_log( sprintf( 'Base*Belles: team %d seed (%s) disagrees with the Wild Card schedule for %d; showing what the schedule says.', $team_id, (string) $status['seed'], $year ) );
 		}
 
 		// Local logos, the same ones the today-game block uses.
@@ -196,17 +204,18 @@ class Basebelles_API {
 	 * The Guardians' postseason schedule for one year: every Wild Card, Division Series, LCS
 	 * and World Series game, "if necessary" ones included.
 	 *
-	 * @param int $year Season year.
+	 * @param int $year    Season year.
+	 * @param int $team_id MLB team ID; defaults to the Guardians.
 	 * @return array|WP_Error The schedule payload's `dates` array.
 	 */
-	public function get_postseason_schedule( $year ) {
+	public function get_postseason_schedule( $year, $team_id = self::GUARDIANS_TEAM_ID ) {
 		// Plain schedule rather than schedule/postseason/series: that endpoint ignores teamId and
 		// returns every series in both leagues.
 		$schedule = $this->request_json(
 			'schedule',
 			array(
 				'sportId'  => 1,
-				'teamId'   => self::GUARDIANS_TEAM_ID,
+				'teamId'   => (int) $team_id,
 				'season'   => (int) $year,
 				'gameType' => 'F,D,L,W',
 				'hydrate'  => 'team,linescore',

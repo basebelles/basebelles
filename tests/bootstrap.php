@@ -886,7 +886,7 @@ class Basebelles_API {
 		return Basebelles_Test_State::$roster;
 	}
 
-	public function get_postseason_status( $season_year = null ) {
+	public function get_postseason_status( $season_year = null, $team_id = 114 ) {
 		return Basebelles_Test_State::$postseason;
 	}
 

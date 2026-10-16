@@ -45,7 +45,7 @@
 	flex: 0 1 var(--bb-tl-w);
 	overflow: hidden;
 	border-radius: 3px;
-	background: #d8d1bb;
+	background: var(--bb-sandstone-cream-bg);
 }
 
 /* Sits inside each segment; the template sets its width (100% done, partway current, 0 upcoming). */
@@ -149,7 +149,7 @@
 	position: relative;
 	height: 18px;
 	margin-top: 10px;
-	border-top: 1px solid #e2dccb;
+	border-top: 1px solid var(--bb-sandstone-cream-bg);
 }
 
 .bb-tl-months span {
@@ -157,7 +157,7 @@
 	top: 3px;
 	transform: translateX(-50%);
 	font-size: 0.72rem;
-	color: #8a8f96;
+	color: var(--bb-accent-slate);
 }
 
 /*

@@ -40,34 +40,18 @@
 	background-position: center;
 }
 
-.basebelles-season-stats-header--spring .season-stats-ghost {
+.basebelles-season-stats-header-spring .season-stats-ghost {
 	background-image: radial-gradient(ellipse 90% 70% at 50% 100%, #f3efe0 0%, transparent 55%);
 }
 
-.basebelles-season-stats-header--regular .season-stats-ghost {
+.basebelles-season-stats-header-regular .season-stats-ghost {
 	background-image: radial-gradient(ellipse 75% 60% at 70% 30%, #f3efe0 0%, transparent 50%),
 		linear-gradient(180deg, rgba(0, 45, 98, 0.35) 0%, transparent 45%);
 }
 
-.basebelles-season-stats-header--postseason .season-stats-ghost {
+.basebelles-season-stats-header-postseason .season-stats-ghost {
 	background-image: radial-gradient(ellipse 80% 55% at 50% 0%, #f3efe0 0%, transparent 50%),
 		linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, transparent 40%);
-}
-
-.season-stats-grid {
-	position: relative;
-	z-index: 1;
-	display: grid;
-	grid-template-columns: repeat(var(--bb-cells, 4), minmax(0, 1fr));
-	gap: 1rem 1.25rem;
-	align-items: start;
-}
-
-.season-stats-cell {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	min-width: 0;
 }
 
 .season-stats-label {
@@ -76,27 +60,6 @@
 	letter-spacing: 0.06em;
 	opacity: 0.9;
 	font-weight: 600;
-}
-
-.season-stats-value {
-	font-size: 1.15rem;
-	font-weight: 700;
-	line-height: 1.25;
-	word-break: break-word;
-}
-
-.season-stats-heading {
-	text-align: center;
-}
-
-/* Mirror Season Header “over” treatment for completed seasons */
-.basebelles-season-stats-header.is-past .season-stats-value {
-	text-decoration: line-through;
-	opacity: 0.65;
-}
-
-.basebelles-season-stats-header.is-past .season-stats-label {
-	opacity: 0.75;
 }
 
 /* Post-season archive: the Guardians' series */
@@ -232,7 +195,7 @@
 	box-shadow: 0 0 0 2px rgba(243, 239, 224, 0.35);
 }
 
-/* Team archive */
+/* Team archive, and the season-type archive (same shell, no logo or tag) */
 .season-team-main {
 	display: flex;
 	align-items: center;
@@ -314,10 +277,36 @@
 	color: #f3b6bf;
 }
 
-@media screen and (max-width: 960px) {
-	.season-stats-grid {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
+/* Season-type archives (always the Guardians): wine red with a Guardians navy stripe */
+.basebelles-season-stats-header--season .season-stats-inner,
+.basebelles-season-stats-header--series .season-stats-inner {
+	border-bottom: 5px solid var(--bb-slate-blue, #00385d);
+}
+
+/* Team colours (set inline by team.php from team-info/list.json) */
+.has-team-colors .season-stats-inner {
+	background-color: var(--bb-team-bg);
+	color: var(--bb-team-fg);
+	border-bottom: 5px solid var(--bb-team-accent);
+}
+
+.has-team-colors .season-team-tag {
+	background: var(--bb-team-fg);
+	color: var(--bb-team-bg);
+}
+
+.has-team-colors .season-team-strip {
+	border-top-color: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.has-team-colors .season-team-stat {
+	border-right-color: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+/* The pastel green/pink only read on dark backgrounds. On a light one, the +/- sign carries it. */
+.has-team-colors.is-light .season-team-stat.is-positive .season-team-value,
+.has-team-colors.is-light .season-team-stat.is-negative .season-team-value {
+	color: inherit;
 }
 
 @media screen and (max-width: 640px) {
@@ -346,15 +335,5 @@
 	.season-team-stat {
 		margin-right: 1rem;
 		padding-right: 1rem;
-	}
-}
-
-@media screen and (max-width: 520px) {
-	.season-stats-grid {
-		grid-template-columns: 1fr;
-	}
-
-	.season-stats-value {
-		font-size: 1.05rem;
 	}
 }
