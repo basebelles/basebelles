@@ -1,0 +1,10 @@
+{
+  "base": "trunk",
+  "testing_notes": true,
+  "changelog": [{ "file": "CHANGELOG.md", "format": "keepachangelog" }],
+  "version_files": [
+    { "file": "basebelles.php", "match": "^ \\* Version:\\s*(.+)$" },
+    { "file": "package.json", "method": "npm" }
+  ],
+  "title": "chore(release): {version} — {summary}"
+}
