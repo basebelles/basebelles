@@ -329,4 +329,116 @@ class GameHubTest extends TestCase {
 		$this->assertSame( '2027-02-19', Basebelles_Game_Hub::first_date_from( $dates, '2026-10-13' ) );
 		$this->assertSame( '', Basebelles_Game_Hub::first_date_from( $dates, '2027-03-01' ) );
 	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Players of the game
+	 * -----------------------------------------------------------------------
+	 */
+
+	/**
+	 * One topPerformers entry.
+	 */
+	private function top( int $id, string $name, string $type, string $batting = '', string $pitching = '' ): array {
+		return array(
+			'type'   => $type,
+			'player' => array(
+				'person' => array(
+					'id'       => $id,
+					'fullName' => $name,
+				),
+				'stats'  => array(
+					'batting'  => array( 'summary' => $batting ),
+					'pitching' => array( 'summary' => $pitching ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * A liveData payload: CLE at home against DET, Ramírez and Bibee ours, Greene theirs.
+	 */
+	private function potg_live_data( array $decisions = array() ): array {
+		return array(
+			'boxscore'  => array(
+				'teams'         => array(
+					'home' => array(
+						'team'    => array( 'id' => 114 ),
+						'players' => array(
+							'ID608070' => array(),
+							'ID676440' => array(),
+						),
+					),
+					'away' => array(
+						'team'    => array( 'id' => 116 ),
+						'players' => array( 'ID682985' => array() ),
+					),
+				),
+				'topPerformers' => array(
+					$this->top( 608070, 'José Ramírez', 'hitter', '2-4 | HR, 3 RBI, 2 R', '' ),
+					$this->top( 682985, 'Riley Greene', 'hitter', '3-4 | 2B', '' ),
+					$this->top( 676440, 'Tanner Bibee', 'starter', '', '7.0 IP, ER, 9 K, BB' ),
+				),
+			),
+			'decisions' => $decisions,
+		);
+	}
+
+	public function test_players_of_the_game_keeps_only_our_top_performers(): void {
+		$players = Basebelles_Game_Hub::players_of_the_game( $this->potg_live_data(), 114 );
+
+		$this->assertSame(
+			array(
+				array(
+					'name' => 'José Ramírez',
+					'line' => '2-4, HR, 3 RBI, 2 R',
+				),
+				array(
+					'name' => 'Tanner Bibee',
+					'line' => '7.0 IP, ER, 9 K, BB',
+				),
+			),
+			$players['performers']
+		);
+	}
+
+	public function test_players_of_the_game_lists_decisions_in_w_l_sv_order(): void {
+		$decisions = array(
+			'save'   => array( 'fullName' => 'Emmanuel Clase' ),
+			'loser'  => array( 'fullName' => 'Jack Flaherty' ),
+			'winner' => array( 'fullName' => 'Tanner Bibee' ),
+		);
+
+		$players = Basebelles_Game_Hub::players_of_the_game( $this->potg_live_data( $decisions ), 114 );
+
+		$this->assertSame( array( 'W', 'L', 'SV' ), array_column( $players['decisions'], 'code' ) );
+		$this->assertSame( array( 'Tanner Bibee', 'Jack Flaherty', 'Emmanuel Clase' ), array_column( $players['decisions'], 'name' ) );
+	}
+
+	public function test_no_save_means_no_sv(): void {
+		$decisions = array(
+			'winner' => array( 'fullName' => 'Tanner Bibee' ),
+			'loser'  => array( 'fullName' => 'Jack Flaherty' ),
+		);
+
+		$players = Basebelles_Game_Hub::players_of_the_game( $this->potg_live_data( $decisions ), 114 );
+
+		$this->assertSame( array( 'W', 'L' ), array_column( $players['decisions'], 'code' ) );
+	}
+
+	public function test_players_of_the_game_is_empty_for_a_game_we_are_not_in(): void {
+		$players = Basebelles_Game_Hub::players_of_the_game( $this->potg_live_data(), 145 );
+
+		$this->assertSame( array(), $players['performers'] );
+	}
+
+	public function test_players_of_the_game_is_empty_before_mlb_posts_anything(): void {
+		$this->assertSame(
+			array(
+				'performers' => array(),
+				'decisions'  => array(),
+			),
+			Basebelles_Game_Hub::players_of_the_game( array(), 114 )
+		);
+	}
 }

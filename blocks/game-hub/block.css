@@ -152,7 +152,7 @@
 
 /* --- Series card (postseason) --- */
 
-/* Centered with the status under it; the game list and "Road here" line stay left-aligned. */
+/* Centered with the status under it; the game list and footnote stay left-aligned. */
 .basebelles-game-hub .bb-hub-series .bb-hub-eyebrow {
 	text-align: center;
 }
@@ -175,7 +175,7 @@
 
 .basebelles-game-hub .bb-hub-series-games {
 	display: grid;
-	gap: 10px;
+	gap: 5px;
 	margin: 0 0 20px;
 	padding: 0;
 	list-style: none;

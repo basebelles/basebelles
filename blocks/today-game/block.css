@@ -157,7 +157,7 @@
 .tg-result-headline {
 	margin-top: 15px;
 	text-align: center;
-	font-size: 1.3rem;
+	font-size: 3rem;
 	font-weight: 800;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -165,6 +165,52 @@
 
 .tg-result-headline.is-win { color: var(--bb-green); }
 .tg-result-headline.is-loss { color: var(--bb-red); }
+
+/* Players of the game, under the result: our top performers, then the W/L/SV pitchers. */
+.tg-potg {
+	margin-top: 12px;
+	text-align: center;
+	color: var(--bb-deep-navy);
+}
+
+.tg-potg-heading {
+	margin: 0 0 6px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--bb-accent-slate);
+}
+
+.tg-potg-performers {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	line-height: 1.5;
+}
+
+.tg-potg-line {
+	margin-left: 4px;
+	color: var(--bb-accent-slate);
+	font-variant-numeric: tabular-nums;
+}
+
+.tg-potg-decisions {
+	margin: 8px 0 0;
+	font-size: 0.85rem;
+	color: var(--bb-accent-slate);
+}
+
+/* A long name never splits from its W/L/SV. */
+.tg-potg-decision {
+	white-space: nowrap;
+}
+
+.tg-potg-decision abbr {
+	font-weight: 700;
+	text-decoration: none;
+	color: var(--bb-deep-navy);
+}
 
 /* Broadcasts & Multi-game Footer */
 .game-broadcasts {
@@ -733,6 +779,11 @@
 /* The server only renders the row pre-game; this hides it once polling moves the game on, so a
    page left open through first pitch doesn't keep showing a stale forecast. */
 .tg-tabs:not([data-phase="far"]):not([data-phase="near"]) ~ .tg-weather {
+	display: none;
+}
+
+/* The forecast belongs to the Status tab; Plays, Stats and Players don't carry it. */
+.tg-tabs[data-active-tab]:not([data-active-tab="score"]) ~ .tg-weather {
 	display: none;
 }
 

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base*Belles archive header mockups</title>
+<style>
+:root{
+  --cream:#f3efe0; --wine:#84172c; --wine-dark:#6d1a22; --navy:#002d62; --slate:#00385d;
+  --accent:#4a6274; --ink:#111; --green:#078025;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding:2rem 1rem 4rem}
+.wrap{max-width:960px;margin:0 auto}
+h1.note{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:3rem 0 .25rem}
+.page-title{font-size:3rem;text-align:center;margin:.5rem 0 1.5rem;font-weight:700}
+.why{font-size:.9rem;color:#444;margin:0 0 1rem;max-width:70ch}
+.label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;opacity:.85}
+.hdr{background:var(--wine);color:var(--cream);border-radius:4px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.sep{border:0;border-top:1px dashed #b9b29a;margin:3rem 0 0}
+
+/* A. Post-season: series status */
+.ps{padding:1.25rem 1.5rem}
+.ps-top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.ps-round{font-size:1.15rem;font-weight:700}
+.ps-meta{font-size:.85rem;opacity:.85}
+.series{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin:1rem 0}
+.side{display:flex;align-items:center;gap:.75rem}
+.side.right{justify-content:flex-end;text-align:right}
+.logo{width:48px;height:48px;border-radius:50%;background:var(--cream);color:var(--wine);display:grid;place-items:center;font-weight:800;font-size:.85rem;flex:none}
+.logo.alt{background:var(--navy);color:var(--cream)}
+.tname{font-weight:700;font-size:1.1rem}
+.seed{font-size:.75rem;opacity:.8}
+.score{font-size:2.5rem;font-weight:800;letter-spacing:.05em;text-align:center;line-height:1}
+.score small{display:block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;opacity:.85;margin-top:.35rem}
+.pips{display:flex;gap:.35rem;justify-content:center;margin-top:.4rem}
+.pip{width:.7rem;height:.7rem;border-radius:50%;border:2px solid var(--cream);opacity:.9}
+.pip.w{background:var(--cream)}
+.pip.l{background:transparent;opacity:.45}
+.ps-next{border-top:1px solid rgba(243,239,224,.25);padding-top:.75rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.95rem}
+.ps-next b{font-weight:700}
+.path{display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap}
+.chip{font-size:.75rem;font-weight:600;padding:.2rem .6rem;border:1px solid rgba(243,239,224,.5);border-radius:999px}
+.chip.won{background:var(--cream);color:var(--wine);border-color:var(--cream)}
+.chip.now{border-color:var(--cream);box-shadow:0 0 0 2px rgba(243,239,224,.35)}
+
+/* B. Team page */
+.team{padding:1.5rem}
+.team-main{display:flex;gap:1.25rem;align-items:center}
+.team-logo{width:84px;height:84px;border-radius:50%;background:var(--cream);color:var(--ink);display:grid;place-items:center;font-weight:800;flex:none;border:3px solid var(--cream)}
+.team-name{font-size:2rem;font-weight:800;line-height:1.1;margin:0}
+.team-sub{opacity:.85;font-size:.95rem;margin-top:.2rem}
+.strip{display:flex;flex-wrap:wrap;gap:0;margin-top:1.25rem;border-top:1px solid rgba(243,239,224,.25)}
+.strip .c{padding:.8rem 1.5rem .2rem 0;margin-right:1.5rem;border-right:1px solid rgba(243,239,224,.2);display:flex;flex-direction:column;gap:.2rem}
+.strip .c:last-child{border-right:0}
+.strip .v{font-size:1.35rem;font-weight:700}
+.strip .v.up{color:#bfe8c6}
+.strip .tag{align-self:center;margin-left:auto;font-size:.75rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;background:var(--cream);color:var(--wine)}
+.form{display:flex;gap:3px;margin-top:.25rem}
+.form i{width:10px;height:18px;border-radius:2px;background:var(--cream)}
+.form i.l{background:rgba(243,239,224,.3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1 class="note">A · Post-season archive — /season-type/post-season/?season_year=2026</h1>
+<p class="why">Drops Rank/GB/L10/STK, which are regular-season ideas. Shows where the team is in the bracket, the series score, and what's next. Chips show the path so far. The data below is placeholder.</p>
+
+<div class="page-title">Post Season</div>
+<div class="hdr ps">
+  <div class="ps-top">
+    <div class="ps-round">ALDS · Game 4</div>
+    <div class="ps-meta">Best of 5 · Series tied 2–2</div>
+  </div>
+  <div class="series">
+    <div class="side">
+      <div class="logo">CLE</div>
+      <div><div class="tname">Guardians</div><div class="seed">#2 seed · AL Central</div></div>
+    </div>
+    <div class="score">2 – 2
+      <div class="pips" aria-label="Guardians: W W L L"><span class="pip w"></span><span class="pip w"></span><span class="pip l"></span><span class="pip l"></span></div>
+      <small>Series</small>
+    </div>
+    <div class="side right">
+      <div><div class="tname">Yankees</div><div class="seed">#3 seed · AL East</div></div>
+      <div class="logo alt">NYY</div>
+    </div>
+  </div>
+  <div class="ps-next">
+    <div><b>Next:</b> Game 5 · Fri Oct 16 · 8:08 PM ET · Progressive Field</div>
+    <div>Post-season: <b>4 – 3</b> · Run diff <b>+10</b></div>
+  </div>
+  <div class="path"><span class="chip won">Wild Card ✓</span><span class="chip now">ALDS · now</span><span class="chip">ALCS</span><span class="chip">World Series</span></div>
+</div>
+
+<hr class="sep">
+
+<h1 class="note">B · Team page, regular season — /team/chicago-white-sox/</h1>
+<p class="why">Identity first (logo, name, division), then one compact line of season stats. GB, L10 and STK only appear when they carry data. Last-10 is a W/L bar instead of a "7–3" string.</p>
+
+<div class="page-title">Chicago White Sox</div>
+<div class="hdr team">
+  <div class="team-main">
+    <div class="team-logo">CWS</div>
+    <div>
+      <h2 class="team-name">Chicago White Sox</h2>
+      <div class="team-sub">American League Central · 2026 Regular Season</div>
+    </div>
+  </div>
+  <div class="strip">
+    <div class="c"><span class="label">Record</span><span class="v">81 – 81</span></div>
+    <div class="c"><span class="label">Division</span><span class="v">3rd</span></div>
+    <div class="c"><span class="label">Run diff</span><span class="v up">+12</span></div>
+    <div class="c"><span class="label">Streak</span><span class="v">W3</span></div>
+    <div class="c"><span class="label">Last 10</span><span class="form" aria-label="7 wins, 3 losses"><i></i><i></i><i class="l"></i><i></i><i></i><i></i><i class="l"></i><i></i><i class="l"></i><i></i></span></div>
+  </div>
+</div>
+
+<hr class="sep">
+
+<h1 class="note">C · Team page, post-season (adapts)</h1>
+<p class="why">Same shell. The stat strip swaps to what matters: result of the current series, the post-season record, and the next game. A team that missed the playoffs falls back to its final regular-season line with an "Eliminated" or "Missed" tag.</p>
+
+<div class="page-title">Cleveland Guardians</div>
+<div class="hdr team">
+  <div class="team-main">
+    <div class="team-logo">CLE</div>
+    <div>
+      <h2 class="team-name">Cleveland Guardians</h2>
+      <div class="team-sub">American League Central · 2026 Post Season</div>
+    </div>
+    <span class="tag" style="margin-left:auto;font-size:.75rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;background:var(--cream);color:var(--wine)">ALDS · tied 2–2</span>
+  </div>
+  <div class="strip">
+    <div class="c"><span class="label">Post-season</span><span class="v">4 – 3</span></div>
+    <div class="c"><span class="label">Run diff</span><span class="v up">+10</span></div>
+    <div class="c"><span class="label">Reg. season</span><span class="v">94 – 68</span></div>
+    <div class="c"><span class="label">Next</span><span class="v" style="font-size:1rem">Fri 8:08 PM vs NYY</span></div>
+  </div>
+</div>
+
+<hr class="sep">
+
+<h1 class="note">C2 · Team page, post-season, team not in the playoffs</h1>
+<p class="why">Falls back to the final regular-season line. The tag says why. "Missed playoffs" if they never qualified, "Eliminated" if they were knocked out.</p>
+
+<div class="hdr team">
+  <div class="team-main">
+    <div class="team-logo">CWS</div>
+    <div>
+      <h2 class="team-name">Chicago White Sox</h2>
+      <div class="team-sub">American League Central · 2026 Final Regular Season</div>
+    </div>
+    <span class="tag" style="margin-left:auto;font-size:.75rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;background:var(--cream);color:var(--wine)">Missed playoffs</span>
+  </div>
+  <div class="strip">
+    <div class="c"><span class="label">Record</span><span class="v">81 – 81</span></div>
+    <div class="c"><span class="label">Division</span><span class="v">3rd</span></div>
+    <div class="c"><span class="label">Run diff</span><span class="v up">+12</span></div>
+  </div>
+</div>
+
+<hr class="sep">
+
+<h1 class="note">D · Team page, spring training (adapts)</h1>
+<p class="why">Spring training has almost no meaningful standings. Record and next game only. No rank, no run diff.</p>
+
+<div class="hdr team">
+  <div class="team-main">
+    <div class="team-logo">CLE</div>
+    <div>
+      <h2 class="team-name">Cleveland Guardians</h2>
+      <div class="team-sub">American League Central · 2026 Spring Training</div>
+    </div>
+  </div>
+  <div class="strip">
+    <div class="c"><span class="label">Record</span><span class="v">12 – 9 – 1</span></div>
+    <div class="c"><span class="label">Next</span><span class="v" style="font-size:1rem">Sat 1:05 PM vs SD</span></div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

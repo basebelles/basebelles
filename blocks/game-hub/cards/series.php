@@ -41,13 +41,6 @@ $bb_ser_cell_class = array(
 	'scheduled'  => '',
 );
 
-// "Wild Card bye · ALDS won 3-2 vs CWS".
-$bb_ser_road = array();
-
-foreach ( (array) ( $bb_hub_postseason['road'] ?? array() ) as $bb_ser_leg ) {
-	$bb_ser_road[] = $bb_ser_leg['round'] . ' ' . lcfirst( (string) $bb_ser_leg['result'] );
-}
-
 $bb_ser_footnote = false;
 ?>
 
@@ -92,14 +85,9 @@ $bb_ser_footnote = false;
 		</ol>
 	<?php endif; ?>
 
-	<?php if ( ! empty( $bb_ser_road ) || $bb_ser_footnote ) : ?>
+	<?php if ( $bb_ser_footnote ) : ?>
 		<p class="bb-hub-foot">
-			<?php if ( ! empty( $bb_ser_road ) ) : ?>
-				<strong>Road here:</strong> <?php echo esc_html( implode( ' · ', $bb_ser_road ) ); ?>.
-			<?php endif; ?>
-			<?php if ( $bb_ser_footnote ) : ?>
-				<br /><span class="bb-hub-if-necessary" aria-hidden="true">* If necessary.</span>
-			<?php endif; ?>
+			<span class="bb-hub-if-necessary" aria-hidden="true">* If necessary.</span>
 		</p>
 	<?php endif; ?>
 </section>

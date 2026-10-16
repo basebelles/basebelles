@@ -328,6 +328,59 @@ class PanelsTest extends TestCase {
 
 		$this->assertStringContainsString( 'FINAL', $html );
 		$this->assertStringContainsString( 'The Guardians win', $html );
+		$this->assertStringNotContainsString( 'tg-potg', $html );
+	}
+
+	public function test_final_panel_lists_the_players_of_the_game_under_the_result(): void {
+		$feed                        = Fixtures::live_feed();
+		$feed['players_of_the_game'] = array(
+			'performers' => array(
+				array(
+					'name' => 'José Ramírez',
+					'line' => '2-4, HR, 3 RBI',
+				),
+			),
+			'decisions'  => array(
+				array(
+					'code'  => 'W',
+					'title' => 'Winning pitcher',
+					'name'  => 'Tanner Bibee',
+				),
+				array(
+					'code'  => 'SV',
+					'title' => 'Save',
+					'name'  => 'Emmanuel Clase',
+				),
+			),
+		);
+
+		$html = Basebelles_Today_Game_Panels::render_score_panel( Fixtures::final_game( 2, 6 ), 'final', $feed );
+
+		$this->assertMatchesRegularExpression( '#The Guardians win\s*</div>\s*<div class="tg-potg">#', $html );
+		$this->assertStringContainsString( '<h4 class="tg-potg-heading">Players of the Game</h4>', $html );
+		$this->assertMatchesRegularExpression( '#<strong>José Ramírez</strong>\s*<span class="tg-potg-line">2-4, HR, 3 RBI</span>#', $html );
+		$this->assertStringContainsString( '<abbr title="Winning pitcher">W</abbr> Tanner Bibee', $html );
+		$this->assertStringContainsString( '<abbr title="Save">SV</abbr> Emmanuel Clase', $html );
+	}
+
+	public function test_decisions_alone_skip_the_heading(): void {
+		$feed                        = Fixtures::live_feed();
+		$feed['players_of_the_game'] = array(
+			'performers' => array(),
+			'decisions'  => array(
+				array(
+					'code'  => 'L',
+					'title' => 'Losing pitcher',
+					'name'  => 'Tanner Bibee',
+				),
+			),
+		);
+
+		$html = Basebelles_Today_Game_Panels::render_score_panel( Fixtures::final_game( 6, 2 ), 'final', $feed );
+
+		$this->assertStringContainsString( 'The Guardians lose', $html );
+		$this->assertStringNotContainsString( 'tg-potg-heading', $html );
+		$this->assertStringContainsString( '<abbr title="Losing pitcher">L</abbr> Tanner Bibee', $html );
 	}
 
 	/*
