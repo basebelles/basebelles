@@ -217,12 +217,13 @@ class GameHubBlockTest extends TestCase {
 		$this->assertMatchesRegularExpression( '#G3</span>\s*<span class="bb-hub-series-where">vs TB</span>#', $html );
 	}
 
-	public function test_if_necessary_games_get_an_asterisk_and_the_road_is_noted(): void {
+	public function test_if_necessary_games_get_an_asterisk_and_a_note(): void {
 		$html = $this->render_alcs();
 
 		$this->assertSame( 3, substr_count( $html, '<span class="bb-footnote-mark" aria-hidden="true">*</span>' ) );
-		$this->assertStringContainsString( '<strong>Road here:</strong> Wild Card bye · ALDS won 3-2 vs CWS.', $html );
-		$this->assertStringContainsString( '* If necessary.', $html );
+		$this->assertMatchesRegularExpression( '#<p class="bb-hub-foot">\s*<span class="bb-hub-if-necessary" aria-hidden="true">\* If necessary\.</span>\s*</p>#', $html );
+		// The summary at the top of the page covers the earlier rounds.
+		$this->assertStringNotContainsString( 'Road here', $html );
 	}
 
 	public function test_todays_game_in_the_postseason_drops_its_series_line(): void {
@@ -248,7 +249,9 @@ class GameHubBlockTest extends TestCase {
 		$this->assertStringContainsString( '<h3 class="bb-hub-title">World Series</h3>', $html );
 		$this->assertStringContainsString( 'Opponent TBD', $html );
 		$this->assertStringNotContainsString( 'bb-hub-series-games', $html );
-		$this->assertStringContainsString( 'ALCS won 4-2 vs TB.', $html );
+		// No road line, and with no games there's no footnote either, so no footer at all.
+		$this->assertStringNotContainsString( 'ALCS won 4-2 vs TB', $html );
+		$this->assertStringNotContainsString( 'bb-hub-foot', $html );
 	}
 
 	public function test_once_eliminated_the_off_season_layout_takes_over(): void {

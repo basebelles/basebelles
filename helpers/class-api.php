@@ -1718,17 +1718,18 @@ class Basebelles_API {
 		$home_box  = $live_data['boxscore']['teams']['home'] ?? array();
 
 		return array(
-			'lineups'      => array(
+			'lineups'             => array(
 				'away' => $this->normalize_boxscore_lineup( $away_box ),
 				'home' => $this->normalize_boxscore_lineup( $home_box ),
 			),
-			'pitchers'     => array(
+			'pitchers'            => array(
 				'away' => $this->normalize_pitching_log( $away_box ),
 				'home' => $this->normalize_pitching_log( $home_box ),
 			),
-			'current_play' => $this->normalize_current_play( $live_data['plays']['currentPlay'] ?? array() ),
-			'recent_plays' => $this->normalize_recent_plays( $live_data['plays']['allPlays'] ?? array() ),
-			'game_summary' => $this->normalize_game_summary( $live_data, $away_box, $home_box ),
+			'current_play'        => $this->normalize_current_play( $live_data['plays']['currentPlay'] ?? array() ),
+			'recent_plays'        => $this->normalize_recent_plays( $live_data['plays']['allPlays'] ?? array() ),
+			'game_summary'        => $this->normalize_game_summary( $live_data, $away_box, $home_box ),
+			'players_of_the_game' =>Basebelles_Game_Hub::players_of_the_game( $live_data, self::GUARDIANS_TEAM_ID ),
 		);
 	}
 

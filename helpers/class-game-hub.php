@@ -1,7 +1,8 @@
 <?php
 /**
  * Pure helpers behind the Game Hub block's cards: the division table, the wild card line, last
- * and next games, the Guardians news feed and the Spring Training countdown.
+ * and next games, the Guardians news feed, the Spring Training countdown, and the players of the
+ * game under Today's Game's final score.
  *
  * Like Basebelles_Postseason, no HTTP and no WordPress -- Basebelles_API fetches the raw
  * payloads and hands them in here, so the shaping is unit-testable against fixtures.
@@ -357,6 +358,73 @@ class Basebelles_Game_Hub {
 		}
 
 		return $first;
+	}
+
+	/**
+	 * Players of the game, for the line under Today's Game's "The Guardians win/lose": our top
+	 * performers and the pitching decisions.
+	 *
+	 * MLB names no single player of the game. Its live feed carries up to three top performers
+	 * (both teams, ranked by game score) and the W/L/SV pitchers; we keep only the Guardians'
+	 * performers, so a bad night can leave that list empty while the decisions still show.
+	 *
+	 * @param array $live_data The live feed's `liveData` payload.
+	 * @param int   $team_id   Our team.
+	 * @return array{performers: array<int, array{name: string, line: string}>, decisions: array<int, array{code: string, title: string, name: string}>}
+	 */
+	public static function players_of_the_game( array $live_data, int $team_id ): array {
+		$teams = $live_data['boxscore']['teams'] ?? array();
+		$side  = (int) ( $teams['home']['team']['id'] ?? 0 ) === $team_id ? 'home' : 'away';
+		$ours  = is_array( $teams[ $side ]['players'] ?? null ) ? $teams[ $side ]['players'] : array();
+
+		$performers = array();
+
+		// Only trust the side when the team is actually in this game.
+		if ( (int) ( $teams[ $side ]['team']['id'] ?? 0 ) === $team_id ) {
+			foreach ( (array) ( $live_data['boxscore']['topPerformers'] ?? array() ) as $top ) {
+				$player = is_array( $top['player'] ?? null ) ? $top['player'] : array();
+				$id     = (int) ( $player['person']['id'] ?? 0 );
+				$name   = (string) ( $player['person']['fullName'] ?? '' );
+
+				if ( $id <= 0 || '' === $name || ! isset( $ours[ 'ID' . $id ] ) ) {
+					continue;
+				}
+
+				// "hitter", or "starter"/"pitcher" for arms. Two-way players get the line they were picked for.
+				$kind = 'hitter' === ( $top['type'] ?? '' ) ? 'batting' : 'pitching';
+				$line = (string) ( $player['stats'][ $kind ]['summary'] ?? '' );
+
+				// MLB writes "2-4 | HR, 3 RBI"; the bar reads oddly in a sentence.
+				$performers[] = array(
+					'name' => $name,
+					'line' => trim( str_replace( ' | ', ', ', $line ) ),
+				);
+			}
+		}
+
+		$decisions = array();
+		$labels    = array(
+			'winner' => array( 'W', 'Winning pitcher' ),
+			'loser'  => array( 'L', 'Losing pitcher' ),
+			'save'   => array( 'SV', 'Save' ),
+		);
+
+		foreach ( $labels as $key => $label ) {
+			$name = (string) ( $live_data['decisions'][ $key ]['fullName'] ?? '' );
+
+			if ( '' !== $name ) {
+				$decisions[] = array(
+					'code'  => $label[0],
+					'title' => $label[1],
+					'name'  => $name,
+				);
+			}
+		}
+
+		return array(
+			'performers' => $performers,
+			'decisions'  => $decisions,
+		);
 	}
 
 	/**

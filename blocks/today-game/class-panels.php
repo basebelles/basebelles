@@ -417,7 +417,7 @@ class Basebelles_Today_Game_Panels {
 
 		ob_start();
 		?>
-		<div class="tg-tabs" data-game-pk="<?php echo esc_attr( (string) $game['game_pk'] ); ?>" data-phase="<?php echo esc_attr( $phase ); ?>">
+		<div class="tg-tabs" data-game-pk="<?php echo esc_attr( (string) $game['game_pk'] ); ?>" data-phase="<?php echo esc_attr( $phase ); ?>" data-active-tab="score">
 			<div class="tg-tab-bar" role="tablist">
 				<?php foreach ( self::TABS as $tab_name => $tab ) : ?>
 					<?php
@@ -529,7 +529,7 @@ class Basebelles_Today_Game_Panels {
 			return self::render_at_bat_now( $game, $live_feed );
 		}
 
-		return self::render_final_score( $game );
+		return self::render_final_score( $game, $live_feed );
 	}
 
 	/**
@@ -756,12 +756,14 @@ class Basebelles_Today_Game_Panels {
 	}
 
 	/**
-	 * Final/live score line. Same markup the block has always shown for scored games.
+	 * Final/live score line. Same markup the block has always shown for scored games, plus the
+	 * players of the game under the result once it's final.
 	 *
-	 * @param array $game Normalized game array.
+	 * @param array $game      Normalized game array.
+	 * @param array $live_feed Live feed data, or empty array.
 	 * @return string
 	 */
-	private static function render_final_score( array $game ) {
+	private static function render_final_score( array $game, array $live_feed = array() ) {
 		if ( empty( $game['scores'] ) ) {
 			return '<p class="tg-empty">Score unavailable.</p>';
 		}
@@ -792,7 +794,53 @@ class Basebelles_Today_Game_Panels {
 			<div class="tg-result-headline <?php echo $guardians_win ? 'is-win' : 'is-loss'; ?>">
 				The Guardians <?php echo $guardians_win ? 'win' : 'lose'; ?>
 			</div>
+			<?php echo self::render_players_of_the_game( $live_feed['players_of_the_game'] ?? array() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
 		<?php endif; ?>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Under the final result: the Guardians' top performers, then the W/L/SV pitchers.
+	 *
+	 * @param array $players See Basebelles_Game_Hub::players_of_the_game().
+	 * @return string Empty when MLB has posted neither.
+	 */
+	private static function render_players_of_the_game( array $players ) {
+		$performers = (array) ( $players['performers'] ?? array() );
+		$decisions  = (array) ( $players['decisions'] ?? array() );
+
+		if ( empty( $performers ) && empty( $decisions ) ) {
+			return '';
+		}
+
+		ob_start();
+		?>
+		<div class="tg-potg">
+			<?php if ( ! empty( $performers ) ) : ?>
+				<h4 class="tg-potg-heading">Players of the Game</h4>
+				<ul class="tg-potg-performers">
+					<?php foreach ( $performers as $performer ) : ?>
+						<li>
+							<strong><?php echo esc_html( (string) $performer['name'] ); ?></strong>
+							<?php if ( '' !== (string) $performer['line'] ) : ?>
+								<span class="tg-potg-line"><?php echo esc_html( (string) $performer['line'] ); ?></span>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+			<?php if ( ! empty( $decisions ) ) : ?>
+				<p class="tg-potg-decisions">
+					<?php foreach ( $decisions as $index => $decision ) : ?>
+						<?php if ( $index > 0 ) : ?>
+							<span aria-hidden="true">·</span>
+						<?php endif; ?>
+						<span class="tg-potg-decision"><abbr title="<?php echo esc_attr( (string) $decision['title'] ); ?>"><?php echo esc_html( (string) $decision['code'] ); ?></abbr> <?php echo esc_html( (string) $decision['name'] ); ?></span>
+					<?php endforeach; ?>
+				</p>
+			<?php endif; ?>
+		</div>
 		<?php
 		return (string) ob_get_clean();
 	}

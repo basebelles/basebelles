@@ -7,6 +7,9 @@
 		var tabs   = instance.querySelectorAll( '.tg-tab' );
 		var panels = instance.querySelectorAll( '.tg-panel' );
 
+		// Read by the CSS that keeps the first-pitch forecast on the Status tab only.
+		instance.setAttribute( 'data-active-tab', tabName );
+
 		for ( var i = 0; i < tabs.length; i++ ) {
 			var isActive = tabs[ i ].getAttribute( 'data-tab' ) === tabName;
 			tabs[ i ].classList.toggle( 'is-active', isActive );
