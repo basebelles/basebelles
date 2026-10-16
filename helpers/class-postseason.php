@@ -130,13 +130,14 @@ class Basebelles_Postseason {
 	 * @param string $today    Y-m-d in the game time zone.
 	 * @param int    $team_id  Team to report on.
 	 * @param string $timezone Time zone game times are shown in.
+	 * @param string $league   AL or NL, for the round labels ("NLCS").
 	 * @return array
 	 */
-	public static function build_status( array $dates, array $seeds, string $today, int $team_id, string $timezone = 'America/New_York' ): array {
+	public static function build_status( array $dates, array $seeds, string $today, int $team_id, string $timezone = 'America/New_York', string $league = 'AL' ): array {
 		$series = array();
 
 		foreach ( self::group_games_by_round( $dates ) as $game_type => $games ) {
-			$series[ $game_type ] = self::build_series( $game_type, $games, $seeds, $today, $team_id, $timezone );
+			$series[ $game_type ] = self::build_series( $game_type, $games, $seeds, $today, $team_id, $timezone, $league );
 		}
 
 		$seed          = isset( $seeds[ $team_id ] ) ? (int) $seeds[ $team_id ] : null;
@@ -167,9 +168,9 @@ class Basebelles_Postseason {
 			'next_round'        => '',
 			'postseason_record' => self::postseason_record( $series ),
 			'series'            => $series,
-			'road'              => self::road( $series, $had_bye, '' ),
+			'road'              => self::road( $series, $had_bye, '', $league ),
 			// Every decided round, the current one included, for the "Season complete" card.
-			'rounds'            => self::road( $series, $had_bye, '' ),
+			'rounds'            => self::road( $series, $had_bye, '', $league ),
 		);
 
 		if ( empty( $series ) ) {
@@ -185,7 +186,7 @@ class Basebelles_Postseason {
 
 		$current           = end( $series );
 		$status['current'] = $current;
-		$status['road']    = self::road( $series, $had_bye, $current['game_type'] );
+		$status['road']    = self::road( $series, $had_bye, $current['game_type'], $league );
 
 		if ( ! $current['complete'] ) {
 			$status['state'] = 'in_series';
@@ -352,9 +353,10 @@ class Basebelles_Postseason {
 	 * @param string $today     Y-m-d.
 	 * @param int    $team_id   Our team.
 	 * @param string $timezone  Display time zone.
+	 * @param string $league    AL or NL.
 	 * @return array
 	 */
-	private static function build_series( string $game_type, array $games, array $seeds, string $today, int $team_id, string $timezone ): array {
+	private static function build_series( string $game_type, array $games, array $seeds, string $today, int $team_id, string $timezone, string $league = 'AL' ): array {
 		$first          = reset( $games );
 		$total          = 0;
 		$description    = '';
@@ -397,8 +399,8 @@ class Basebelles_Postseason {
 
 		return array(
 			'game_type'       => $game_type,
-			'round'           => '' !== $description ? $description : self::ROUND_FULL[ $game_type ],
-			'round_short'     => self::ROUND_SHORT[ $game_type ],
+			'round'           => '' !== $description ? $description : self::league_label( self::ROUND_FULL[ $game_type ], $league ),
+			'round_short'     => self::round_short( $game_type, $league ),
 			'games_in_series' => $total,
 			'wins_needed'     => $wins_needed,
 			'guardians'       => $guardians,
@@ -625,9 +627,10 @@ class Basebelles_Postseason {
 	 * @param array  $series   Game type => series.
 	 * @param bool   $had_bye  Whether we skipped the Wild Card Series.
 	 * @param string $current  Game type of the round to stop before, or '' for all of them.
+	 * @param string $league   AL or NL.
 	 * @return array<int, array{round: string, result: string}>
 	 */
-	private static function road( array $series, bool $had_bye, string $current ): array {
+	private static function road( array $series, bool $had_bye, string $current, string $league = 'AL' ): array {
 		$road = array();
 
 		foreach ( self::ROUND_ORDER as $game_type ) {
@@ -642,13 +645,35 @@ class Basebelles_Postseason {
 				);
 			} elseif ( isset( $series[ $game_type ] ) && $series[ $game_type ]['complete'] ) {
 				$road[] = array(
-					'round'  => self::ROUND_SHORT[ $game_type ],
+					'round'  => self::round_short( $game_type, $league ),
 					'result' => $series[ $game_type ]['result_label'],
 				);
 			}
 		}
 
 		return $road;
+	}
+
+	/**
+	 * Short round name for a league: "ALDS", "NLCS". ROUND_SHORT is the AL's.
+	 *
+	 * @param string $game_type F, D, L or W.
+	 * @param string $league    AL or NL.
+	 * @return string
+	 */
+	public static function round_short( string $game_type, string $league = 'AL' ): string {
+		return self::league_label( self::ROUND_SHORT[ $game_type ] ?? '', $league );
+	}
+
+	/**
+	 * Swap the AL prefix of a round label for the NL's when needed.
+	 *
+	 * @param string $label  Label from ROUND_SHORT or ROUND_FULL.
+	 * @param string $league AL or NL.
+	 * @return string
+	 */
+	private static function league_label( string $label, string $league ): string {
+		return 'NL' === $league && 0 === strpos( $label, 'AL' ) ? 'NL' . substr( $label, 2 ) : $label;
 	}
 
 	/**

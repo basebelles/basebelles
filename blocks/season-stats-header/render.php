@@ -5,7 +5,7 @@
  * Three layouts, picked from what the archive is about:
  * - Post-season archive: the Guardians' series status (series.php).
  * - Team archive: team identity plus a stat strip that adapts to the season type (team.php).
- * - Any other season-type archive: the four-cell standings bar below.
+ * - Any other season-type archive: the Guardians' season title, summary and stat strip (season.php).
  *
  * @package Base*Belles
  */
@@ -149,72 +149,5 @@ if ( is_tax( 'team' ) ) {
 	return;
 }
 
-/*
- * Season-type archive (spring training, regular season): the four-cell standings bar.
- */
-
-$record_label = sprintf( '%d – %d', (int) ( $stats['wins'] ?? 0 ), (int) ( $stats['losses'] ?? 0 ) );
-
-// GB, L10 and STK, each only when it carries data.
-$context_items = array();
-foreach (
-	array(
-		/* translators: %s: games back */
-		'games_back' => __( 'GB: %s', 'basebelles' ),
-		/* translators: %s: last ten record */
-		'last_ten'   => __( 'L10: %s', 'basebelles' ),
-		/* translators: %s: streak code */
-		'streak'     => __( 'STK: %s', 'basebelles' ),
-	) as $bb_key => $bb_format
-) {
-	if ( $bb_has_value( $stats[ $bb_key ] ?? '' ) ) {
-		$context_items[] = esc_html( sprintf( $bb_format, (string) $stats[ $bb_key ] ) );
-	}
-}
-
-$cells   = array();
-$cells[] = array( 'record', __( 'Record', 'basebelles' ), esc_html( $record_label ) );
-if ( $bb_has_value( $stats['rank'] ?? '' ) ) {
-	$cells[] = array( 'rank', __( 'Rank', 'basebelles' ), esc_html( (string) $stats['rank'] ) );
-}
-if ( $bb_has_value( $stats['run_diff'] ?? '' ) ) {
-	$cells[] = array( 'diff', __( 'Run diff', 'basebelles' ), esc_html( (string) $stats['run_diff'] ) );
-}
-if ( $context_items ) {
-	$cells[] = array( 'context', __( 'Snapshot', 'basebelles' ), implode( '<br />', $context_items ) );
-}
-
-$snapshot_heading = sprintf( '%d Standings', $season_year );
-
-$class_season_type = 'basebelles-season-stats-header-regular';
-if ( 'springTraining' === $season_type ) {
-	$class_season_type = 'basebelles-season-stats-header-spring';
-} elseif ( 'postseason' === $season_type ) {
-	$class_season_type = 'basebelles-season-stats-header-postseason';
-}
-
-$class_current_season = ( (int) gmdate( 'Y' ) === $current_season ) ? 'is-current' : '';
-
-$classes = array(
-	'basebelles-season-stats-header',
-	$class_season_type,
-	$class_current_season,
-);
-if ( $is_past ) {
-	$classes[] = 'is-past';
-}
-?>
-<div class="<?php echo esc_attr( implode( ' ', array_filter( $classes ) ) ); ?>">
-	<div class="season-stats-inner">
-		<div class="season-stats-ghost" aria-hidden="true"></div>
-		<div class="season-stats-heading"><h4><?php echo esc_html( $snapshot_heading ); ?></h4></div>
-		<div class="season-stats-grid" style="--bb-cells: <?php echo (int) count( $cells ); ?>">
-			<?php foreach ( $cells as $bb_cell ) : ?>
-				<div class="season-stats-cell season-stats-<?php echo esc_attr( $bb_cell[0] ); ?>">
-					<span class="season-stats-label"><?php echo esc_html( $bb_cell[1] ); ?></span>
-					<span class="season-stats-value"><?php echo wp_kses( $bb_cell[2], array( 'br' => array() ) ); ?></span>
-				</div>
-			<?php endforeach; ?>
-		</div>
-	</div>
-</div>
+// Season-type archive (spring training, regular season, or a post season the Guardians missed).
+require __DIR__ . '/season.php';

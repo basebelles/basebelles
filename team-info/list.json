@@ -8,7 +8,29 @@
 		"state": "CA",
 		"country": "USA",
 		"league": "AL West",
-		"mlb_team_id": 108
+		"mlb_team_id": 108,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#003263"
+			},
+			{
+				"name": "Red",
+				"hex": "#BA0021"
+			},
+			{
+				"name": "Maroon",
+				"hex": "#862633"
+			},
+			{
+				"name": "Silver",
+				"hex": "#C4CED4"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"astros": {
 		"name": "Houston Astros",
@@ -19,7 +41,25 @@
 		"state": "TX",
 		"country": "USA",
 		"league": "AL West",
-		"mlb_team_id": 117
+		"mlb_team_id": 117,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#002D62"
+			},
+			{
+				"name": "Orange",
+				"hex": "#EB6E1F"
+			},
+			{
+				"name": "Light Orange",
+				"hex": "#F4911E"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"athletics": {
 		"name": "Athletics",
@@ -30,7 +70,25 @@
 		"state": "CA",
 		"country": "USA",
 		"league": "AL West",
-		"mlb_team_id": 133
+		"mlb_team_id": 133,
+		"colors": [
+			{
+				"name": "Green",
+				"hex": "#003831"
+			},
+			{
+				"name": "Gold",
+				"hex": "#EFB21E"
+			},
+			{
+				"name": "Gray",
+				"hex": "#A2AAAD"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"blue-jays": {
 		"name": "Toronto Blue Jays",
@@ -41,7 +99,25 @@
 		"state": "ON",
 		"country": "Canada",
 		"league": "AL East",
-		"mlb_team_id": 141
+		"mlb_team_id": 141,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#134A8E"
+			},
+			{
+				"name": "Navy Blue",
+				"hex": "#1D2D5C"
+			},
+			{
+				"name": "Red",
+				"hex": "#E8291C"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"braves": {
 		"name": "Atlanta Braves",
@@ -52,7 +128,25 @@
 		"state": "GA",
 		"country": "USA",
 		"league": "NL East",
-		"mlb_team_id": 144
+		"mlb_team_id": 144,
+		"colors": [
+			{
+				"name": "Scarlet",
+				"hex": "#CE1141"
+			},
+			{
+				"name": "Navy Blue",
+				"hex": "#13274F"
+			},
+			{
+				"name": "Yellow",
+				"hex": "#EAAA00"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"brewers": {
 		"name": "Milwaukee Brewers",
@@ -63,7 +157,21 @@
 		"state": "WI",
 		"country": "USA",
 		"league": "NL Central",
-		"mlb_team_id": 158
+		"mlb_team_id": 158,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#12284B"
+			},
+			{
+				"name": "Yellow",
+				"hex": "#FFC52F"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"cardinals": {
 		"name": "St. Louis Cardinals",
@@ -74,7 +182,25 @@
 		"state": "MO",
 		"country": "USA",
 		"league": "NL Central",
-		"mlb_team_id": 138
+		"mlb_team_id": 138,
+		"colors": [
+			{
+				"name": "Red",
+				"hex": "#C41E3A"
+			},
+			{
+				"name": "Navy Blue",
+				"hex": "#0C2340"
+			},
+			{
+				"name": "Yellow",
+				"hex": "#FEDB00"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"cubs": {
 		"name": "Chicago Cubs",
@@ -85,7 +211,21 @@
 		"state": "IL",
 		"country": "USA",
 		"league": "NL Central",
-		"mlb_team_id": 112
+		"mlb_team_id": 112,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#0E3386"
+			},
+			{
+				"name": "Red",
+				"hex": "#CC3433"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"d-backs": {
 		"name": "Arizona Diamondbacks",
@@ -96,7 +236,29 @@
 		"state": "AZ",
 		"country": "USA",
 		"league": "NL West",
-		"mlb_team_id": 109
+		"mlb_team_id": 109,
+		"colors": [
+			{
+				"name": "Sedona Red",
+				"hex": "#A71930"
+			},
+			{
+				"name": "Sonoran Sand",
+				"hex": "#E3D4AD"
+			},
+			{
+				"name": "Black",
+				"hex": "#000000"
+			},
+			{
+				"name": "Teal",
+				"hex": "#30CED8"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"dodgers": {
 		"name": "Los Angeles Dodgers",
@@ -107,7 +269,25 @@
 		"state": "CA",
 		"country": "USA",
 		"league": "NL West",
-		"mlb_team_id": 119
+		"mlb_team_id": 119,
+		"colors": [
+			{
+				"name": "Dodger Blue",
+				"hex": "#005A9C"
+			},
+			{
+				"name": "Red",
+				"hex": "#EF3E42"
+			},
+			{
+				"name": "Silver",
+				"hex": "#A5ACAF"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"giants": {
 		"name": "San Francisco Giants",
@@ -118,7 +298,29 @@
 		"state": "CA",
 		"country": "USA",
 		"league": "NL West",
-		"mlb_team_id": 137
+		"mlb_team_id": 137,
+		"colors": [
+			{
+				"name": "Orange",
+				"hex": "#FD5A1E"
+			},
+			{
+				"name": "Black",
+				"hex": "#27251F"
+			},
+			{
+				"name": "Beige",
+				"hex": "#EFD19F"
+			},
+			{
+				"name": "Gold",
+				"hex": "#AE8F6F"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"guardians": {
 		"name": "Cleveland Guardians",
@@ -129,7 +331,21 @@
 		"state": "OH",
 		"country": "USA",
 		"league": "AL Central",
-		"mlb_team_id": 114
+		"mlb_team_id": 114,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#00385D"
+			},
+			{
+				"name": "Red",
+				"hex": "#E50022"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"mariners": {
 		"name": "Seattle Mariners",
@@ -140,7 +356,29 @@
 		"state": "WA",
 		"country": "USA",
 		"league": "AL West",
-		"mlb_team_id": 136
+		"mlb_team_id": 136,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#0C2C56"
+			},
+			{
+				"name": "Northwest Green",
+				"hex": "#005C5C"
+			},
+			{
+				"name": "Silver",
+				"hex": "#C4CED4"
+			},
+			{
+				"name": "Red",
+				"hex": "#D50032"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"marlins": {
 		"name": "Miami Marlins",
@@ -151,7 +389,29 @@
 		"state": "FL",
 		"country": "USA",
 		"league": "NL East",
-		"mlb_team_id": 146
+		"mlb_team_id": 146,
+		"colors": [
+			{
+				"name": "Miami Blue",
+				"hex": "#00A3E0"
+			},
+			{
+				"name": "Caliente Red",
+				"hex": "#EF3340"
+			},
+			{
+				"name": "Slate Gray",
+				"hex": "#41748D"
+			},
+			{
+				"name": "Midnight Black",
+				"hex": "#000000"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"mets": {
 		"name": "New York Mets",
@@ -162,7 +422,21 @@
 		"state": "NY",
 		"country": "USA",
 		"league": "NL East",
-		"mlb_team_id": 121
+		"mlb_team_id": 121,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#002D72"
+			},
+			{
+				"name": "Orange",
+				"hex": "#FF5910"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"nationals": {
 		"name": "Washington Nationals",
@@ -173,7 +447,21 @@
 		"state": "DC",
 		"country": "USA",
 		"league": "NL East",
-		"mlb_team_id": 120
+		"mlb_team_id": 120,
+		"colors": [
+			{
+				"name": "Red",
+				"hex": "#AB0003"
+			},
+			{
+				"name": "Navy Blue",
+				"hex": "#14225A"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"orioles": {
 		"name": "Baltimore Orioles",
@@ -184,7 +472,21 @@
 		"state": "MD",
 		"country": "USA",
 		"league": "AL East",
-		"mlb_team_id": 110
+		"mlb_team_id": 110,
+		"colors": [
+			{
+				"name": "Orange",
+				"hex": "#DF4601"
+			},
+			{
+				"name": "Black",
+				"hex": "#000000"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"padres": {
 		"name": "San Diego Padres",
@@ -195,7 +497,21 @@
 		"state": "CA",
 		"country": "USA",
 		"league": "NL West",
-		"mlb_team_id": 135
+		"mlb_team_id": 135,
+		"colors": [
+			{
+				"name": "Brown",
+				"hex": "#2F241D"
+			},
+			{
+				"name": "Gold",
+				"hex": "#FFC425"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"phillies": {
 		"name": "Philadelphia Phillies",
@@ -206,7 +522,21 @@
 		"state": "PA",
 		"country": "USA",
 		"league": "NL East",
-		"mlb_team_id": 143
+		"mlb_team_id": 143,
+		"colors": [
+			{
+				"name": "Red",
+				"hex": "#E81828"
+			},
+			{
+				"name": "Blue",
+				"hex": "#002D72"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"pirates": {
 		"name": "Pittsburgh Pirates",
@@ -217,7 +547,21 @@
 		"state": "PA",
 		"country": "USA",
 		"league": "NL Central",
-		"mlb_team_id": 134
+		"mlb_team_id": 134,
+		"colors": [
+			{
+				"name": "Black",
+				"hex": "#27251F"
+			},
+			{
+				"name": "Yellow",
+				"hex": "#FDB827"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"rangers": {
 		"name": "Texas Rangers",
@@ -228,7 +572,21 @@
 		"state": "TX",
 		"country": "USA",
 		"league": "AL West",
-		"mlb_team_id": 140
+		"mlb_team_id": 140,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#003278"
+			},
+			{
+				"name": "Red",
+				"hex": "#C0111F"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"rays": {
 		"name": "Tampa Bay Rays",
@@ -239,7 +597,25 @@
 		"state": "FL",
 		"country": "USA",
 		"league": "AL East",
-		"mlb_team_id": 139
+		"mlb_team_id": 139,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#092C5C"
+			},
+			{
+				"name": "Columbia Blue",
+				"hex": "#8FBCE6"
+			},
+			{
+				"name": "Yellow",
+				"hex": "#F5D130"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"red-sox": {
 		"name": "Boston Red Sox",
@@ -250,7 +626,21 @@
 		"state": "MA",
 		"country": "USA",
 		"league": "AL East",
-		"mlb_team_id": 111
+		"mlb_team_id": 111,
+		"colors": [
+			{
+				"name": "Red",
+				"hex": "#BD3039"
+			},
+			{
+				"name": "Blue",
+				"hex": "#0C2340"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"reds": {
 		"name": "Cincinnati Reds",
@@ -261,7 +651,21 @@
 		"state": "OH",
 		"country": "USA",
 		"league": "NL Central",
-		"mlb_team_id": 113
+		"mlb_team_id": 113,
+		"colors": [
+			{
+				"name": "Red",
+				"hex": "#C6011F"
+			},
+			{
+				"name": "Black",
+				"hex": "#000000"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"rockies": {
 		"name": "Colorado Rockies",
@@ -272,7 +676,25 @@
 		"state": "CO",
 		"country": "USA",
 		"league": "NL West",
-		"mlb_team_id": 115
+		"mlb_team_id": 115,
+		"colors": [
+			{
+				"name": "Rockies Purple",
+				"hex": "#333366"
+			},
+			{
+				"name": "Silver",
+				"hex": "#C4CED4"
+			},
+			{
+				"name": "Black",
+				"hex": "#131413"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"royals": {
 		"name": "Kansas City Royals",
@@ -283,7 +705,21 @@
 		"state": "MO",
 		"country": "USA",
 		"league": "AL Central",
-		"mlb_team_id": 118
+		"mlb_team_id": 118,
+		"colors": [
+			{
+				"name": "Royal Blue",
+				"hex": "#004687"
+			},
+			{
+				"name": "Gold",
+				"hex": "#BD9B60"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"tigers": {
 		"name": "Detroit Tigers",
@@ -294,7 +730,21 @@
 		"state": "MI",
 		"country": "USA",
 		"league": "AL Central",
-		"mlb_team_id": 116
+		"mlb_team_id": 116,
+		"colors": [
+			{
+				"name": "Navy Blue",
+				"hex": "#0C2340"
+			},
+			{
+				"name": "Orange",
+				"hex": "#FA4616"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"twins": {
 		"name": "Minnesota Twins",
@@ -305,7 +755,25 @@
 		"state": "MN",
 		"country": "USA",
 		"league": "AL Central",
-		"mlb_team_id": 142
+		"mlb_team_id": 142,
+		"colors": [
+			{
+				"name": "Twins Navy Blue",
+				"hex": "#002B5C"
+			},
+			{
+				"name": "Scarlet Red",
+				"hex": "#D31145"
+			},
+			{
+				"name": "Kasota Gold",
+				"hex": "#B9975B"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"white-sox": {
 		"name": "Chicago White Sox",
@@ -316,7 +784,21 @@
 		"state": "IL",
 		"country": "USA",
 		"league": "AL Central",
-		"mlb_team_id": 145
+		"mlb_team_id": 145,
+		"colors": [
+			{
+				"name": "Black",
+				"hex": "#27251F"
+			},
+			{
+				"name": "Silver",
+				"hex": "#C4CED4"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	},
 	"yankees": {
 		"name": "New York Yankees",
@@ -327,6 +809,28 @@
 		"state": "NY",
 		"country": "USA",
 		"league": "AL East",
-		"mlb_team_id": 147
+		"mlb_team_id": 147,
+		"colors": [
+			{
+				"name": "Blue",
+				"hex": "#003087"
+			},
+			{
+				"name": "Red",
+				"hex": "#E4002C"
+			},
+			{
+				"name": "Navy Blue",
+				"hex": "#0C2340"
+			},
+			{
+				"name": "Gray",
+				"hex": "#C4CED3"
+			},
+			{
+				"name": "White",
+				"hex": "#FFFFFF"
+			}
+		]
 	}
 }

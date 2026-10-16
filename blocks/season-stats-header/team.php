@@ -15,6 +15,15 @@ $bb_name   = (string) ( $team_data['name'] ?? $queried_season_term->name );
 $bb_league = (string) ( $team_data['league'] ?? '' );
 $bb_logo   = $api->get_team_logo_url( (string) ( $team_data['slug'] ?? '' ) );
 
+/*
+ * Team colours (team-info/list.json, primary first): the header takes the primary as its
+ * background and the second colour as a stripe. Text is the site's cream unless that fails
+ * WCAG AA (4.5:1) on the primary, in which case it's dark ink (Giants, Marlins, Orioles...).
+ */
+$bb_team_colors = Basebelles_Team_Colors::for_team( (array) $team_data );
+$bb_team_style  = Basebelles_Team_Colors::style( $bb_team_colors );
+$bb_team_light  = ! empty( $bb_team_colors['light'] );
+
 $bb_type_labels = array(
 	'springTraining' => __( 'Spring Training', 'basebelles' ),
 	'regularSeason'  => __( 'Regular Season', 'basebelles' ),
@@ -45,16 +54,16 @@ $bb_sign_class = static function ( $value ) {
 // Drop the division from "3rd (AL Central)"; the subtitle already says it.
 $bb_rank = trim( (string) preg_replace( '/\s*\(.*\)\s*$/', '', (string) ( $stats['rank'] ?? '' ) ) );
 
-// Post-season context: the tag beside the name, and (for the Guardians) the series for "Next".
-$bb_tag         = '';
-$bb_result      = null; // Last decided series: array( round, 'Won'|'Lost', our wins, their wins ).
-$bb_next        = null;
-$bb_postseason  = null;
-$bb_is_guardian = Basebelles_API::GUARDIANS_TEAM_ID === $team_id;
+// Post-season context: the tag beside the name, and the series for "Next". Built from the
+// team's own post-season schedule, so it works for any team, not only the Guardians.
+$bb_tag        = '';
+$bb_result     = null; // Last decided series: array( round, 'Won'|'Lost', our wins, their wins ).
+$bb_next       = null;
+$bb_postseason = null;
 
 if ( $bb_in_postseason ) {
-	if ( $bb_is_guardian && method_exists( $api, 'get_postseason_status' ) ) {
-		$bb_postseason = $api->get_postseason_status( $season_year );
+	if ( method_exists( $api, 'get_postseason_status' ) ) {
+		$bb_postseason = $api->get_postseason_status( $season_year, $team_id );
 	}
 
 	if ( is_array( $bb_postseason ) && ! is_wp_error( $bb_postseason ) ) {
@@ -82,7 +91,11 @@ if ( $bb_in_postseason ) {
 				$bb_tag = ! empty( $bb_postseason['had_bye'] ) ? __( 'First-round bye', 'basebelles' ) : __( 'Playoffs', 'basebelles' );
 				break;
 			case 'eliminated':
-				$bb_tag = __( 'Eliminated', 'basebelles' );
+				$bb_eliminator = (string) ( $bb_current['opponent']['abbreviation'] ?? '' );
+				$bb_tag        = '' !== $bb_eliminator
+					/* translators: 1: round name (ALDS), 2: abbreviation of the team that won the series */
+					? sprintf( __( 'Eliminated in %1$s by %2$s', 'basebelles' ), $bb_current['round_short'], $bb_eliminator )
+					: __( 'Eliminated', 'basebelles' );
 				break;
 			case 'champion':
 				$bb_tag = __( 'World Series champions', 'basebelles' );
@@ -90,40 +103,14 @@ if ( $bb_in_postseason ) {
 			default:
 				$bb_tag = __( 'Missed playoffs', 'basebelles' );
 		}
-	} elseif ( ! $bb_is_guardian ) {
-		// Only the Guardians' series are tracked, so for anyone else the tag is the one thing the
-		// standings can say for certain: whether they got in.
-		// The one exception: a team that played the Guardians shows up as their opponent, so the
-		// result of that series is known from the Guardians' data.
-		$bb_vs_guardians = method_exists( $api, 'get_postseason_status' ) ? $api->get_postseason_status( $season_year ) : null;
-
-		if ( is_array( $bb_vs_guardians ) && ! is_wp_error( $bb_vs_guardians ) ) {
-			foreach ( (array) ( $bb_vs_guardians['series'] ?? array() ) as $bb_series ) {
-				if ( $team_id !== (int) ( $bb_series['opponent']['id'] ?? 0 ) || empty( $bb_series['complete'] ) ) {
-					continue;
-				}
-
-				$bb_guardians_abbr = (string) ( $bb_series['guardians']['abbreviation'] ?? 'CLE' );
-				$bb_result         = array( $bb_series['round_short'], empty( $bb_series['won'] ), (int) $bb_series['opponent_wins'], (int) $bb_series['guardians_wins'] );
-
-				if ( ! empty( $bb_series['won'] ) ) {
-					/* translators: 1: round name (ALDS), 2: team abbreviation that won the series */
-					$bb_tag = sprintf( __( 'Eliminated in %1$s by %2$s', 'basebelles' ), $bb_series['round_short'], $bb_guardians_abbr );
-				} else {
-					/* translators: 1: round name (ALDS), 2: team abbreviation that lost the series */
-					$bb_tag = sprintf( __( 'Won %1$s over %2$s', 'basebelles' ), $bb_series['round_short'], $bb_guardians_abbr );
-				}
-			}
-		}
-
-		if ( '' === $bb_tag ) {
-			$bb_seed = $api->get_team_playoff_seed( $team_id, $bb_league, $season_year );
-			if ( null === $bb_seed ) {
-				$bb_tag = __( 'Missed playoffs', 'basebelles' );
-			} else {
-				/* translators: %d: playoff seed */
-				$bb_tag = sprintf( __( '#%d seed', 'basebelles' ), $bb_seed );
-			}
+	} else {
+		// No schedule to go on (the API is down): the standings can still say whether they got in.
+		$bb_seed = $api->get_team_playoff_seed( $team_id, $bb_league, $season_year );
+		if ( null === $bb_seed ) {
+			$bb_tag = __( 'Missed playoffs', 'basebelles' );
+		} else {
+			/* translators: %d: playoff seed */
+			$bb_tag = sprintf( __( '#%d seed', 'basebelles' ), $bb_seed );
 		}
 	}
 }
@@ -143,15 +130,6 @@ if ( 'postseason' === $season_type && ! $fell_back ) {
 				sprintf( '%s %d – %d', ! empty( $bb_wc_series['won'] ) ? __( 'Won', 'basebelles' ) : __( 'Lost', 'basebelles' ), (int) $bb_wc_series['guardians_wins'], (int) $bb_wc_series['opponent_wins'] ),
 				! empty( $bb_wc_series['won'] ) ? 'is-positive' : 'is-negative',
 			);
-		}
-	} elseif ( ! $bb_is_guardian && $bb_result && 'Wild Card' !== $bb_result[0] ) {
-		// Only the Guardians' series are tracked. A team that reached a later round against them
-		// either had a bye (top two seeds) or won the Wild Card Series to get there.
-		$bb_wc_seed = $api->get_team_playoff_seed( $team_id, $bb_league, $season_year );
-		if ( null !== $bb_wc_seed ) {
-			$bb_wild_card = $bb_wc_seed <= Basebelles_Postseason::BYE_SEEDS
-				? array( __( 'Bye', 'basebelles' ), '' )
-				: array( __( 'Won', 'basebelles' ), 'is-positive' );
 		}
 	}
 }
@@ -222,8 +200,14 @@ $bb_classes = array(
 if ( $is_past ) {
 	$bb_classes[] = 'is-past';
 }
+if ( '' !== $bb_team_style ) {
+	$bb_classes[] = 'has-team-colors';
+}
+if ( $bb_team_light ) {
+	$bb_classes[] = 'is-light';
+}
 ?>
-<div class="<?php echo esc_attr( implode( ' ', $bb_classes ) ); ?>">
+<div class="<?php echo esc_attr( implode( ' ', $bb_classes ) ); ?>"<?php echo '' !== $bb_team_style ? ' style="' . esc_attr( $bb_team_style ) . '"' : ''; ?>>
 	<div class="season-stats-inner season-team">
 		<div class="season-stats-ghost" aria-hidden="true"></div>
 		<div class="season-team-main">

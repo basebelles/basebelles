@@ -395,6 +395,40 @@ class PostseasonTest extends TestCase {
 		$this->assertSame( array( false, false, false, true, true ), array_column( $plan['games'], 'if_necessary' ) );
 	}
 
+	/*
+	 * -----------------------------------------------------------------------
+	 * Other teams (team archives)
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_status_reads_from_the_other_teams_side_when_asked(): void {
+		$status = Basebelles_Postseason::build_status( Fixtures::ps_dates( Fixtures::alds_2026_before_game_four() ), $this->seeds(), '2026-10-08', 145 );
+
+		$this->assertSame( 'CWS', $status['current']['guardians']['abbreviation'] );
+		$this->assertSame( 'CLE', $status['current']['opponent']['abbreviation'] );
+		$this->assertSame( 2, $status['current']['guardians_wins'] );
+		$this->assertSame( 1, $status['current']['opponent_wins'] );
+	}
+
+	public function test_eliminated_series_names_the_team_that_won_it(): void {
+		$games   = Fixtures::alds_2026_before_game_four();
+		$games[] = Fixtures::ps_game( 'D', 4, 5, 145, false, 'Final', 1, 5, array( 'officialDate' => '2026-10-08' ) );
+		$status  = $this->build( $games );
+
+		$this->assertSame( 'eliminated', $status['state'] );
+		$this->assertSame( 'CWS', $status['current']['opponent']['abbreviation'] );
+	}
+
+	public function test_nl_teams_get_nl_round_names(): void {
+		$status = Basebelles_Postseason::build_status( Fixtures::ps_dates( Fixtures::alds_2026_before_game_four() ), $this->seeds(), '2026-10-08', self::CLE, 'America/New_York', 'NL' );
+
+		$this->assertSame( 'NLDS', $status['current']['round_short'] );
+		$this->assertSame( 'NLCS', Basebelles_Postseason::round_short( 'L', 'NL' ) );
+		$this->assertSame( 'ALCS', Basebelles_Postseason::round_short( 'L' ) );
+		$this->assertSame( 'World Series', Basebelles_Postseason::round_short( 'W', 'NL' ) );
+		$this->assertSame( 'Wild Card', Basebelles_Postseason::round_short( 'F', 'NL' ) );
+	}
+
 	public function test_fallback_wild_card_is_all_at_the_higher_seed(): void {
 		$plan = Basebelles_Postseason::plan_series( array(), '20260930', '20261002', self::CLE, 3, false );
 

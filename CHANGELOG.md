@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.9] - 2026-10-16
+
+### Added
+
+- Game Matchup block for the game post template: the post's opponent (its Team term) as a card in that team's colors from `team-info/list.json`, with both teams' logos, the season type and home/away as pills, and an "All White Sox games" link to the team archive. Text switches from cream to dark whenever cream would fall below WCAG AA on the team color. In a column beside the featured image, the card matches the image's height and centers its content; in the footer it's a single row. A team missing from `list.json` gets the site's wine red and no logo, and a post without a team shows nothing (a placeholder in the editor).
+- Game Post template: posts in the Games category now use their own `single-game` template, editable under Appearance > Editor > Templates, since WordPress has no per-category single templates. Until it's saved it starts as a copy of Single Posts. A template made for one specific post still wins. Needs WordPress 6.7+.
+
+### Changed
+
+- Season-type archives for spring training, the regular season, and a post season the Guardians missed use the same layout as team archives: a title, a one-line summary of how the season went, and a stat strip. The old four-cell standings grid is gone. Once a phase is over, games back, last ten and streak drop out, and the regular season shows its playoff result in their place.
+- Team archive headers use each club's colors as the background and stripe, with text that switches from cream to dark ink when cream would fail WCAG AA contrast, or to black when ink would too (Phillies red), so all 30 teams pass.
+- Post-season status works for any team, not only the Guardians: it's built from that team's own schedule and uses NL round names for National League clubs. An eliminated team's tag names the round and the team that beat them.
+- The team color and contrast logic now lives in one place (`helpers/class-team-colors.php`), shared by the team archive header and the Game Matchup block.
+
 ## [1.6.8] - 2026-10-16
 
 ### Added

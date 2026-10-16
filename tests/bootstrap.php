@@ -149,6 +149,16 @@ function get_terms( $args = array() ) {
 	return Basebelles_Test_State::$terms[ $args['taxonomy'] ?? '' ] ?? array();
 }
 
+/**
+ * get_term_link(): a predictable archive URL from the term's taxonomy (default 'team') and slug.
+ *
+ * @param object $term Term object.
+ * @return string
+ */
+function get_term_link( $term ) {
+	return 'https://example.test/' . ( $term->taxonomy ?? 'team' ) . '/' . $term->slug . '/';
+}
+
 function sanitize_hex_color( $color ) {
 	if ( '' === $color ) {
 		return '';
@@ -886,7 +896,7 @@ class Basebelles_API {
 		return Basebelles_Test_State::$roster;
 	}
 
-	public function get_postseason_status( $season_year = null ) {
+	public function get_postseason_status( $season_year = null, $team_id = 114 ) {
 		return Basebelles_Test_State::$postseason;
 	}
 
@@ -921,6 +931,11 @@ class Basebelles_API {
 
 		return array();
 	}
+
+	/** Like the real one, minus the file check: every slug but '' has a logo. */
+	public function get_team_logo_url( $slug ) {
+		return '' === $slug ? '' : 'https://example.test/wp-content/plugins/basebelles/team-info/logos/' . $slug . '.png';
+	}
 }
 
 /** The today-game template reads Basebelles::$version when enqueueing its script. */
@@ -936,11 +951,15 @@ require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-postseason.php';
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season.php';
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-season-timeline.php';
 require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-game-hub.php';
+require_once BASEBELLES_PLUGIN_DIR . '/helpers/class-team-colors.php';
 
 // Requiring this constructs the singleton, which registers hooks and the post type against the
 // stubs above. is_admin() is false at bootstrap, so nothing gets scheduled.
 require_once BASEBELLES_PLUGIN_DIR . '/features/class-belles.php';
 
 require_once BASEBELLES_PLUGIN_DIR . '/features/class-category-style.php';
+
+// register_block_template() isn't stubbed, so constructing this registers nothing.
+require_once BASEBELLES_PLUGIN_DIR . '/features/class-game-template.php';
 
 require_once BASEBELLES_TESTS_DIR . '/Fixtures.php';
