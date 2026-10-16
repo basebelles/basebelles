@@ -1,0 +1,19 @@
+{
+    "name": "acf/basebelles-matchup",
+    "title": "Game Matchup",
+    "description": "The post's opponent in their team colours, with the season type and home/away. For the game post template.",
+    "style": [ "basebelles-matchup-style" ],
+    "category": "basebelles",
+    "icon": "groups",
+    "keywords": ["matchup", "opponent", "team", "game", "guardians"],
+    "usesContext": [ "postId", "postType" ],
+    "acf": {
+        "mode": "preview",
+        "renderTemplate": "render.php"
+    },
+    "supports": {
+        "align": true,
+        "anchor": true,
+        "mode": false
+    }
+}

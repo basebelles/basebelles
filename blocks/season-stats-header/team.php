@@ -20,55 +20,9 @@ $bb_logo   = $api->get_team_logo_url( (string) ( $team_data['slug'] ?? '' ) );
  * background and the second colour as a stripe. Text is the site's cream unless that fails
  * WCAG AA (4.5:1) on the primary, in which case it's dark ink (Giants, Marlins, Orioles...).
  */
-$bb_hex_colors = array();
-foreach ( (array) ( $team_data['colors'] ?? array() ) as $bb_color ) {
-	$bb_hex = strtoupper( (string) ( $bb_color['hex'] ?? '' ) );
-	if ( preg_match( '/^#[0-9A-F]{6}$/', $bb_hex ) ) {
-		$bb_hex_colors[] = $bb_hex;
-	}
-}
-
-/**
- * WCAG relative luminance of a #RRGGBB colour.
- *
- * @param string $hex Colour.
- * @return float
- */
-$bb_luminance = static function ( $hex ) {
-	$channels = array_map(
-		static function ( $pair ) {
-			$value = hexdec( $pair ) / 255;
-			return $value <= 0.03928 ? $value / 12.92 : ( ( $value + 0.055 ) / 1.055 ) ** 2.4;
-		},
-		str_split( substr( $hex, 1 ), 2 )
-	);
-
-	return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
-};
-
-$bb_contrast = static function ( $one, $two ) use ( $bb_luminance ) {
-	$first  = $bb_luminance( $one );
-	$second = $bb_luminance( $two );
-
-	return ( max( $first, $second ) + 0.05 ) / ( min( $first, $second ) + 0.05 );
-};
-
-$bb_team_style = '';
-$bb_team_light = false;
-
-if ( $bb_hex_colors ) {
-	$bb_cream      = '#F3EFE0';
-	$bb_ink        = '#111111';
-	$bb_team_bg    = $bb_hex_colors[0];
-	$bb_team_light = $bb_contrast( $bb_team_bg, $bb_cream ) < 4.5;
-	$bb_team_fg    = $bb_team_light ? $bb_ink : $bb_cream;
-	$bb_team_style = sprintf(
-		'--bb-team-bg:%1$s;--bb-team-fg:%2$s;--bb-team-accent:%3$s;',
-		$bb_team_bg,
-		$bb_team_fg,
-		$bb_hex_colors[1] ?? $bb_team_fg
-	);
-}
+$bb_team_colors = Basebelles_Team_Colors::for_team( (array) $team_data );
+$bb_team_style  = Basebelles_Team_Colors::style( $bb_team_colors );
+$bb_team_light  = ! empty( $bb_team_colors['light'] );
 
 $bb_type_labels = array(
 	'springTraining' => __( 'Spring Training', 'basebelles' ),

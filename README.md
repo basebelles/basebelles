@@ -14,6 +14,7 @@ The plugin wires together the block editor, [Advanced Custom Fields (ACF)](https
 | **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `features/class-api.php`. |
 | **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`features/class-embeds.php`, `helpers/class-streamable-oembed.php`). |
 | **Site behavior** | Loads small feature modules under `features/` (comment moderation hooks, anti-spam, query tweaks for season archives, optional privacy-related HTTP filters, automatic updates policy, etc.). |
+| **Game Post template** | Registers a `single-game` block template (editable under Appearance → Editor → Templates) and routes posts in the `games` category to it, since WordPress has no per-category single templates. Starts as a copy of the theme's Single Posts template. Needs WordPress 6.7+ (`features/class-game-template.php`). |
 | **Belle directory** | A moderated public directory of Belles. A **WPForms** submission becomes a `belle` post in `pending` status; publishing approves it, trashing marks it spam. Roster choices for the "favorite current player" field are synced from the MLB Stats API daily. See [`docs/belles-setup.md`](docs/belles-setup.md). |
 
 **ACF field definitions** (field groups, options screens, taxonomies, and other synced ACF JSON) live in **`acf-json/`** as the version-controlled source. Each file is a single JSON object named **`{key}.json`** (matching the top-level `"key"`). Saving a field group in wp-admin writes back to that folder via **`acf/settings/save_json`**. The plugin registers load/save paths in [`blocks/class-acf-json.php`](blocks/class-acf-json.php) (theme Local JSON paths remain; the plugin directory is appended for loading).
@@ -41,6 +42,7 @@ All blocks are registered from `blocks/class-blocks.php` and appear under the **
 | Block directory | Purpose (high level) |
 | ----------------- | ---------------------- |
 | `blocks/game-hub/` | Front-page game section that follows the season: Today's Game with the division table (regular season) or the series card (postseason); a Spring Training countdown and MLB.com Guardians headlines (off season). Cards live in `cards/`; pure shaping in `helpers/class-game-hub.php` |
+| `blocks/matchup/` | Game Matchup, for the game post template: the post's `team` term as a card in that team's colours (from `team-info/list.json`), both logos, season type and home/away pills, and a link to the team archive. Colour and contrast logic is shared with the team archive header in `helpers/class-team-colors.php` |
 | `blocks/belles/` | Belle directory card grid |
 | `blocks/results/` | Game / results presentation |
 | `blocks/season-header/` | Season header UI |

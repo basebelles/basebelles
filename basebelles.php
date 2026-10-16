@@ -69,6 +69,7 @@ class Basebelles {
 		require_once 'features/class-category-style.php';
 		require_once 'features/class-comment-probation.php';
 		require_once 'features/class-embeds.php';
+		require_once 'features/class-game-template.php';
 		require_once 'features/class-patterns.php';
 		require_once 'features/class-series-generator.php';
 		require_once 'features/class-today-game-rest.php';
@@ -78,6 +79,7 @@ class Basebelles {
 		require_once 'helpers/class-season.php';
 		require_once 'helpers/class-season-timeline.php';
 		require_once 'helpers/class-game-hub.php';
+		require_once 'helpers/class-team-colors.php';
 		require_once 'helpers/class-api.php';
 		require_once 'helpers/class-impostercide.php';
 		require_once 'helpers/class-in-progress.php';
