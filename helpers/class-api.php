@@ -55,7 +55,7 @@ class Basebelles_API {
 	const ROSTER_CACHE_TTL = 12 * HOUR_IN_SECONDS;
 
 	/** MLB.com's Guardians-only news feed, for the Game Hub's off-season news card. */
-	const NEWS_FEED_URL = 'https://www.mlb.com/guardians/feeds/news/rss.xml';
+	const NEWS_FEED_URL = 'https://restless-paper-ad79.webmaster-6c5.workers.dev/';
 	/** Cache TTL for the parsed news feed. */
 	const NEWS_CACHE_TTL = 15 * MINUTE_IN_SECONDS;
 	/** How long a failed news fetch waits before trying MLB.com again. */
