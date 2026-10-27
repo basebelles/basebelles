@@ -64,10 +64,14 @@
 }
 
 /* Responsive Streamable Embeds */
+/*
+ * aspect-ratio, not the padding-bottom trick: padding % is of the parent's width, so once the
+ * theme's layout widens the box past max-width the height stops matching and Streamable
+ * letterboxes the clip with big empty bands.
+ */
 .streamable-video-container {
 	position: relative;
-	padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-	height: 0;
+	aspect-ratio: 16 / 9;
 	overflow: hidden;
 	max-width: 560px;
 	margin: 20px auto;
@@ -311,7 +315,8 @@ a.wp-block-latest-posts__post-title {
 }
 
 /* Series result from the post's tag ("Series Win"), in place of Read More / after the date. */
-.bb-home-posts .bb-series-status {
+.bb-home-posts .bb-series-status,
+.bb-posts-grid .bb-series-status {
 	display: inline-block;
 	padding: 3px 10px;
 	border-radius: 999px;
@@ -325,12 +330,72 @@ a.wp-block-latest-posts__post-title {
 	white-space: nowrap;
 }
 
-.bb-home-posts .bb-series-status.is-win {
+.bb-home-posts .bb-series-status.is-win,
+.bb-posts-grid .bb-series-status.is-win {
 	background: var(--bb-green);
 }
 
-.bb-home-posts .bb-series-status.is-loss {
+.bb-home-posts .bb-series-status.is-loss,
+.bb-posts-grid .bb-series-status.is-loss {
 	background: var(--bb-wine-red);
+}
+
+/*
+ * Posts grid (/posts/): a Query block with the bb-posts-grid class, in the theme's card
+ * layout (image, then a white box with the title and meta). --bb-cat-color comes from the
+ * same per-category <style> block as the homepage.
+ */
+
+/* The theme lets the image grow to fill the card, leaving a gap above shorter boxes. Grow the box instead. */
+.bb-posts-grid .wp-block-post-featured-image {
+	flex-grow: 0;
+}
+
+.bb-posts-grid .wp-block-post-featured-image + .wp-block-group {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+/* A shadow, not a border: the block's inline style sets border: none. */
+.bb-posts-grid .bb-posts-meta {
+	flex-grow: 1;
+	box-shadow: inset 0 4px 0 var(--bb-cat-color, var(--bb-wine-red));
+}
+
+.bb-posts-grid .wp-block-post-title a,
+.bb-posts-grid .taxonomy-category a {
+	color: var(--bb-cat-color, var(--bb-wine-red));
+}
+
+/*
+ * Duotone, for every category except Games (bb-cat-games): a grayscale photo blended over
+ * the category color. The color sits on the link (not the figure) and is clipped to the
+ * image's shape, so no colored square shows around it.
+ */
+.bb-posts-grid .wp-block-post:not(.bb-cat-games) .wp-block-post-featured-image > a {
+	background: var(--bb-cat-color, var(--bb-wine-red));
+	clip-path: var(--shape, none);
+}
+
+.bb-posts-grid .wp-block-post:not(.bb-cat-games) .wp-block-post-featured-image img {
+	filter: grayscale(1) contrast(1.1);
+	mix-blend-mode: luminosity;
+	opacity: 0.85;
+}
+
+.bb-posts-grid .wp-block-post:not(.bb-cat-games) .wp-block-post-featured-image:hover img,
+.bb-posts-grid .wp-block-post:not(.bb-cat-games) .tw-stretched-link:hover .wp-block-post-featured-image img {
+	opacity: 1;
+}
+
+/* Series status on the image's top-right, clear of the cut corner and the theme's bottom-left format icon. */
+.bb-posts-grid .wp-block-post-featured-image .bb-series-status {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	z-index: 1;
+	pointer-events: none;
 }
 
 /* Homepage Pullquote */

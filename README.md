@@ -8,11 +8,11 @@ The plugin wires together the block editor, [Advanced Custom Fields (ACF)](https
 
 ## Features
 
-| Area              | Role |
-|-------------------|------------|
-| **Blocks**        | Registers a dedicated **Base\*Belles** block category and ships multiple **ACF-powered blocks** (see below). Each block has `block.json`, `render.php`, and block-scoped CSS. |
-| **Custom data**   | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `features/class-api.php`. |
-| **Embeds**        | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`features/class-embeds.php`, `helpers/class-streamable-oembed.php`). |
+| Area | Role |
+| ---- | ---- |
+| **Blocks** | Registers a dedicated **Base\*Belles** block category and ships multiple **ACF-powered blocks** (see below). Each block has `block.json`, `render.php`, and block-scoped CSS. |
+| **Custom data** | Integrates with **MLB’s public Stats API** (`statsapi.mlb.com`) for Cleveland Guardians–oriented data (standings, schedules, game context, etc.), with caching and season/archive behavior defined in `features/class-api.php`. |
+| **Embeds** | Extends WordPress oEmbed/shortcode behavior for **Streamable** and **MLB video** URLs, including fallbacks when the oEmbed endpoint does not return markup (`features/class-embeds.php`, `helpers/class-streamable-oembed.php`). |
 | **Site behavior** | Loads small feature modules under `features/` (comment moderation hooks, anti-spam, query tweaks for season archives, optional privacy-related HTTP filters, automatic updates policy, etc.). |
 | **Game Post template** | Registers a `single-game` block template (editable under Appearance → Editor → Templates) and routes posts in the `games` category to it, since WordPress has no per-category single templates. Starts as a copy of the theme's Single Posts template. Needs WordPress 6.7+ (`features/class-game-template.php`). |
 | **Belle directory** | A moderated public directory of Belles. A **WPForms** submission becomes a `belle` post in `pending` status; publishing approves it, trashing marks it spam. Roster choices for the "favorite current player" field are synced from the MLB Stats API daily. See [`docs/belles-setup.md`](docs/belles-setup.md). |
