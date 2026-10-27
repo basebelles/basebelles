@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.6.10] - TBD
 
+### Added
+
+- Posts grid styling: give a Query block the `bb-posts-grid` class (as on /posts/) and its cards get the homepage's Series Win / Series Loss pill on the image, the category color on the title, category link and a top accent on the white box, and, for every category but Games, a duotone photo in the category color. The white boxes now fill the card, so they're the same height across a row.
+
+### Fixed
+
+- Streamable / MLB video embeds no longer have huge empty bands above and below. The container sized itself with the padding-bottom trick, which measures from the parent's width, so in wide post content it came out far taller than the 16:9 video. It now uses `aspect-ratio`.
+
 ### Changed
 
 - Using a custom Cloudflare passthrough to avoid the block on MLB's RSS feeds.

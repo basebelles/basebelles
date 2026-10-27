@@ -526,4 +526,59 @@ class CategoryStyleTest extends TestCase {
 		$this->assertStringContainsString( '&lt;b&gt;Series&lt;/b&gt; Win', $html );
 		$this->assertStringNotContainsString( '<b>', $html );
 	}
+
+	/*
+	 * -----------------------------------------------------------------------
+	 * Posts grid (.bb-posts-grid)
+	 * -----------------------------------------------------------------------
+	 */
+
+	public function test_the_grid_puts_the_series_status_inside_the_figure(): void {
+		self::set_categories( array( self::games() ) );
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$html = $this->render_in( 'render_featured_image', self::FIGURE, 'bb-posts-grid' );
+
+		$this->assertStringEndsWith( '<span class="bb-series-status is-win">Series Win</span></figure>', $html );
+	}
+
+	public function test_the_grid_gets_no_category_or_team_pills(): void {
+		self::set_categories( array( self::games() ) );
+		self::set_team( 'toronto-blue-jays', 'Toronto Blue Jays', 'away' );
+		self::set_series_tag( 'series-loss', 'Series Lost' );
+
+		$html = $this->render_in( 'render_featured_image', self::FIGURE, 'bb-posts-grid' );
+
+		$this->assertStringNotContainsString( 'bb-cat-pill', $html );
+	}
+
+	public function test_a_grid_image_without_a_series_tag_is_unchanged(): void {
+		self::set_categories( array( self::games() ) );
+
+		$this->assertSame( self::FIGURE, $this->render_in( 'render_featured_image', self::FIGURE, 'bb-posts-grid' ) );
+	}
+
+	public function test_the_grid_leaves_read_more_alone(): void {
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$this->assertSame( self::READMORE, $this->render_in( 'render_read_more', self::READMORE, 'bb-posts-grid' ) );
+	}
+
+	public function test_the_grid_leaves_title_and_date_alone(): void {
+		self::set_categories( array( self::games() ) );
+		self::set_series_tag( 'series-win', 'Series Win' );
+
+		$this->assertSame( self::TITLE, $this->render_in( 'render_post_title', self::TITLE, 'bb-posts-grid' ) );
+		$this->assertSame( self::DATE, $this->render_in( 'render_post_date', self::DATE, 'bb-posts-grid' ) );
+	}
+
+	public function test_the_grid_stops_after_its_query_ends(): void {
+		self::set_series_tag( 'series-win', 'Series Win' );
+		$query = self::home_query( 'bb-posts-grid' );
+
+		$this->style->enter_query( $query );
+		$this->style->leave_query( '', $query );
+
+		$this->assertSame( self::FIGURE, $this->style->render_featured_image( self::FIGURE, array(), self::instance( self::POST_ID ) ) );
+	}
 }

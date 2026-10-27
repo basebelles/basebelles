@@ -10,7 +10,9 @@
  * - Adds a category label pill to featured images inside the .bb-home-posts Query Loop,
  *   plus a team label ("vs Blue Jays" / "@ Blue Jays") for game posts.
  *
- * All visual styling lives in basebelles.css, scoped to .bb-home-posts.
+ * - Adds the series status pill to featured images inside a .bb-posts-grid Query Loop.
+ *
+ * All visual styling lives in basebelles.css, scoped to .bb-home-posts and .bb-posts-grid.
  *
  * @package Base*Belles
  */
@@ -37,6 +39,12 @@ class Basebelles_Category_Style {
 	const ROWS_CLASS = 'bb-home-posts--rows';
 
 	/**
+	 * Class on a Query block for the card grid (the /posts/ page). Its featured images get
+	 * the series status pill; colors and duotone are in basebelles.css.
+	 */
+	const GRID_CLASS = 'bb-posts-grid';
+
+	/**
 	 * Post tag slug => result, for the series status on game posts ("Series Win"). The tag's own
 	 * name is what's shown, so renaming a tag in the admin renames the label.
 	 */
@@ -51,8 +59,9 @@ class Basebelles_Category_Style {
 	);
 
 	/**
-	 * The .bb-home-posts Query blocks currently rendering, innermost last: 'rows' for the
-	 * compact rows, 'list' otherwise. More than one only if nested.
+	 * The .bb-home-posts / .bb-posts-grid Query blocks currently rendering, innermost last:
+	 * 'rows' for the compact rows, 'grid' for the card grid, 'list' otherwise. More than one
+	 * only if nested.
 	 *
 	 * @var string[]
 	 */
@@ -280,22 +289,24 @@ class Basebelles_Category_Style {
 	 * @return array Unchanged.
 	 */
 	public function enter_query( $parsed_block ) {
-		if ( self::is_home_posts_query( $parsed_block ) ) {
-			self::$home_posts_stack[] = self::has_class( $parsed_block, self::ROWS_CLASS ) ? 'rows' : 'list';
+		$kind = self::query_kind( $parsed_block );
+
+		if ( '' !== $kind ) {
+			self::$home_posts_stack[] = $kind;
 		}
 
 		return $parsed_block;
 	}
 
 	/**
-	 * Note when a .bb-home-posts Query block finishes rendering.
+	 * Note when a .bb-home-posts / .bb-posts-grid Query block finishes rendering.
 	 *
 	 * @param string $block_content Rendered block.
 	 * @param array  $block         Parsed block.
 	 * @return string Unchanged.
 	 */
 	public function leave_query( $block_content, $block ) {
-		if ( self::is_home_posts_query( $block ) && ! empty( self::$home_posts_stack ) ) {
+		if ( '' !== self::query_kind( $block ) && ! empty( self::$home_posts_stack ) ) {
 			array_pop( self::$home_posts_stack );
 		}
 
@@ -303,7 +314,7 @@ class Basebelles_Category_Style {
 	}
 
 	/**
-	 * Which kind of .bb-home-posts Query is rendering: 'list', 'rows', or '' for none.
+	 * Which kind of styled Query is rendering: 'list', 'rows', 'grid', or '' for none.
 	 *
 	 * @return string
 	 */
@@ -426,7 +437,8 @@ class Basebelles_Category_Style {
 	 * @return string
 	 */
 	public function render_read_more( $block_content, $block, $instance = null ) {
-		if ( '' === self::current_query() ) {
+		// The grid shows the status on the image instead (render_featured_image()).
+		if ( ! in_array( self::current_query(), array( 'list', 'rows' ), true ) ) {
 			return $block_content;
 		}
 
@@ -444,8 +456,10 @@ class Basebelles_Category_Style {
 	 * @return string
 	 */
 	public function render_featured_image( $block_content, $block, $instance = null ) {
+		$query = self::current_query();
+
 		// The compact rows' diamonds are too small for pills; render_post_title() covers them.
-		if ( 'list' !== self::current_query() || '' === trim( (string) $block_content ) ) {
+		if ( ! in_array( $query, array( 'list', 'grid' ), true ) || '' === trim( (string) $block_content ) ) {
 			return $block_content;
 		}
 
@@ -453,6 +467,14 @@ class Basebelles_Category_Style {
 
 		if ( ! $post_id ) {
 			return $block_content;
+		}
+
+		// The grid's cards already show the category and team under the image; only the series status goes on it.
+		if ( 'grid' === $query ) {
+			$pill  = self::series_pill( $post_id );
+			$close = strrpos( $block_content, '</figure>' );
+
+			return ( '' === $pill || false === $close ) ? $block_content : substr_replace( $block_content, $pill, $close, 0 );
 		}
 
 		$category = self::category_for_post( $post_id );
@@ -476,17 +498,22 @@ class Basebelles_Category_Style {
 	}
 
 	/**
-	 * Whether a parsed block is a Query block with the bb-home-posts class.
+	 * What kind of styled Query a parsed block is: 'list' or 'rows' for .bb-home-posts,
+	 * 'grid' for .bb-posts-grid, '' for anything else.
 	 *
 	 * @param array $block Parsed block.
-	 * @return bool
+	 * @return string
 	 */
-	private static function is_home_posts_query( $block ) {
+	private static function query_kind( $block ) {
 		if ( ! is_array( $block ) || 'core/query' !== ( $block['blockName'] ?? '' ) ) {
-			return false;
+			return '';
 		}
 
-		return self::has_class( $block, self::QUERY_CLASS );
+		if ( self::has_class( $block, self::QUERY_CLASS ) ) {
+			return self::has_class( $block, self::ROWS_CLASS ) ? 'rows' : 'list';
+		}
+
+		return self::has_class( $block, self::GRID_CLASS ) ? 'grid' : '';
 	}
 
 	/**
